@@ -25,6 +25,12 @@ class UserProfile(models.Model):
         verbose_name        = _("UserProfile")
         verbose_name_plural = _("UserProfile")
 
-#__MODELS__
+class MDBFile(models.Model):
+    file = models.FileField(upload_to='mdb_files/')  # Ruta donde se guardarán los archivos
+    name = models.CharField(max_length=255)
+    version = models.CharField(max_length=50)
+    status = models.CharField(max_length=50, default="Pendiente")
+    upload_date = models.DateTimeField(default=timezone.now)
 
-#__MODELS__END
+    def __str__(self):
+        return self.name

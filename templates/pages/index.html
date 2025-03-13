@@ -1,0 +1,94 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+
+  <div class="page-wrapper">
+    <!-- Page header -->
+    <div class="page-header d-print-none">
+      <div class="container-xl">
+        <div class="row g-2 align-items-center">
+          <div class="col">
+            <!-- Page pre-title -->
+            <div class="page-pretitle">
+              Bienvenido
+            </div>
+            <h2 class="page-title">
+              Test to Data Base
+            </h2>
+          </div>
+          <!-- Page title actions -->
+          
+        </div>
+      </div>
+    </div>
+    <!-- Page body -->
+    <div class="page-body">
+      <div class="container-xl">
+        <div class="row row-deck row-cards">
+          
+       
+
+              <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card h-100">
+                  <div class="card-status-start bg-primary"></div>
+                  <div class="card-body">
+                  
+                    <div class="d-flex align-items-center pb-3">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-database me-2"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 6m-8 0a8 3 0 1 0 16 0a8 3 0 1 0 -16 0" /><path d="M4 6v6a8 3 0 0 0 16 0v-6" /><path d="M4 12v6a8 3 0 0 0 16 0v-6" /></svg>
+                      <h3 class="card-title mb-0">DB Manager</h3>
+                    </div>
+                    <p class="text-muted">Actualice la base de datos principal con Access (.mdb)</p>
+                  </div>
+                  <!-- Card footer -->
+                  <div class="card-footer d-flex justify-content-end">
+                    <a href="#" class="btn btn-primary">Acceder</a>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card h-100">
+                  <div class="card-status-start bg-primary"></div>
+                  <div class="card-body">
+                    <div class="d-flex align-items-center pb-3">
+                      <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-file-description me-2"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M9 17h6" /><path d="M9 13h6" /></svg>
+                      <h3 class="card-title mb-0">Testlog</h3>
+                    </div>
+
+                    <p class="text-muted">Historial de pruebas realizadas y sus resultados.</p>
+                  </div>
+                  <!-- Card footer -->
+                  <div class="card-footer d-flex justify-content-end">
+                    <a href="#" class="btn btn-primary">Acceder</a>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card h-100">
+                  <div class="card-status-start bg-primary"></div>
+                  <div class="card-body">
+                    <div class="d-flex align-items-center pb-3">
+                      <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-player-play me-2"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 4v16l13 -8z" /></svg>
+                      <h3 class="card-title mb-0">New test</h3>
+                    </div>
+                    <p class="text-muted">Inicie una nueva prueba de cableado en el sistema.</p>
+                  </div>
+                  <!-- Card footer -->
+                  <div class="card-footer d-flex justify-content-end">
+                    <a href="#" class="btn btn-primary">Acceder</a>
+                  </div>
+                </div>
+              </div>
+
+          
+          
+        </div>
+      </div>
+    </div>
+    {% include 'includes/footer.html' %}
+  </div>
+
+{% endblock content %}
+

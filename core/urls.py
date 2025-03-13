@@ -1,8 +1,3 @@
-# -*- encoding: utf-8 -*-
-"""
-Copyright (c) 2019 - present AppSeed.us
-"""
-
 from django.contrib import admin
 from django.urls import path, include
 
@@ -11,9 +6,11 @@ try:
 except:
     pass
 
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("admin_tabler.urls")),
+    path("", include("home.urls")),
 ]
 
 

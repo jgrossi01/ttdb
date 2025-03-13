@@ -6,8 +6,8 @@
 /docs/_build/
 /node_modules/
 build/
-env
+venv
 
 #src
-*.sqlite*
+#*.sqlite*
 
