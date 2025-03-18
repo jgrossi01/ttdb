@@ -118,6 +118,10 @@ else:
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": "db.sqlite3",
+        },
+        'db2': {
+            "ENGINE": "django.db.backends.sqlite3",  # Segunda base de datos
+            "NAME": "db2.sqlite3",        # Ruta a la segunda base de datos
         }
     }
 

@@ -7,6 +7,7 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('db-manager/', views.db_manager, name='db_manager'),
     path('upload-mdb/', views.upload_mdb, name='upload_mdb'),
+    path('api/databases/', views.getDatabases, name='get_databases'),
 ]
 
 if settings.DEBUG:

@@ -4,1002 +4,222 @@
 
 {% block content %}
 
-      <div class="page-wrapper">
-        <!-- Page header -->
-        <div class="page-header d-print-none">
-          <div class="container-xl">
-            <div class="row g-2 align-items-center">
-              <div class="col">
-                <h2 class="page-title">
-                  DB Manager
-                </h2>
-              </div>
+  <div class="page-wrapper">
+    <!-- Page header -->
+    <div class="page-header d-print-none">
+      <div class="container-xl">
+        <div class="row g-2 align-items-center">
+          <div class="col">
+            <!-- Page pre-title -->
+            <div class="page-pretitle">
+              Overview
+            </div>
+            <h2 class="page-title">
+              DB Manager
+            </h2>
+          </div>
+          <!-- Page title actions -->
+          <div class="col-auto ms-auto d-print-none">
+            <div class="btn-list">
+              <a href="#" class="btn btn-primary d-none d-sm-inline-block" data-bs-toggle="modal" data-bs-target="#dataModal" data-bs-backdrop="static">
+                <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
+                Cargar Access
+              </a>
             </div>
           </div>
         </div>
-        <!-- Page body -->
-        <div class="page-body">
-          <div class="container-xl">
-            <div class="row row-cards">
-              <div class="col-lg-8">
-                <div class="card">
-                  <div class="table-responsive">
-                    <table
-		class="table table-vcenter card-table">
-                      <thead>
-                        <tr>
-                          <th>Fecha</th>
-                          <th>Nombre</th>
-                          <th>Estado</th>
-                          <th>Role</th>
-                          <th class="w-1"></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td >Paweł Kuna</td>
-                          <td class="text-muted" >
-                            UI Designer, Training
-                          </td>
-                          <td class="text-muted" ><a href="#" class="text-reset">paweluna@howstuffworks.com</a></td>
-                          <td class="text-muted" >
-                            User
-                          </td>
-                          <td>
-                            <a href="#">Edit</a>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td >Jeffie Lewzey</td>
-                          <td class="text-muted" >
-                            Chemical Engineer, Support
-                          </td>
-                          <td class="text-muted" ><a href="#" class="text-reset">jlewzey1@seesaa.net</a></td>
-                          <td class="text-muted" >
-                            Admin
-                          </td>
-                          <td>
-                            <a href="#">Edit</a>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td >Mallory Hulme</td>
-                          <td class="text-muted" >
-                            Geologist IV, Support
-                          </td>
-                          <td class="text-muted" ><a href="#" class="text-reset">mhulme2@domainmarket.com</a></td>
-                          <td class="text-muted" >
-                            User
-                          </td>
-                          <td>
-                            <a href="#">Edit</a>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td >Dunn Slane</td>
-                          <td class="text-muted" >
-                            Research Nurse, Sales
-                          </td>
-                          <td class="text-muted" ><a href="#" class="text-reset">dslane3@epa.gov</a></td>
-                          <td class="text-muted" >
-                            Owner
-                          </td>
-                          <td>
-                            <a href="#">Edit</a>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td >Emmy Levet</td>
-                          <td class="text-muted" >
-                            VP Product Management, Accounting
-                          </td>
-                          <td class="text-muted" ><a href="#" class="text-reset">elevet4@senate.gov</a></td>
-                          <td class="text-muted" >
-                            Admin
-                          </td>
-                          <td>
-                            <a href="#">Edit</a>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td >Maryjo Lebarree</td>
-                          <td class="text-muted" >
-                            Civil Engineer, Product Management
-                          </td>
-                          <td class="text-muted" ><a href="#" class="text-reset">mlebarree5@unc.edu</a></td>
-                          <td class="text-muted" >
-                            User
-                          </td>
-                          <td>
-                            <a href="#">Edit</a>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td >Egan Poetz</td>
-                          <td class="text-muted" >
-                            Research Nurse, Engineering
-                          </td>
-                          <td class="text-muted" ><a href="#" class="text-reset">epoetz6@free.fr</a></td>
-                          <td class="text-muted" >
-                            Admin
-                          </td>
-                          <td>
-                            <a href="#">Edit</a>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td >Kellie Skingley</td>
-                          <td class="text-muted" >
-                            Teacher, Services
-                          </td>
-                          <td class="text-muted" ><a href="#" class="text-reset">kskingley7@columbia.edu</a></td>
-                          <td class="text-muted" >
-                            Owner
-                          </td>
-                          <td>
-                            <a href="#">Edit</a>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-4">
-                <div class="card h-100">
-                  <div class="card-body">
-                  <h3 class="card-title">Cargar Access (.mdb)</h3>
-                    <form class="dropzone" id="dropzone-custom" action="./" autocomplete="off" novalidate>
-                    {% csrf_token %}
-                    <div class="fallback">
-                      <input name="file" type="file" />
-                    </div>
-                    <div class="dz-message">
-                      <h3 class="dropzone-msg-title">Cargar DB con actualizaciones</h3>
-                      <span class="dropzone-msg-desc">Suelta o haz click aqui para cargar</span>
-                    </div>
-                    </form>
-
-                    {% block modal %}
-                    <div class="modal modal-blur fade" id="dataModal" tabindex="-1" role="dialog">
-                      <div class="modal-dialog modal-lg" role="document">
-                        <div class="modal-content">
-                          <div class="modal-header">
-                            <h5 class="modal-title">Guardar base de datos</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                          </div>
-                          <div class="modal-body">
-                            <div class="mb-3">
-                              <label class="form-label">Nombre</label>
-                              <input type="text" class="form-control" name="name" id="inputName" placeholder="Nombre de la base de datos">
-                            </div>
-                            <div class="mb-3">
-                              <label class="form-label">Versión</label>
-                              <input type="text" class="form-control" name="version" id="inputVersion" placeholder="Versión de la base de datos">
-                            </div>
-                            <label class="form-label">Operación</label>
-                            <div class="form-selectgroup-boxes row mb-3">
-                              <div class="col-lg-6">
-                                <label class="form-selectgroup-item">
-                                  <input type="radio" name="report-type" value="0" class="form-selectgroup-input" >
-                                  <span class="form-selectgroup-label d-flex align-items-center p-3">
-                                    <span class="me-3">
-                                      <span class="form-selectgroup-check"></span>
-                                    </span>
-                                    <span class="form-selectgroup-label-content">
-                                      <div class="mb-3">
-                                        <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-upload me-1"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /><path d="M7 9l5 -5l5 5" /><path d="M12 4l0 12" /></svg>
-                                        <span class="form-selectgroup-title strong mb-1">Subir</span>
-                                      </div>
-                                      
-                                      <span class="d-block text-muted">Únicamente suebe la nueva base de datos. Podrás combinarla con la base de datos principal mas adelante.</span>
-                                    </span>
-                                  </span>
-                                </label>
-                              </div>
-                              <div class="col-lg-6">
-                                <label class="form-selectgroup-item">
-                                  <input type="radio" name="report-type" value="1" class="form-selectgroup-input">
-                                  <span class="form-selectgroup-label d-flex align-items-center p-3">
-                                    <span class="me-3">
-                                      <span class="form-selectgroup-check"></span>
-                                    </span>
-                                    <span class="form-selectgroup-label-content">
-                                      <div class="mb-3">
-                                        <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="currentColor"  class="icon icon-tabler icons-tabler-filled icon-tabler-alert-triangle me-1"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 1.67c.955 0 1.845 .467 2.39 1.247l.105 .16l8.114 13.548a2.914 2.914 0 0 1 -2.307 4.363l-.195 .008h-16.225a2.914 2.914 0 0 1 -2.582 -4.2l.099 -.185l8.11 -13.538a2.914 2.914 0 0 1 2.491 -1.403zm.01 13.33l-.127 .007a1 1 0 0 0 0 1.986l.117 .007l.127 -.007a1 1 0 0 0 0 -1.986l-.117 -.007zm-.01 -7a1 1 0 0 0 -.993 .883l-.007 .117v4l.007 .117a1 1 0 0 0 1.986 0l.007 -.117v-4l-.007 -.117a1 1 0 0 0 -.993 -.883z" /></svg>
-                                        <span class="form-selectgroup-title strong">Subir y actualizar</span>
-                                      </div>
-                                      <span class="d-block text-muted">Sube e inserta los datos nuevos en la base de datos principal sin modificar el resto de los datos guardados.</span>
-                                    </span>
-                                  </span>
-                                </label>
-                              </div>
-                            </div>
-                          </div>
-                          <div class="modal-footer">
-                            <div id="alert-container" class="row col-12"></div>
-                            <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal">
-                              Cancelar
-                            </a>
-                            <a href="#" onclick="saveData()" class="btn btn-primary ms-auto">
-                              <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
-                              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
-                              Subir
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  {% endblock modal %}
-
-                  </div>
-                </div>
-              </div>
-              <div class="col-12">
-                <div class="card">
-                  <div class="table-responsive">
-                    <table
-		class="table table-vcenter card-table table-striped">
-                      <thead>
-                        <tr>
-                          <th>Name</th>
-                          <th>Title</th>
-                          <th>Email</th>
-                          <th>Role</th>
-                          <th class="w-1"></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td >Maryjo Lebarree</td>
-                          <td class="text-muted" >
-                            Civil Engineer, Product Management
-                          </td>
-                          <td class="text-muted" ><a href="#" class="text-reset">mlebarree5@unc.edu</a></td>
-                          <td class="text-muted" >
-                            User
-                          </td>
-                          <td>
-                            <a href="#">Edit</a>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td >Egan Poetz</td>
-                          <td class="text-muted" >
-                            Research Nurse, Engineering
-                          </td>
-                          <td class="text-muted" ><a href="#" class="text-reset">epoetz6@free.fr</a></td>
-                          <td class="text-muted" >
-                            Admin
-                          </td>
-                          <td>
-                            <a href="#">Edit</a>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td >Kellie Skingley</td>
-                          <td class="text-muted" >
-                            Teacher, Services
-                          </td>
-                          <td class="text-muted" ><a href="#" class="text-reset">kskingley7@columbia.edu</a></td>
-                          <td class="text-muted" >
-                            User
-                          </td>
-                          <td>
-                            <a href="#">Edit</a>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td >Christabel Charlwood</td>
-                          <td class="text-muted" >
-                            Tax Accountant, Engineering
-                          </td>
-                          <td class="text-muted" ><a href="#" class="text-reset">ccharlwood8@nifty.com</a></td>
-                          <td class="text-muted" >
-                            Owner
-                          </td>
-                          <td>
-                            <a href="#">Edit</a>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td >Haskel Shelper</td>
-                          <td class="text-muted" >
-                            Staff Scientist, Legal
-                          </td>
-                          <td class="text-muted" ><a href="#" class="text-reset">hshelper9@woothemes.com</a></td>
-                          <td class="text-muted" >
-                            Admin
-                          </td>
-                          <td>
-                            <a href="#">Edit</a>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-              <div class="col-12">
-                <div class="card">
-                  <div class="table-responsive">
-                    <table
-		class="table table-vcenter card-table">
-                      <thead>
-                        <tr>
-                          <th>Name</th>
-                          <th>Title</th>
-                          <th>Role</th>
-                          <th class="w-1"></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td >
-                            <div class="d-flex py-1 align-items-center">
-                              <span class="avatar me-2" style="background-image: url({% static 'static/avatars/006m.jpg' %})"></span>
-                              <div class="flex-fill">
-                                <div class="font-weight-medium">Lorry Mion</div>
-                                <div class="text-muted"><a href="#" class="text-reset">lmiona@livejournal.com</a></div>
-                              </div>
-                            </div>
-                          </td>
-                          <td >
-                            <div>Automation Specialist IV</div>
-                            <div class="text-muted">Accounting</div>
-                          </td>
-                          <td class="text-muted" >
-                            User
-                          </td>
-                          <td>
-                            <a href="#">Edit</a>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td >
-                            <div class="d-flex py-1 align-items-center">
-                              <span class="avatar me-2" style="background-image: url({% static 'static/avatars/004f.jpg' %})"></span>
-                              <div class="flex-fill">
-                                <div class="font-weight-medium">Leesa Beaty</div>
-                                <div class="text-muted"><a href="#" class="text-reset">lbeatyb@alibaba.com</a></div>
-                              </div>
-                            </div>
-                          </td>
-                          <td >
-                            <div>Editor</div>
-                            <div class="text-muted">Services</div>
-                          </td>
-                          <td class="text-muted" >
-                            Admin
-                          </td>
-                          <td>
-                            <a href="#">Edit</a>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td >
-                            <div class="d-flex py-1 align-items-center">
-                              <span class="avatar me-2" style="background-image: url({% static 'static/avatars/007m.jpg' %})"></span>
-                              <div class="flex-fill">
-                                <div class="font-weight-medium">Perren Keemar</div>
-                                <div class="text-muted"><a href="#" class="text-reset">pkeemarc@yahoo.com</a></div>
-                              </div>
-                            </div>
-                          </td>
-                          <td >
-                            <div>Analog Circuit Design manager</div>
-                            <div class="text-muted">Services</div>
-                          </td>
-                          <td class="text-muted" >
-                            User
-                          </td>
-                          <td>
-                            <a href="#">Edit</a>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td >
-                            <div class="d-flex py-1 align-items-center">
-                              <span class="avatar me-2">SA</span>
-                              <div class="flex-fill">
-                                <div class="font-weight-medium">Sunny Airey</div>
-                                <div class="text-muted"><a href="#" class="text-reset">saireyd@prlog.org</a></div>
-                              </div>
-                            </div>
-                          </td>
-                          <td >
-                            <div>Nuclear Power Engineer</div>
-                            <div class="text-muted">Engineering</div>
-                          </td>
-                          <td class="text-muted" >
-                            Owner
-                          </td>
-                          <td>
-                            <a href="#">Edit</a>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td >
-                            <div class="d-flex py-1 align-items-center">
-                              <span class="avatar me-2" style="background-image: url({% static 'static/avatars/009m.jpg' %})"></span>
-                              <div class="flex-fill">
-                                <div class="font-weight-medium">Geoffry Flaunders</div>
-                                <div class="text-muted"><a href="#" class="text-reset">gflaunderse@loc.gov</a></div>
-                              </div>
-                            </div>
-                          </td>
-                          <td >
-                            <div>Software Test Engineer II</div>
-                            <div class="text-muted">Accounting</div>
-                          </td>
-                          <td class="text-muted" >
-                            Admin
-                          </td>
-                          <td>
-                            <a href="#">Edit</a>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-              <div class="col-12">
-                <div class="card">
-                  <div class="table-responsive">
-                    <table
-		class="table table-vcenter table-mobile-md card-table">
-                      <thead>
-                        <tr>
-                          <th>Name</th>
-                          <th>Title</th>
-                          <th>Role</th>
-                          <th class="w-1"></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td data-label="Name" >
-                            <div class="d-flex py-1 align-items-center">
-                              <span class="avatar me-2" style="background-image: url({% static 'static/avatars/010m.jpg' %})"></span>
-                              <div class="flex-fill">
-                                <div class="font-weight-medium">Thatcher Keel</div>
-                                <div class="text-muted"><a href="#" class="text-reset">tkeelf@blogger.com</a></div>
-                              </div>
-                            </div>
-                          </td>
-                          <td data-label="Title" >
-                            <div>VP Sales</div>
-                            <div class="text-muted">Business Development</div>
-                          </td>
-                          <td class="text-muted" data-label="Role" >
-                            User
-                          </td>
-                          <td>
-                            <div class="btn-list flex-nowrap">
-                              <a href="#" class="btn">
-                                Edit
-                              </a>
-                              <div class="dropdown">
-                                <button class="btn dropdown-toggle align-text-top" data-bs-toggle="dropdown">
-                                  Actions
-                                </button>
-                                <div class="dropdown-menu dropdown-menu-end">
-                                  <a class="dropdown-item" href="#">
-                                    Action
-                                  </a>
-                                  <a class="dropdown-item" href="#">
-                                    Another action
-                                  </a>
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td data-label="Name" >
-                            <div class="d-flex py-1 align-items-center">
-                              <span class="avatar me-2" style="background-image: url({% static 'static/avatars/005f.jpg' %})"></span>
-                              <div class="flex-fill">
-                                <div class="font-weight-medium">Dyann Escala</div>
-                                <div class="text-muted"><a href="#" class="text-reset">descalag@usatoday.com</a></div>
-                              </div>
-                            </div>
-                          </td>
-                          <td data-label="Title" >
-                            <div>Mechanical Systems Engineer</div>
-                            <div class="text-muted">Sales</div>
-                          </td>
-                          <td class="text-muted" data-label="Role" >
-                            Admin
-                          </td>
-                          <td>
-                            <div class="btn-list flex-nowrap">
-                              <a href="#" class="btn">
-                                Edit
-                              </a>
-                              <div class="dropdown">
-                                <button class="btn dropdown-toggle align-text-top" data-bs-toggle="dropdown">
-                                  Actions
-                                </button>
-                                <div class="dropdown-menu dropdown-menu-end">
-                                  <a class="dropdown-item" href="#">
-                                    Action
-                                  </a>
-                                  <a class="dropdown-item" href="#">
-                                    Another action
-                                  </a>
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td data-label="Name" >
-                            <div class="d-flex py-1 align-items-center">
-                              <span class="avatar me-2" style="background-image: url({% static 'static/avatars/006f.jpg' %})"></span>
-                              <div class="flex-fill">
-                                <div class="font-weight-medium">Avivah Mugleston</div>
-                                <div class="text-muted"><a href="#" class="text-reset">amuglestonh@intel.com</a></div>
-                              </div>
-                            </div>
-                          </td>
-                          <td data-label="Title" >
-                            <div>Actuary</div>
-                            <div class="text-muted">Sales</div>
-                          </td>
-                          <td class="text-muted" data-label="Role" >
-                            User
-                          </td>
-                          <td>
-                            <div class="btn-list flex-nowrap">
-                              <a href="#" class="btn">
-                                Edit
-                              </a>
-                              <div class="dropdown">
-                                <button class="btn dropdown-toggle align-text-top" data-bs-toggle="dropdown">
-                                  Actions
-                                </button>
-                                <div class="dropdown-menu dropdown-menu-end">
-                                  <a class="dropdown-item" href="#">
-                                    Action
-                                  </a>
-                                  <a class="dropdown-item" href="#">
-                                    Another action
-                                  </a>
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td data-label="Name" >
-                            <div class="d-flex py-1 align-items-center">
-                              <span class="avatar me-2">AA</span>
-                              <div class="flex-fill">
-                                <div class="font-weight-medium">Arlie Armstead</div>
-                                <div class="text-muted"><a href="#" class="text-reset">aarmsteadi@yellowpages.com</a></div>
-                              </div>
-                            </div>
-                          </td>
-                          <td data-label="Title" >
-                            <div>VP Quality Control</div>
-                            <div class="text-muted">Accounting</div>
-                          </td>
-                          <td class="text-muted" data-label="Role" >
-                            Owner
-                          </td>
-                          <td>
-                            <div class="btn-list flex-nowrap">
-                              <a href="#" class="btn">
-                                Edit
-                              </a>
-                              <div class="dropdown">
-                                <button class="btn dropdown-toggle align-text-top" data-bs-toggle="dropdown">
-                                  Actions
-                                </button>
-                                <div class="dropdown-menu dropdown-menu-end">
-                                  <a class="dropdown-item" href="#">
-                                    Action
-                                  </a>
-                                  <a class="dropdown-item" href="#">
-                                    Another action
-                                  </a>
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td data-label="Name" >
-                            <div class="d-flex py-1 align-items-center">
-                              <span class="avatar me-2" style="background-image: url({% static 'static/avatars/008f.jpg' %})"></span>
-                              <div class="flex-fill">
-                                <div class="font-weight-medium">Tessie Curzon</div>
-                                <div class="text-muted"><a href="#" class="text-reset">tcurzonj@hp.com</a></div>
-                              </div>
-                            </div>
-                          </td>
-                          <td data-label="Title" >
-                            <div>Research Nurse</div>
-                            <div class="text-muted">Product Management</div>
-                          </td>
-                          <td class="text-muted" data-label="Role" >
-                            Admin
-                          </td>
-                          <td>
-                            <div class="btn-list flex-nowrap">
-                              <a href="#" class="btn">
-                                Edit
-                              </a>
-                              <div class="dropdown">
-                                <button class="btn dropdown-toggle align-text-top" data-bs-toggle="dropdown">
-                                  Actions
-                                </button>
-                                <div class="dropdown-menu dropdown-menu-end">
-                                  <a class="dropdown-item" href="#">
-                                    Action
-                                  </a>
-                                  <a class="dropdown-item" href="#">
-                                    Another action
-                                  </a>
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-              <div class="col-12">
-                <div class="card">
-                  <div class="card-header">
-                    <h3 class="card-title">Invoices</h3>
-                  </div>
-                  <div class="card-body border-bottom py-3">
-                    <div class="d-flex">
-                      <div class="text-muted">
-                        Show
-                        <div class="mx-2 d-inline-block">
-                          <input type="text" class="form-control form-control-sm" value="8" size="3" aria-label="Invoices count">
-                        </div>
-                        entries
-                      </div>
-                      <div class="ms-auto text-muted">
-                        Search:
-                        <div class="ms-2 d-inline-block">
-                          <input type="text" class="form-control form-control-sm" aria-label="Search invoice">
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="table-responsive">
-                    <table class="table card-table table-vcenter text-nowrap datatable">
-                      <thead>
-                        <tr>
-                          <th class="w-1"><input class="form-check-input m-0 align-middle" type="checkbox" aria-label="Select all invoices"></th>
-                          <th class="w-1">No. <!-- Download SVG icon from http://tabler-icons.io/i/chevron-up -->
-                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-sm icon-thick" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 15l6 -6l6 6" /></svg>
-                          </th>
-                          <th>Invoice Subject</th>
-                          <th>Client</th>
-                          <th>VAT No.</th>
-                          <th>Created</th>
-                          <th>Status</th>
-                          <th>Price</th>
-                          <th></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td><input class="form-check-input m-0 align-middle" type="checkbox" aria-label="Select invoice"></td>
-                          <td><span class="text-muted">001401</span></td>
-                          <td><a href="invoice.html" class="text-reset" tabindex="-1">Design Works</a></td>
-                          <td>
-                            <span class="flag flag-country-us"></span>
-                            Carlson Limited
-                          </td>
-                          <td>
-                            87956621
-                          </td>
-                          <td>
-                            15 Dec 2017
-                          </td>
-                          <td>
-                            <span class="badge bg-success me-1"></span> Paid
-                          </td>
-                          <td>$887</td>
-                          <td class="text-end">
-                            <span class="dropdown">
-                              <button class="btn dropdown-toggle align-text-top" data-bs-boundary="viewport" data-bs-toggle="dropdown">Actions</button>
-                              <div class="dropdown-menu dropdown-menu-end">
-                                <a class="dropdown-item" href="#">
-                                  Action
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                  Another action
-                                </a>
-                              </div>
-                            </span>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td><input class="form-check-input m-0 align-middle" type="checkbox" aria-label="Select invoice"></td>
-                          <td><span class="text-muted">001402</span></td>
-                          <td><a href="invoice.html" class="text-reset" tabindex="-1">UX Wireframes</a></td>
-                          <td>
-                            <span class="flag flag-country-gb"></span>
-                            Adobe
-                          </td>
-                          <td>
-                            87956421
-                          </td>
-                          <td>
-                            12 Apr 2017
-                          </td>
-                          <td>
-                            <span class="badge bg-warning me-1"></span> Pending
-                          </td>
-                          <td>$1200</td>
-                          <td class="text-end">
-                            <span class="dropdown">
-                              <button class="btn dropdown-toggle align-text-top" data-bs-boundary="viewport" data-bs-toggle="dropdown">Actions</button>
-                              <div class="dropdown-menu dropdown-menu-end">
-                                <a class="dropdown-item" href="#">
-                                  Action
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                  Another action
-                                </a>
-                              </div>
-                            </span>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td><input class="form-check-input m-0 align-middle" type="checkbox" aria-label="Select invoice"></td>
-                          <td><span class="text-muted">001403</span></td>
-                          <td><a href="invoice.html" class="text-reset" tabindex="-1">New Dashboard</a></td>
-                          <td>
-                            <span class="flag flag-country-de"></span>
-                            Bluewolf
-                          </td>
-                          <td>
-                            87952621
-                          </td>
-                          <td>
-                            23 Oct 2017
-                          </td>
-                          <td>
-                            <span class="badge bg-warning me-1"></span> Pending
-                          </td>
-                          <td>$534</td>
-                          <td class="text-end">
-                            <span class="dropdown">
-                              <button class="btn dropdown-toggle align-text-top" data-bs-boundary="viewport" data-bs-toggle="dropdown">Actions</button>
-                              <div class="dropdown-menu dropdown-menu-end">
-                                <a class="dropdown-item" href="#">
-                                  Action
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                  Another action
-                                </a>
-                              </div>
-                            </span>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td><input class="form-check-input m-0 align-middle" type="checkbox" aria-label="Select invoice"></td>
-                          <td><span class="text-muted">001404</span></td>
-                          <td><a href="invoice.html" class="text-reset" tabindex="-1">Landing Page</a></td>
-                          <td>
-                            <span class="flag flag-country-br"></span>
-                            Salesforce
-                          </td>
-                          <td>
-                            87953421
-                          </td>
-                          <td>
-                            2 Sep 2017
-                          </td>
-                          <td>
-                            <span class="badge bg-secondary me-1"></span> Due in 2 Weeks
-                          </td>
-                          <td>$1500</td>
-                          <td class="text-end">
-                            <span class="dropdown">
-                              <button class="btn dropdown-toggle align-text-top" data-bs-boundary="viewport" data-bs-toggle="dropdown">Actions</button>
-                              <div class="dropdown-menu dropdown-menu-end">
-                                <a class="dropdown-item" href="#">
-                                  Action
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                  Another action
-                                </a>
-                              </div>
-                            </span>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td><input class="form-check-input m-0 align-middle" type="checkbox" aria-label="Select invoice"></td>
-                          <td><span class="text-muted">001405</span></td>
-                          <td><a href="invoice.html" class="text-reset" tabindex="-1">Marketing Templates</a></td>
-                          <td>
-                            <span class="flag flag-country-pl"></span>
-                            Printic
-                          </td>
-                          <td>
-                            87956621
-                          </td>
-                          <td>
-                            29 Jan 2018
-                          </td>
-                          <td>
-                            <span class="badge bg-danger me-1"></span> Paid Today
-                          </td>
-                          <td>$648</td>
-                          <td class="text-end">
-                            <span class="dropdown">
-                              <button class="btn dropdown-toggle align-text-top" data-bs-boundary="viewport" data-bs-toggle="dropdown">Actions</button>
-                              <div class="dropdown-menu dropdown-menu-end">
-                                <a class="dropdown-item" href="#">
-                                  Action
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                  Another action
-                                </a>
-                              </div>
-                            </span>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td><input class="form-check-input m-0 align-middle" type="checkbox" aria-label="Select invoice"></td>
-                          <td><span class="text-muted">001406</span></td>
-                          <td><a href="invoice.html" class="text-reset" tabindex="-1">Sales Presentation</a></td>
-                          <td>
-                            <span class="flag flag-country-br"></span>
-                            Tabdaq
-                          </td>
-                          <td>
-                            87956621
-                          </td>
-                          <td>
-                            4 Feb 2018
-                          </td>
-                          <td>
-                            <span class="badge bg-secondary me-1"></span> Due in 3 Weeks
-                          </td>
-                          <td>$300</td>
-                          <td class="text-end">
-                            <span class="dropdown">
-                              <button class="btn dropdown-toggle align-text-top" data-bs-boundary="viewport" data-bs-toggle="dropdown">Actions</button>
-                              <div class="dropdown-menu dropdown-menu-end">
-                                <a class="dropdown-item" href="#">
-                                  Action
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                  Another action
-                                </a>
-                              </div>
-                            </span>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td><input class="form-check-input m-0 align-middle" type="checkbox" aria-label="Select invoice"></td>
-                          <td><span class="text-muted">001407</span></td>
-                          <td><a href="invoice.html" class="text-reset" tabindex="-1">Logo & Print</a></td>
-                          <td>
-                            <span class="flag flag-country-us"></span>
-                            Apple
-                          </td>
-                          <td>
-                            87956621
-                          </td>
-                          <td>
-                            22 Mar 2018
-                          </td>
-                          <td>
-                            <span class="badge bg-success me-1"></span> Paid Today
-                          </td>
-                          <td>$2500</td>
-                          <td class="text-end">
-                            <span class="dropdown">
-                              <button class="btn dropdown-toggle align-text-top" data-bs-boundary="viewport" data-bs-toggle="dropdown">Actions</button>
-                              <div class="dropdown-menu dropdown-menu-end">
-                                <a class="dropdown-item" href="#">
-                                  Action
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                  Another action
-                                </a>
-                              </div>
-                            </span>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td><input class="form-check-input m-0 align-middle" type="checkbox" aria-label="Select invoice"></td>
-                          <td><span class="text-muted">001408</span></td>
-                          <td><a href="invoice.html" class="text-reset" tabindex="-1">Icons</a></td>
-                          <td>
-                            <span class="flag flag-country-pl"></span>
-                            Tookapic
-                          </td>
-                          <td>
-                            87956621
-                          </td>
-                          <td>
-                            13 May 2018
-                          </td>
-                          <td>
-                            <span class="badge bg-success me-1"></span> Paid Today
-                          </td>
-                          <td>$940</td>
-                          <td class="text-end">
-                            <span class="dropdown">
-                              <button class="btn dropdown-toggle align-text-top" data-bs-boundary="viewport" data-bs-toggle="dropdown">Actions</button>
-                              <div class="dropdown-menu dropdown-menu-end">
-                                <a class="dropdown-item" href="#">
-                                  Action
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                  Another action
-                                </a>
-                              </div>
-                            </span>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                  <div class="card-footer d-flex align-items-center">
-                    <p class="m-0 text-muted">Showing <span>1</span> to <span>8</span> of <span>16</span> entries</p>
-                    <ul class="pagination m-0 ms-auto">
-                      <li class="page-item disabled">
-                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
-                          <!-- Download SVG icon from http://tabler-icons.io/i/chevron-left -->
-                          <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 6l-6 6l6 6" /></svg>
-                          prev
-                        </a>
-                      </li>
-                      <li class="page-item"><a class="page-link" href="#">1</a></li>
-                      <li class="page-item active"><a class="page-link" href="#">2</a></li>
-                      <li class="page-item"><a class="page-link" href="#">3</a></li>
-                      <li class="page-item"><a class="page-link" href="#">4</a></li>
-                      <li class="page-item"><a class="page-link" href="#">5</a></li>
-                      <li class="page-item">
-                        <a class="page-link" href="#">
-                          next <!-- Download SVG icon from http://tabler-icons.io/i/chevron-right -->
-                          <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6l-6 6" /></svg>
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        {% include 'includes/footer.html' %}
       </div>
+    </div>
+    <!-- Page body -->
+    <div class="page-body">
+      <div class="container-xl">
+        <div class="row row-cards">
+          <div class="col-lg-12">
+            <div class="card">
+              <div class="">
+                <h3 class="my-3 mx-3">Actualizaciones realizadas en la base de datos principal</h3>
+                <table class="table table-vcenter card-table table-striped" id="databases-table">
+                  <thead>
+                    <tr>
+                      <th>Fecha</th>
+                      <th width="200">Nombre</th>
+                      <th>Versión</th>
+                      <th>Archivo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    {% include 'includes/footer.html' %}
+  </div>
+
+  {% block modal %}
+  <div class="modal modal-blur fade" id="dataModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Actualizar base de datos</h5>
+          <button type="button" id="closeBtn" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-center">Seleccione un archivo Access (.mdb) para actualizar la base de datos principal.</p>
+          <p class="text-center">Se creara una copia de seguridad de la versión que se está utilizando actualmente.</p>
+          <div class="mb-3">
+            <form class="dropzone mb-2" id="dropzone-custom" action="./" autocomplete="off" novalidate >
+              {% csrf_token %}
+              <div class="fallback">
+                <input name="file" type="file" disabled/>
+              </div>
+              <div class="dz-message">
+                <h3 class="dropzone-msg-title">Cargar DB con actualizaciones</h3>
+                <span class="dropzone-msg-desc">Suelta o haz click aqui para cargar</span>
+              </div>
+            </form>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Nombre</label>
+            <input type="text" class="form-control" name="name" id="inputName" placeholder="Nombre de la base de datos">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Versión</label>
+            <input type="text" class="form-control" name="version" id="inputVersion" placeholder="Versión de la base de datos">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div id="alert-container" class="row col-12"></div>
+          <button id="cancelBtn" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+            Cancelar
+          </button>
+          <button id="saveBtn" onclick="saveData()" class="btn btn-primary ms-auto">
+            <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
+            Subir
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endblock modal %}
 
 {% endblock content %}
 
 {% block extrajs %}
 <script src="{% static 'dist/libs/dropzone/dist/dropzone-min.js' %}?1684106062" defer></script>
+<script src="{% static 'dist/libs/list.js/dist/list.min.js' %}?1684106062" defer></script>
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/2.2.2/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/2.2.2/js/dataTables.bootstrap5.js"></script>
+
 <script>
 // Definir myDropzone en el ámbito global
+
 let myDropzone;
 
-// Configuración de Dropzone
+
+
 document.addEventListener('DOMContentLoaded', function () {
+
+// Configuración de DataTables
+const table = $('#databases-table').DataTable({
+  ajax: {
+    url: '/api/databases', // Ruta de la API
+    dataSrc: 'data' // Accede a la propiedad "data" del JSON
+  },
+  columns: [
+    { data: 'upload_date', title: 'Fecha' }, // Columna Fecha
+    { data: 'name', title: 'Nombre' },       // Columna Nombre
+    { data: 'version', title: 'Versión' },   // Columna Versión
+    { data: 'file', title: 'Archivo' },       // Columna Archivo
+  ],
+  order: [[0, "desc"]],
+  language: {
+    url: '{% static 'static/es-ES.json' %}' // Lenguaje en español
+  },
+  searching: false, // Desactiva el buscador
+  pageLength: 10,   // Muestra 10 registros por página
+  paging: true      // Activa el paginador
+});
+
+table.on('draw', function () {
+   
+  // Texto bajo tabla
+  const dt = document.querySelector('.dt-info');
+  dt.style.marginLeft = '15px';
+  dt.style.marginBottom = '8px';
+
+  // Cantidad de registros
+  const dtLengthContainer = document.querySelector('.dt-length');
+  const dtLengthContainerLabel = document.querySelector('.dt-length > label');
+  const dtLengthContainerSelect = document.querySelector('.dt-length > select');
+
+  dtLengthContainer.style.paddingLeft = '10px';
+  dtLengthContainer.style.height = 'auto';
+  dtLengthContainerLabel.style.display = 'inline-block';
+  dtLengthContainerSelect.style.width = 'auto';
+  dtLengthContainerSelect.style.marginRight = '5px';
+  dtLengthContainerSelect.style.display = 'inline-block';
+
+  // Paginador
+  const dtPaging = document.querySelector('.dt-paging');
+  dtPaging.style.paddingTop = '10px';
+  dtPaging.style.paddingRight = '20px';
+});
+
+
+  
+
+// Funciona, vanilla JS
+/*
+fetch("/api/databases/")
+  .then(response => response.json())
+  .then(data => {
+      let tbody = document.getElementById("databases-body");
+      tbody.innerHTML = ""; // Limpiar antes de agregar nuevos datos
+
+      data.data.forEach(archivo => {
+          let fila = `
+              <tr>
+                  <td>${archivo.upload_date}</td>
+                  <td>${archivo.name}</td>
+                  <td>${archivo.version}</td>
+                  <td><a href="/media/${archivo.file}" target="_blank">${archivo.file}</a></td>
+                  <td>${archivo.status}</td>
+              </tr>
+          `;
+          tbody.innerHTML += fila;
+      });
+  })
+  .catch(error => console.error("Error al obtener los datos:", error));
+*/
+
+
+
+  const dataModal = new bootstrap.Modal(document.getElementById('dataModal'), {
+    backdrop: 'static', // Evita que el modal se cierre al hacer clic fuera
+    keyboard: false,    // Evita que el modal se cierre al presionar la tecla Esc
+  }); 
+
+  const inputName = document.querySelector('#inputName');
+  const inputVersion = document.querySelector('#inputVersion');
+
+  //modal.show();
+  //progressModal.show();
   Dropzone.autoDiscover = false;
   myDropzone = new Dropzone("#dropzone-custom", {
       paramName: "file",
-      maxFilesize: 50, // Tamaño máximo en MB
+      maxFilesize: 100, // Tamaño máximo en MB
       acceptedFiles: ".mdb", // Solo aceptar archivos .mdb
       addRemoveLinks: false, // Mostrar enlaces para eliminar archivos
       autoProcessQueue: true, // Subir automáticamente el archivo
+      maxFiles: 1,
       previewTemplate: `
       <div class="dz-preview dz-file-preview">
           <div class="dz-details">
@@ -1009,6 +229,8 @@ document.addEventListener('DOMContentLoaded', function () {
           <div class="dz-error-message"><span data-dz-errormessage></span></div>
       </div>
       `,
+      dictInvalidFileType: "Debes seleccionar un archivo .mdb (Access)",
+      dictMaxFilesExceeded: "No puedes subir más archivos.",
       init: function () {
           // Evento cuando se añade un archivo
           this.on("addedfile", function (file) {
@@ -1018,41 +240,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
           // Evento cuando se completa la subida
           this.on("success", function (file, response) {
-            console.log("Archivo subido:", file.name);
-            //console.log("Respuesta del servidor:", response);
-
-            // Mostrar el modal después de subir el archivo
-            const modal = new bootstrap.Modal(document.getElementById('dataModal')); // Usar Bootstrap para abrir el modal
-            modal.show();
-
-            // Asignar el nombre del archivo al campo de entrada después de que el modal esté visible
-            document.getElementById('dataModal').addEventListener('shown.bs.modal', function () {
-                const inputName = document.querySelector('#inputName');
-                if (inputName) {
-                    inputName.setAttribute('value', file.name);
-                    console.log("Valor asignado:", inputName.value); // Verificar en la consola
-                }
-            });
             
+            // Cargar nombre en input
+            if (inputName) {
+              inputName.setAttribute('value', file.name);
+            }
+            
+            // Obtener versión del archivo
             const fileName = file.name;
             const revIndex = fileName.indexOf("Rev.");
 
             if (revIndex !== -1) { // Verificar que "Rev." esté presente
-                // 2. Extraer la subcadena desde "Rev." hasta el final
-                const revText = fileName.substring(revIndex);
-
-                // 3. Eliminar la extensión .mdb
-                const finalText = revText.replace(/\.mdb$/, ""); // Eliminar ".mdb" al final
-
-                console.log(finalText); // Resultado: "Rev.20-01-25"
-
-                const inputVersion = document.querySelector('#inputVersion');
+              const revText = fileName.substring(revIndex);
+              const finalText = revText.replace(/\.mdb$/, ""); // Eliminar ".mdb" al final
+                // Cargar version en input
                 if (inputVersion) {
-                    inputVersion.setAttribute('value', finalText);
-                }
-            } else {
-                console.log("No se encontró 'Rev.' en el nombre del archivo.");
-            }
+                inputVersion.setAttribute('value', finalText);
+              } 
+            }            
 
           });
 
@@ -1069,44 +274,30 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 
-// Si se cierra el modal, cancelar la carga.
+// Si se cierra el modal, cancelar la carga y limpiar formulario
 document.getElementById('dataModal').addEventListener('hidden.bs.modal', function () {
-    // Obtener el archivo subido
-    const files = myDropzone.getAcceptedFiles();
-    if (files.length > 0) {
-        // Eliminar el archivo de Dropzone
-        myDropzone.removeFile(files[0]);
-        console.log("Archivo eliminado y carga cancelada.");
-    }
+  cleanForm();
+  loadingState(false);
+});
+
+document.getElementById('dataModal').addEventListener('shown.bs.modal', function () {
+
 });
 
 // Función para guardar los datos del modal
 function saveData() {
+    const inputNameValue = document.querySelector('#inputName').value;
+    const inputVersionValue = document.querySelector('#inputVersion').value;
+    const saveBtn = document.getElementById('saveBtn');
+
     if (!myDropzone) {
         console.error("myDropzone no está definida.");
         return;
     }
 
-    const name = document.getElementById('inputName').value;
-    const version = document.getElementById('inputVersion').value;
-    let update = 3;
-
-    const radioButtons = document.querySelectorAll('input[name="report-type"]');
-    radioButtons.forEach(radio => {
-        if (radio.checked) {
-            update = radio.value;
-        }
-    });
-
     // Validar que los campos no estén vacíos
-    if (!name || !version) {
+    if (!inputNameValue || !inputVersionValue) {
       showAlert("Por favor, complete todos los campos.", "warning");
-      return;
-    }
-
-    if (update != 0 && update != 1) {
-      showAlert("Por favor, seleccione la operación a realizar.", "warning");
-      alert(update);
       return;
     }
 
@@ -1117,12 +308,15 @@ function saveData() {
       return;
     }
 
+    loadingState(true);
+    
+
     const file = files[0]; // Obtener el primer archivo subido
 
     // Crear un objeto FormData para enviar el archivo y los datos adicionales
     const formData = new FormData();
     formData.append('file', file); // Archivo subido
-    formData.append('data', JSON.stringify({ name, version, update })); // Datos adicionales
+    formData.append('data', JSON.stringify({ inputNameValue, inputVersionValue })); // Datos adicionales
 
     // Enviar los datos al servidor
     fetch('/upload-mdb/', {
@@ -1136,6 +330,10 @@ function saveData() {
     .then(data => {
         if (data.success) {
             showAlert(data.message, "success");
+            saveBtn.innerHTML = "Cerrar";
+            saveBtn.removeAttribute('onclick');
+            saveBtn.setAttribute('data-bs-dismiss', 'modal');
+            saveBtn.disabled = false;
         } else {
             showAlert(data.message, "danger");
         }
@@ -1144,6 +342,67 @@ function saveData() {
         console.error("Error:", error);
         showAlert("Hubo un error al guardar la base de datos.", "danger");
     });
+}
+
+function loadingState(state){
+  const alertContainer = document.getElementById('alert-container');
+  const saveBtn = document.getElementById('saveBtn');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const closeBtn = document.getElementById('closeBtn');
+  const inputName = document.querySelector('#inputName');
+  const inputVersion = document.querySelector('#inputVersion');
+  
+  if (state) { 
+    alertContainer.innerHTML = `
+    <div class="progress progress-sm">
+      <div class="progress-bar progress-bar-indeterminate"></div>
+    </div>
+    `;
+    saveBtn.disabled = true;
+    cancelBtn.disabled = true;
+    closeBtn.disabled = true;
+    inputName.disabled = true;
+    inputVersion.disabled = true;
+    myDropzone.disable();
+  } else {
+    saveBtn.removeAttribute('data-bs-dismiss');
+    saveBtn.setAttribute('onclick', 'saveData()');
+    saveBtn.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <path d="M12 5l0 14" />
+      <path d="M5 12l14 0" />
+    </svg>
+    Subir
+    `;
+    saveBtn.disabled = false;
+    cancelBtn.disabled = false;
+    closeBtn.disabled = false;
+    inputName.disabled = false;
+    inputVersion.disabled = false;
+    myDropzone.enable();
+  }
+}
+
+function cleanForm(){
+  const files = myDropzone.getAcceptedFiles();
+  const inputName = document.querySelector('#inputName');
+  const inputVersion = document.querySelector('#inputVersion');
+  const alertContainer = document.getElementById('alert-container');
+
+  if (files.length > 0) {
+    myDropzone.removeFile(files[0]);
+    console.log("Archivo eliminado y carga cancelada.");
+  }
+  if (inputName) {
+    inputName.setAttribute('value', '');
+  }
+  if (inputVersion) {
+    inputVersion.setAttribute('value', '');
+  }
+  if(alertContainer) {
+    alertContainer.innerHTML = '';
+  }
 }
 
 function showAlert(message, type = "success") {
@@ -1228,5 +487,19 @@ function showAlert(message, type = "success") {
         border-color: #1e90ff;
     }
 }
+
+.markdown>table>:not(caption)>*>*, .table>:not(caption)>*>* {
+  padding: .50rem .50rem !important;
+  
+}
+
+tbody, td, tfoot, th, thead, tr {
+  font-weight: 300;
+  padding: .50rem .50rem !important;
+}
+
+
+
+
 </style>
 {% endblock extrastyle %}
