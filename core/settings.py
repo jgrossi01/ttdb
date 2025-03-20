@@ -47,6 +47,7 @@ if RENDER_EXTERNAL_HOSTNAME:
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     "admin_tabler.apps.AdminTablerConfig",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -54,6 +55,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django_eventstream",
     "home",
 ]
 
@@ -72,6 +74,8 @@ MIDDLEWARE = [
 ROOT_URLCONF = "core.urls"
 
 HOME_TEMPLATES = os.path.join(BASE_DIR, "templates")
+
+ASGI_APPLICATION = "core.asgi.application"
 
 TEMPLATES = [
     {
