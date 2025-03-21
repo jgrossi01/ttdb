@@ -128,6 +128,8 @@ else:
             "NAME": "db2.sqlite3",        # Ruta a la segunda base de datos
         }
     }
+    
+DATABASE_ROUTERS = ['home.routers.DB2Router']
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
@@ -151,13 +153,13 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = 'es-us'
 
-TIME_ZONE = "UTC"
+TIME_ZONE = 'America/Argentina/Buenos_Aires'
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)

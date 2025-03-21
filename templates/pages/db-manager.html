@@ -44,12 +44,18 @@
                   <thead>
                     <tr>
                       <th>Fecha</th>
-                      <th width="200">Nombre</th>
                       <th>Versión</th>
-                      <th>Archivo</th>
+                      <th class="left">Archivo</th>
+                      <th>Registros creados</th>
                     </tr>
                   </thead>
                   <tbody>
+                    <tr>
+                      <th></th>
+                      <th></th>
+                      <th class="text-start"></th>
+                      <th></th>
+                    </tr>
                   </tbody>
                 </table>
               </div>
@@ -171,13 +177,16 @@ document.addEventListener('DOMContentLoaded', function () {
     },
     columns: [
       { data: 'upload_date', title: 'Fecha' }, // Columna Fecha
-      { data: 'name', title: 'Nombre' },       // Columna Nombre
       { data: 'version', title: 'Versión' },   // Columna Versión
       { data: 'file', title: 'Archivo' },       // Columna Archivo
+      { data: 'created_records', title: 'Registros creados' },       // Columna Nombre
+    ],
+    columnDefs: [
+        { targets: 2, className: 'text-start' },  // Alineación a la izquierda
     ],
     order: [[0, "desc"]],
     language: {
-      url: '{% static 'static/es-ES.json' %}' // Lenguaje en español
+      url: '{% static "static/es-ES.json" %}' // Lenguaje en español
     },
     searching: false, // Desactiva el buscador
     pageLength: 10,   // Muestra 10 registros por página
@@ -235,8 +244,10 @@ document.addEventListener('DOMContentLoaded', function () {
       init: function () {
           // Evento cuando se añade un archivo
           this.on("addedfile", function (file) {
-            console.log("Archivo añadido:", file.name);
-
+            // Reemplaza el archivo si ya se selecciono uno.
+            if (this.files.length > 1) {
+              this.removeFile(this.files[0]);
+            }
           });
 
           // Evento cuando se completa la subida
@@ -273,19 +284,21 @@ document.addEventListener('DOMContentLoaded', function () {
           });
       }
   });
+
+  document.getElementById('dataModal').addEventListener('hidden.bs.modal', function () {
+    cleanForm();
+  });
+
+  document.getElementById('processModal').addEventListener('hidden.bs.modal', function () {
+    const processBody = document.getElementById('processBody');
+    processBody.innerHTML = '';
+    table.ajax.reload(null, false);
+  });
 }); // Fin DOMContentLoaded
 
-document.getElementById('dataModal').addEventListener('hidden.bs.modal', function () {
-  cleanForm();
-});
 
-document.getElementById('processModal').addEventListener('hidden.bs.modal', function () {
-  const processBody = document.getElementById('processBody');
-  processBody.innerHTML = '';
-});
 
 var es = new ReconnectingEventSource('/events/');
-
 es.addEventListener('message', function (e) {
   const data = JSON.parse(e.data); 
   console.log(data.status); 
@@ -373,92 +386,90 @@ function replace_spinners () {
 
 // Función para guardar los datos del modal
 function saveData() {
-    const inputNameValue = document.querySelector('#inputName').value;
-    const inputVersionValue = document.querySelector('#inputVersion').value;
-    const saveBtn = document.querySelector('#saveBtn');
-    const alertContainer = document.querySelector('#alert-container');
-    alertContainer.innerHTML = '';
+  const inputNameValue = document.querySelector('#inputName').value;
+  const inputVersionValue = document.querySelector('#inputVersion').value;
+  const saveBtn = document.querySelector('#saveBtn');
+  const alertContainer = document.querySelector('#alert-container');
+  alertContainer.innerHTML = '';
 
-    // Obtener el archivo subido
-    const files = myDropzone.getAcceptedFiles(); // Obtener los archivos subidos
-    if (files.length === 0) {
-      alertContainer.innerHTML =
-      `<div class="alert alert-important alert-warning alert-dismissible" role="alert">
-        <div class="alert-icon">
-          <!-- Download SVG icon from http://tabler.io/icons/icon/alert-circle -->
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon icon-2">
-            <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path>
-            <path d="M12 8v4"></path>
-            <path d="M12 16h.01"></path>
-          </svg>
-        </div>
-        <div>
-          <h4 class="alert-heading">Por favor seleccione el archivo .mdb para la actualización</h4>
-        </div>
-        <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+  // Obtener el archivo subido
+  const files = myDropzone.getAcceptedFiles(); // Obtener los archivos subidos
+  if (files.length === 0) {
+    alertContainer.innerHTML =
+    `<div class="alert alert-important alert-warning alert-dismissible" role="alert">
+      <div class="alert-icon">
+        <!-- Download SVG icon from http://tabler.io/icons/icon/alert-circle -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon icon-2">
+          <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path>
+          <path d="M12 8v4"></path>
+          <path d="M12 16h.01"></path>
+        </svg>
       </div>
-      `
-      return;
-    }
-
-     // Validar que los campos no estén vacíos
-    if (!inputNameValue || !inputVersionValue) {
-      alertContainer.innerHTML =
-      `<div class="alert alert-important alert-warning alert-dismissible" role="alert">
-        <div class="alert-icon">
-          <!-- Download SVG icon from http://tabler.io/icons/icon/alert-circle -->
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon icon-2">
-            <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path>
-            <path d="M12 8v4"></path>
-            <path d="M12 16h.01"></path>
-          </svg>
-        </div>
-        <div>
-          <h4 class="alert-heading">Por favor complete los campos nombre y versión</h4>
-        </div>
-        <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+      <div>
+        <h4 class="alert-heading">Por favor seleccione el archivo .mdb para la actualización</h4>
       </div>
-      `
-      return;
+      <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+    </div>
+    `
+    return;
+  }
+
+    // Validar que los campos no estén vacíos
+  if (!inputNameValue || !inputVersionValue) {
+    alertContainer.innerHTML =
+    `<div class="alert alert-important alert-warning alert-dismissible" role="alert">
+      <div class="alert-icon">
+        <!-- Download SVG icon from http://tabler.io/icons/icon/alert-circle -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon icon-2">
+          <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path>
+          <path d="M12 8v4"></path>
+          <path d="M12 16h.01"></path>
+        </svg>
+      </div>
+      <div>
+        <h4 class="alert-heading">Por favor complete los campos nombre y versión</h4>
+      </div>
+      <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+    </div>
+    `
+    return;
+  }
+
+  const dataModal = bootstrap.Modal.getInstance(document.querySelector('#dataModal'));
+  dataModal.hide();
+  const processModal = bootstrap.Modal.getInstance(document.querySelector('#processModal'));
+  processModal.show();
+      
+  const file = files[0]; // Obtener el primer archivo subido
+
+  // Crear un objeto FormData para enviar el archivo y los datos adicionales
+  const formData = new FormData();
+  formData.append('file', file); // Archivo subido
+  formData.append('data', JSON.stringify({ inputNameValue, inputVersionValue })); // Datos adicionales
+
+  // Enviar los datos al servidor
+  fetch('/upload-mdb/', {
+    method: 'POST',
+    headers: {
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+    },
+    body: formData // Usar FormData en lugar de JSON
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      console.log(data.message)
+      const btnCloseModalx = document.querySelector('#btnCloseModalx');
+      const btnCloseModal = document.querySelector('#btnCloseModal');
+      btnCloseModalx.disabled = false;
+      btnCloseModal.disabled = false;
+    } else {
+      console.error(data.message)
     }
-
-    
-
-    const dataModal = bootstrap.Modal.getInstance(document.querySelector('#dataModal'));
-    dataModal.hide();
-    const processModal = bootstrap.Modal.getInstance(document.querySelector('#processModal'));
-    processModal.show();
-        
-    const file = files[0]; // Obtener el primer archivo subido
-
-    // Crear un objeto FormData para enviar el archivo y los datos adicionales
-    const formData = new FormData();
-    formData.append('file', file); // Archivo subido
-    formData.append('data', JSON.stringify({ inputNameValue, inputVersionValue })); // Datos adicionales
-
-    // Enviar los datos al servidor
-    fetch('/upload-mdb/', {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-        },
-        body: formData // Usar FormData en lugar de JSON
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            console.log(data.message)
-            const btnCloseModalx = document.querySelector('#btnCloseModalx');
-            const btnCloseModal = document.querySelector('#btnCloseModal');
-            btnCloseModalx.disabled = false;
-            btnCloseModal.disabled = false;
-        } else {
-            console.error(data.message)
-        }
-    })
-    .catch(error => {
-        console.error("Error:", error);
-    });
+  })
+  .catch(error => {
+    console.error("Error:", error);
+  });
 }
 
 function cleanForm(){
@@ -555,6 +566,10 @@ function cleanForm(){
 tbody, td, tfoot, th, thead, tr {
   font-weight: 300;
   padding: .50rem .50rem !important;
+}
+
+thead tr, tbody tr {
+  text-align: center;
 }
 
 .dt-empty {

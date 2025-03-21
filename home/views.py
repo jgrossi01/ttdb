@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import MDBFile
+from .models_db2 import Conectores
 from django_eventstream import send_event
 from datetime import datetime
 from django.http import StreamingHttpResponse
@@ -25,6 +26,10 @@ def db_manager(request):
         'parent': '',
         'segment': 'db_manager'
     }
+    
+    c = Conectores(conector="USB-C")
+    c.save(using="db2", force_insert=True) # o force_update
+    
     # send_event(<channel>, <event_type>, <event_data>)
     #send_event("dbupdate", "message", {"text": "hello world"})
     return render(request, 'pages/db-manager.html', context)
@@ -32,17 +37,16 @@ def db_manager(request):
 #@csrf_exempt
 
 def getDatabases(request):
-    archivos = MDBFile.objects.all().values("upload_date", "name", "file", "version", "status")
+    registros = MDBFile.objects.using("default").all()
     
     data = [
         {
-            "upload_date": archivo["upload_date"].strftime("%d/%m/%y %H:%M"),
-            "name": archivo["name"],
-            "file": archivo["file"],
-            "version": archivo["version"],
-            "status": archivo["status"],
+            "upload_date": r.upload_date.strftime("%d/%m/%y %H:%M"),
+            "file": r.file.name if r.file else None,  # Devuelve solo el nombre del archivo
+            "version": r.version,
+            "created_records": r.created_records,
         }
-        for archivo in archivos
+        for r in registros
     ]
     return JsonResponse({"data": data})
 
@@ -113,7 +117,8 @@ def get_last_signal_number(db_path, table_name):
 
 def sync_databases(db2_path, new_db_path, sqlite_name):
     """Sincroniza db2.sqlite3 con la nueva base sin modificar datos existentes."""
-    modifications_made = False
+    #modifications_made = False
+    total_new_records = 0
     with sqlite3.connect(db2_path) as conn_db2, sqlite3.connect(new_db_path) as conn_new:
         cursor_db2 = conn_db2.cursor()
         cursor_new = conn_new.cursor()
@@ -126,7 +131,7 @@ def sync_databases(db2_path, new_db_path, sqlite_name):
             last_signal_new = get_last_signal_number(new_db_path, table)
             
             if last_signal_new > last_signal_db2:
-                modifications_made = modifications_made or True #Si es false le asigna true
+                #modifications_made = modifications_made or True #Si es false le asigna true
                 send_event("dbupdate", "message", {"status": "info", "text": f"Actualizando {table}..."})
                 
                 cursor_new.execute(f"SELECT * FROM {table} WHERE \"# de Señal\" > ?", (last_signal_db2,))
@@ -138,14 +143,18 @@ def sync_databases(db2_path, new_db_path, sqlite_name):
                     columns_str = ', '.join(f'"{col}"' for col in columns)
                     placeholders = ', '.join(['?' for _ in columns])
                     insert_query = f"INSERT INTO {table} ({columns_str}) VALUES ({placeholders})"
+                    
                     cursor_db2.executemany(insert_query, new_records)
                     conn_db2.commit()
+                    
                     new_rec_qty = len(new_records)
+                    total_new_records += new_rec_qty
                     send_event("dbupdate", "message", {"status": "success", "text": f"{new_rec_qty} registros añadidos en {table}"})
                              
-        
-        if not modifications_made:
+        if not total_new_records:
              send_event("dbupdate", "message", {"status": "info", "text": f"No se agregaron registros en ninguna tabla"}) 
+             
+    return total_new_records
     
 @csrf_exempt
 def upload_mdb(request):
@@ -163,8 +172,8 @@ def upload_mdb(request):
             send_event("dbupdate", "message", {"status": "error", "text": f"Ocurrio un error al subir el archivo .mdb"})
             return JsonResponse({'success': False, 'message': 'Ocurrio un error al subir el archivo .mdb'}, status=400)
         
-        mdb_file = MDBFile(file=uploaded_file, name=name, version=version, status="Pendiente")
-        mdb_file.save()
+        mdb_file = MDBFile(file=uploaded_file, name=name, version=version, created_records=0)
+        mdb_file.save(using="default")
         
         mdb_path = os.path.join(settings.MEDIA_ROOT, mdb_file.file.name)
         sqlite_name = os.path.splitext(os.path.basename(mdb_file.file.name))[0] + ".sqlite3"
@@ -187,7 +196,10 @@ def upload_mdb(request):
         
         send_event("dbupdate", "message", {"status": "info", "text": f"Sincronizando bases de datos"})
 
-        sync_databases(os.path.join(settings.BASE_DIR, "db2.sqlite3"), sqlite_path, sqlite_name)
+        total_new_records = sync_databases(os.path.join(settings.BASE_DIR, "db2.sqlite3"), sqlite_path, sqlite_name)
+
+        mdb_file.created_records = total_new_records
+        mdb_file.save(update_fields=['created_records'], using="default")
 
         send_event("dbupdate", "message", {"status": "success", "text": f"Proceso completado"})
         return JsonResponse({'success': True, 'message': 'Proceso completado'}, status=200)
