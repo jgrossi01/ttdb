@@ -7,18 +7,21 @@ import django_eventstream
 urlpatterns = [
     # Paginas
     path('', views.index, name='index'),
-    path('db-manager/', views.db_manager, name='db_manager'),
+    path('db-manager/edit', views.edit_db, name='edit_db'),
+    path('db-manager/update', views.update_db, name='update_db'),
+    path('new-test', views.new_test, name='new_test'),
     
     # Funciones
     path('upload-mdb/', views.upload_mdb, name='upload_mdb'),
     
     # API
     path('api/databases/', views.getDatabases, name='get_databases'),
+    path('api/harness/', views.editConexionesHarness, name='get_harness'),
+    path('api/backup-harness/', views.backup_harness_ajax, name='backup_harness_ajax'),
+    path('api/saveEditHarness/', views.saveConexionesHarness, name='save_edit_harness'),
+    path('api/latest-db-update', views.getLastDbUpdate, name='get_last_update'),
     
-    # Logs
-    #path('sse-logs/', views.sse_logs, name='sse_logs'),
-    #path('reset-logs/', views.reset_logs_view, name='reset_logs'),
-    
+    # Logs   
     path("events/", include(django_eventstream.urls), {"channels": ["dbupdate"]}),
 ]
 

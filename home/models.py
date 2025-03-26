@@ -6,7 +6,7 @@ Copyright (c) 2019 - present AppSeed.us
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
-from .models_db2 import *
+from .models_harness import *
 from django.utils.translation import gettext_lazy as _
 
 # Create your models here.

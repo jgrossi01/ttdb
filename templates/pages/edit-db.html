@@ -1,0 +1,411 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Edit DB - TTDB{% endblock title %}
+
+{% load static %}
+
+{% block content %}
+
+  <div class="page-wrapper">
+    <!-- Page header -->
+    <div class="page-header d-print-none">
+      <div class="container-xl">
+        <div class="row g-3 align-items-center">
+          <div class="col-auto">
+            <span class="status-indicator status-green status-indicator-animated">
+              <span class="status-indicator-circle"></span>
+              <span class="status-indicator-circle"></span>
+              <span class="status-indicator-circle"></span>
+            </span>
+          </div>
+          <div class="col">
+            <h2 class="page-title">
+              harness.sqlite3
+            </h2>
+            <div class="text-muted">
+              <ul class="list-inline list-inline-dots mb-0">
+                <li class="list-inline-item"><span class="text-green">Online</span></li>
+                <li class="list-inline-item">Ultima actualización: <span id="lastUpdate">21/03/2025</span></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-md-auto ms-auto d-print-none">
+            <div class="btn-list">
+              <a href="{% url 'update_db' %}" class="btn">
+                <!-- Download SVG icon from http://tabler-icons.io/i/settings -->
+                <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-report"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h5.697" /><path d="M18 14v4h4" /><path d="M18 11v-4a2 2 0 0 0 -2 -2h-2" /><path d="M8 3m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v0a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z" /><path d="M18 18m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /><path d="M8 11h4" /><path d="M8 15h3" /></svg>
+                Log de actualizaciones
+              </a>
+              <a href="#" class="btn" data-bs-toggle="modal" data-bs-target="#backupModal" data-bs-backdrop="static">
+                <!-- Download SVG icon from http://tabler-icons.io/i/player-pause -->
+                <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-database-export"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 6c0 1.657 3.582 3 8 3s8 -1.343 8 -3s-3.582 -3 -8 -3s-8 1.343 -8 3" /><path d="M4 6v6c0 1.657 3.582 3 8 3c1.118 0 2.183 -.086 3.15 -.241" /><path d="M20 12v-6" /><path d="M4 12v6c0 1.657 3.582 3 8 3c.157 0 .312 -.002 .466 -.005" /><path d="M16 19h6" /><path d="M19 16l3 3l-3 3" /></svg>
+                Crear backup
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Page body -->
+    <div class="page-body">
+      <div class="container-xl">
+        <div class="row row-cards">
+          <div class="col-lg-12">
+            <div class="card">
+              <div class="">
+                <h3 class="my-3 mx-3">Editar harness.sqlite</h3>
+                <table class="table table-vcenter card-table table-striped" id="harness-table">
+                  <thead>
+                    <tr>
+                      <th># de señal</th>
+                      <th>Nombre de señal</th>
+                      <th>Tipo Señal</th>
+                      <th>PEM Polaridad</th>
+                      <th>PEM Telemetría</th>
+                    </tr>
+                  </thead>
+                  
+                </table>
+
+                <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11" id="toastContainer"></div>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    {% include 'includes/footer.html' %}
+  </div>
+
+  {% block modal %}
+  
+  <div class="modal modal-blur fade" id="backupModal" tabindex="-1" style="display: none;" aria-modal="true" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Copia de seguridad</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          ¿Esta seguro que desea crear una copia de seguridad?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn me-auto" data-bs-dismiss="modal">Cerrar</button>
+          <button type="button" class="btn btn-primary" id="btnCrearBackup">Crear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endblock modal %}
+
+{% endblock content %}
+
+{% block extrajs %}
+<script src="{% static 'dist/libs/dropzone/dist/dropzone-min.js' %}?1684106062" defer></script>
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/2.2.2/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/2.2.2/js/dataTables.bootstrap5.js"></script>
+<script src="https://cdn.datatables.net/plug-ins/1.13.4/api/row().edit().js"></script>
+
+<script src="{% static 'django_eventstream/eventsource.min.js' %}"></script>
+<script src="{% static 'django_eventstream/reconnecting-eventsource.js' %}"></script>
+<script>
+
+let myDropzone;
+
+document.addEventListener('DOMContentLoaded', function () {
+
+  const backupModal = new bootstrap.Modal(document.getElementById('backupModal')); 
+  
+  // Configuración de DataTables
+  const table = $('#harness-table').DataTable({
+    ajax: '/api/harness/', 
+    dataSrc: 'data',
+    columns: [
+        { data: 'field_de_señal' },
+        { data: 'nombre' },
+        { data: 'tipo_señal', className: 'editable' },
+        { data: 'PEM_Polaridad', className: 'editable' },
+        { data: 'PEM_Telemetria', className: 'editable' }
+    ],
+    language: {
+      url: '{% static "static/es-ES.json" %}' // Lenguaje en español
+    },
+    stateSave: true,  // Actilet guardado de estado
+    stateDuration: -1,  // Guardar en sessionStorage (0 para localStorage)
+    pageLength: 50
+  });
+
+  // 🔥 Flag para evitar llamadas dobles
+  let isProcessing = false;
+
+  $('#harness-table tbody').on('click', 'td.editable', function () {
+    if (isProcessing) return;
+    let cell = table.cell(this);
+    let oldValue = cell.data();
+    let displayValue = (oldValue === "null" || oldValue === null) ? "" : oldValue;
+    let rowData = table.row(this).data();
+    let columnName = table.column(this).dataSrc();
+
+    let input = $('<input type="text" class="edit-input form-control-sm" value="' + displayValue + '" />');
+    $(this).html(input);
+    input.focus();
+
+    let tmpStr = input.val();
+    input.val('');
+    input.val(tmpStr);
+    
+
+    input.on('blur keypress', function (e) {
+      if (e.type === 'blur' || (e.type === 'keypress' && e.which === 13)) {
+        e.preventDefault(); // Prevenir comportamiento por defecto del Enter
+
+        if (isProcessing) return; 
+        isProcessing = true;
+
+        let newValue = input.val().trim();
+        if (newValue.toLowerCase() === "null") newValue = ""; // Evitar que guarde "null" como string
+
+        if (newValue === oldValue) {
+          cell.data(oldValue).draw(false);
+          isProcessing = false; // 🔥 Permite futuras ediciones
+          return;
+        }
+
+        let currentPage = table.page();
+        cell.data(newValue).draw(false);
+
+        /*
+        console.log("✅ Enviando datos al backend:", {
+          "field_de_señal": rowData.field_de_señal,
+          "column": columnName,
+          "value": newValue
+        });*/
+
+        $.ajax({
+          url: '/api/saveEditHarness/',
+          type: 'POST',
+          data: JSON.stringify({
+            "field_de_señal": rowData.field_de_señal,
+            "column": columnName,
+            "value": newValue
+          }),
+          contentType: "application/json",
+          headers: { "X-CSRFToken": getCSRFToken() },
+          success: function(response) {
+            if (!$('.toast:contains("' + response.message + '")').length) {  
+              showToast(response.message || "Guardado exitosamente", response.type || "success");
+            }
+            table.page(currentPage).draw(false);
+          },
+          error: function(response) {
+            if (!$('.toast:contains("' + response.message + '")').length) {  
+              showToast(response.message || "Ocurrió un error", response.type || "danger");
+            }
+          },
+          complete: function () {
+            isProcessing = false; // 🔥 Permitir futuras ediciones
+          }
+        });
+      }
+    });
+  });
+
+  function getCSRFToken() {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      let cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        let cookie = cookies[i].trim();
+        if (cookie.startsWith('csrftoken=')) {
+          cookieValue = decodeURIComponent(cookie.substring('csrftoken='.length));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  $('#btnCrearBackup').click(function() {
+      $.ajax({
+      url: "/api/backup-harness/",
+      type: "POST",
+      headers: { "X-CSRFToken": getCSRFToken() },  // Solo si usas CSRF
+      success: function(response) {
+        backupModal.hide();
+        showToast(response.message + '<br />' + response.backup_name, response.status);
+        //console.log("Backup creado en:", response.backup_path);
+      },
+      error: function(xhr) {
+        let errorMsg = xhr.responseJSON ? xhr.responseJSON.message : "Error desconocido";
+        showToast(errorMsg, "danger");
+      }
+    });
+  });
+
+
+  function showToast(mensaje, status = 'info') {
+    // Crear el elemento toast
+    const toast = document.createElement('div');
+    toast.className = `toast align-items-center text-white bg-${status} border-0 mb-1`;
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', 'assertive');
+    toast.setAttribute('aria-atomic', 'true');
+    
+    // Contenido del toast
+    toast.innerHTML = `
+      <div class="d-flex">
+        <div class="toast-body">
+          ${mensaje}
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    `;
+    
+    // Obtener el contenedor
+    const toastContainer = document.getElementById('toastContainer');
+    if (!toastContainer) {
+      console.error('No se encontró el contenedor con id="toastContainer"');
+      return;
+    }
+    
+    // Agregar el toast al contenedor
+    toastContainer.appendChild(toast);
+    
+    // Inicializar y mostrar el toast
+    const bootstrapToast = new bootstrap.Toast(toast);
+    bootstrapToast.show();
+    
+    // Eliminar el toast del DOM cuando se oculta
+    toast.addEventListener('hidden.bs.toast', () => {
+      toast.remove();
+    });
+  }
+
+  table.on('draw', function () {
+    /* Ajuste de estilos*/
+
+    // Texto bajo tabla
+    const dt = document.querySelector('.dt-info');
+
+    dt.style.marginLeft = '15px';
+    dt.style.marginBottom = '8px';
+
+    // Busqueda
+    const dtSearchContainer = document.querySelector('.dt-search');
+    const dtSearchContainerLabel = document.querySelector('.dt-search > label');
+    const dtSearchContainerInput = document.querySelector('.dt-search > input');
+
+    dtSearchContainer.style.paddingRight = '10px';
+    dtSearchContainer.style.height = 'auto';
+    dtSearchContainerLabel.style.display = 'inline-block';
+    dtSearchContainerLabel.style.marginRight = '10px';
+    dtSearchContainerInput.style.width = 'auto';
+    dtSearchContainerInput.style.marginRight = '5px';
+    dtSearchContainerInput.style.display = 'inline-block';
+    
+    // Cantidad de registros
+    const dtLengthContainer = document.querySelector('.dt-length');
+    const dtLengthContainerLabel = document.querySelector('.dt-length > label');
+    const dtLengthContainerSelect = document.querySelector('.dt-length > select');
+
+    dtLengthContainer.style.paddingLeft = '10px';
+    dtLengthContainer.style.height = 'auto';
+    dtLengthContainerLabel.style.display = 'inline-block';
+    dtLengthContainerSelect.style.width = 'auto';
+    dtLengthContainerSelect.style.marginRight = '5px';
+    dtLengthContainerSelect.style.display = 'inline-block';
+
+    // Paginador
+    const dtPaging = document.querySelector('.dt-paging');
+    dtPaging.style.paddingTop = '10px';
+    dtPaging.style.paddingRight = '20px';
+  });
+
+}); // FIN DOM LOAD
+
+</script>
+{% endblock extrajs %}
+
+{% block extrastyle %}
+<style>
+/* Estilos base de Dropzone */
+.dropzone {
+    border-radius: 5px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.dropzone:hover {
+    background-color:#e3e4e5;
+    border-color: #007bff;
+}
+
+
+/* Estilos para el modo claro */
+[data-bs-theme="light"] .dropzone {
+    border: 1px dashed #ccc;
+    background-color: #fff;
+    color: #000;
+}
+
+[data-bs-theme="light"] .dropzone:hover {
+    background-color: #f9f9f9;
+    border-color: #007bff;
+}
+
+/* Estilos para el modo oscuro */
+[data-bs-theme="dark"] .dropzone {
+    border: 1px dashed #555;
+    background-color: #151f2c;
+    color: #fff;
+}
+
+[data-bs-theme="dark"] .dropzone:hover {
+    background-color: #182433;
+    border-color: #1e90ff;
+}
+
+/* Estilos para el modo automático (basado en la preferencia del sistema) */
+[data-bs-theme="auto"] .dropzone {
+    border: 2px dashed #ccc;
+    background-color: #fff;
+    color: #000;
+}
+
+@media (prefers-color-scheme: dark) {
+    [data-bs-theme="auto"] .dropzone {
+        border: 2px dashed #555;
+        background-color: #333;
+        color: #fff;
+    }
+
+    [data-bs-theme="auto"] .dropzone:hover {
+        background-color: #444;
+        border-color: #1e90ff;
+    }
+}
+
+.markdown>table>:not(caption)>*>*, .table>:not(caption)>*>* {
+  padding: .50rem .50rem !important;
+  
+}
+
+tbody, td, tfoot, th, thead, tr {
+  font-weight: 300;
+  padding: .50rem .50rem !important;
+}
+
+thead tr, tbody tr {
+  text-align: center;
+}
+
+.dt-empty {
+  text-align: center;
+}
+
+</style>
+{% endblock extrastyle %}

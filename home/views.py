@@ -1,38 +1,44 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
 from .models import MDBFile
-from .models_db2 import Conectores
+from .models_harness import Conexiones
 from django_eventstream import send_event
 from datetime import datetime
-from django.http import StreamingHttpResponse
 
 import pyodbc
 import sqlite3
 import pandas as pd
-from django.conf import settings
 import os
 import json
 import uuid
 import shutil
-import time
-import queue
+
 
 def index(request):
     return render(request, 'pages/index.html')
 
-def db_manager(request):
+def update_db(request):
     context = {
         'parent': '',
-        'segment': 'db_manager'
+        'segment': 'edit_db'
     }
-    
-    c = Conectores(conector="USB-C")
-    c.save(using="db2", force_insert=True) # o force_update
-    
-    # send_event(<channel>, <event_type>, <event_data>)
-    #send_event("dbupdate", "message", {"text": "hello world"})
-    return render(request, 'pages/db-manager.html', context)
+    return render(request, 'pages/update-db.html', context)
+
+def edit_db(request):
+    context = {
+        'parent': '',
+        'segment': 'edit_db'
+    }
+    return render(request, 'pages/edit-db.html', context)
+
+def new_test(request):
+    context = {
+        'parent': '',
+        'segment': 'new_test'
+    }
+    return render(request, 'pages/new-test.html', context)
 
 #@csrf_exempt
 
@@ -50,34 +56,106 @@ def getDatabases(request):
     ]
     return JsonResponse({"data": data})
 
-def backup_db2():
-    """Crea una copia de seguridad de db2.sqlite3 con fecha e ID único."""
+def editConexionesHarness(request):
+    # en vez de values se puede utilizar .only para generar la estructura como getDatabases.
+    data = list(Conexiones.objects.using("harness").values(
+        'field_de_señal', 
+        'nombre', 
+        'tipo_señal', 
+        'PEM_Polaridad', 
+        'PEM_Telemetria'
+    ))
+    return JsonResponse({"data": data})
+
+def saveConexionesHarness(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            field_de_senal = data.get("field_de_señal")
+            column = data.get("column")
+            new_value = data.get("value").strip() if data.get("value") else None
+
+            print(f"Recibido: {data}")  # Debugging
+
+            allowed_fields = ["tipo_señal", "PEM_Polaridad", "PEM_Telemetria"]
+            if column not in allowed_fields:
+                return JsonResponse({"message": f"Campo '{column}' no es editable", "type": "warning"}, status=400)
+
+            obj = Conexiones.objects.using("harness").get(field_de_señal=field_de_senal)
+
+            if obj:
+                current_value = getattr(obj, column)
+
+                # Normalizar valores: None en BD equivale a "" en el frontend
+                if current_value is None:
+                    current_value = ""
+
+                # Evitar guardar si el nuevo valor es igual al actual
+                if (new_value is None and current_value == "") or str(current_value).strip() == new_value:
+                    return JsonResponse({"message": "No se realizaron cambios", "type": "info"}, status=200)
+
+                # Guardar como NULL si está vacío
+                setattr(obj, column, new_value)
+                obj.save(using="harness")
+
+                return JsonResponse({"message": "Actualización exitosa", "type": "success"}, status=200)
+
+            return JsonResponse({"message": "Registro no encontrado", "type": "danger"}, status=404)
+
+        except Exception as e:
+            return JsonResponse({"message": str(e), "type": "danger"}, status=500)
+
+    return JsonResponse({"message": "Método no permitido", "type": "danger"}, status=405)
+
+
+def getLastDbUpdate(request):
+    # Obtener la fecha más reciente
+    latest_file = MDBFile.objects.using("default").order_by('-upload_date').first()
+    
+    if latest_file:
+        # Formatear la fecha en un formato legible (opcional)
+        latest_date = latest_file.upload_date.strftime("%d/%m/%Y %H:%M")
+    else:
+        latest_date = None  # Si no hay archivos, devolver None
+    
+    # Devolver la fecha como JSON
+    return JsonResponse({"latest_upload_date": latest_date})
+
+def backup_harness():
+    """Crea una copia de seguridad de harness.sqlite3 con fecha e ID único."""
     try:
         fecha = datetime.now().strftime("%Y-%m-%d")
         unique_id = uuid.uuid4().hex[:6]
-        backup_name = f"db2_backup_{fecha}_{unique_id}.sqlite3"
+        backup_name = f"harness_backup_{fecha}_{unique_id}.sqlite3"
         backup_path = os.path.join(settings.MEDIA_ROOT, "backups", backup_name)
-        db2_path = os.path.join(settings.BASE_DIR, "db2.sqlite3")
+        harness_path = os.path.join(settings.BASE_DIR, "harness.sqlite3")
 
-        # Verificar si db2.sqlite3 existe
-        if not os.path.exists(db2_path):
-            send_event("dbupdate", "message", {"status": "error", "text": f"Error: No se encontró la base de datos en {db2_path}"})
-            #log_message(messages, f"Error: No se encontró la base de datos en {db2_path}")
+        # Verificar si harness.sqlite3 existe
+        if not os.path.exists(harness_path):
+            send_event("dbupdate", "message", {"status": "error", "text": f"Error: No se encontró la base de datos en {harness_path}"})
             return None
 
         # Crear la carpeta si no existe
         os.makedirs(os.path.dirname(backup_path), exist_ok=True)
 
         # Realizar la copia de seguridad
-        shutil.copy2(db2_path, backup_path)
+        shutil.copy2(harness_path, backup_path)
         send_event("dbupdate", "message", {"status": "success", "text": f"Copia de seguridad creada en: /media/backups/{backup_name}"})
-        #log_message(messages, f"Copia de seguridad creada: {backup_path}")
 
         return backup_path
     except Exception as e:
         send_event("dbupdate", "message", {"status": "error", "text": f"Error creando backup: {e}"})
-        #log_message(messages, f"Error creando backup: {e}")
         return None
+    
+@csrf_exempt
+def backup_harness_ajax(request):
+    if request.method == "POST":
+        backup_path = backup_harness()
+        if backup_path:
+            file_name = os.path.basename(backup_path);
+            return JsonResponse({"status": "success", "message": "Copia de seguridad creada correctamente.", "backup_name": file_name})
+        return JsonResponse({"status": "error", "message": "Error al crear la copia de seguridad."}, status=500)
+    return JsonResponse({"status": "error", "message": "Método no permitido."}, status=405)
 
 
 def convert_mdb_to_sqlite(mdb_path, sqlite_path, sqlite_name):
@@ -115,26 +193,26 @@ def get_last_signal_number(db_path, table_name):
         result = cursor.fetchone()
         return result[0] if result and result[0] else 0
 
-def sync_databases(db2_path, new_db_path, sqlite_name):
-    """Sincroniza db2.sqlite3 con la nueva base sin modificar datos existentes."""
+def sync_databases(harness_path, new_db_path, sqlite_name):
+    """Sincroniza harness.sqlite3 con la nueva base sin modificar datos existentes."""
     #modifications_made = False
     total_new_records = 0
-    with sqlite3.connect(db2_path) as conn_db2, sqlite3.connect(new_db_path) as conn_new:
-        cursor_db2 = conn_db2.cursor()
+    with sqlite3.connect(harness_path) as conn_harness, sqlite3.connect(new_db_path) as conn_new:
+        cursor_harness = conn_harness.cursor()
         cursor_new = conn_new.cursor()
         
         cursor_new.execute("SELECT name FROM sqlite_master WHERE type='table'")
         tables = [row[0] for row in cursor_new.fetchall()]
         
         for table in tables:
-            last_signal_db2 = get_last_signal_number(db2_path, table)
+            last_signal_harness = get_last_signal_number(harness_path, table)
             last_signal_new = get_last_signal_number(new_db_path, table)
             
-            if last_signal_new > last_signal_db2:
+            if last_signal_new > last_signal_harness:
                 #modifications_made = modifications_made or True #Si es false le asigna true
                 send_event("dbupdate", "message", {"status": "info", "text": f"Actualizando {table}..."})
                 
-                cursor_new.execute(f"SELECT * FROM {table} WHERE \"# de Señal\" > ?", (last_signal_db2,))
+                cursor_new.execute(f"SELECT * FROM {table} WHERE \"# de Señal\" > ?", (last_signal_harness,))
                 new_records = cursor_new.fetchall()
                 
                 if new_records:
@@ -144,15 +222,15 @@ def sync_databases(db2_path, new_db_path, sqlite_name):
                     placeholders = ', '.join(['?' for _ in columns])
                     insert_query = f"INSERT INTO {table} ({columns_str}) VALUES ({placeholders})"
                     
-                    cursor_db2.executemany(insert_query, new_records)
-                    conn_db2.commit()
+                    cursor_harness.executemany(insert_query, new_records)
+                    conn_harness.commit()
                     
                     new_rec_qty = len(new_records)
                     total_new_records += new_rec_qty
-                    send_event("dbupdate", "message", {"status": "success", "text": f"{new_rec_qty} registros añadidos en {table}"})
+                    send_event("dbupdate", "message", {"status": "success", "style": "success", "text": f"{new_rec_qty} registros añadidos en {table}"})
                              
         if not total_new_records:
-             send_event("dbupdate", "message", {"status": "info", "text": f"No se agregaron registros en ninguna tabla"}) 
+             send_event("dbupdate", "message", {"status": "info", "style": "info", "text": f"No se agregaron registros en ninguna tabla"}) 
              
     return total_new_records
     
@@ -187,8 +265,8 @@ def upload_mdb(request):
         convert_mdb_to_sqlite(mdb_path, sqlite_path, sqlite_name)
         
         
-        send_event("dbupdate", "message", {"status": "info", "text": f"Creando backup de db2.sqlite3"})
-        backup_path = backup_db2()
+        send_event("dbupdate", "message", {"status": "info", "text": f"Creando backup de harness.sqlite3"})
+        backup_path = backup_harness()
 
         if not backup_path:
             send_event("dbupdate", "message", {"status": "error", "text": f"Error creando copia de seguridad"})
@@ -196,7 +274,7 @@ def upload_mdb(request):
         
         send_event("dbupdate", "message", {"status": "info", "text": f"Sincronizando bases de datos"})
 
-        total_new_records = sync_databases(os.path.join(settings.BASE_DIR, "db2.sqlite3"), sqlite_path, sqlite_name)
+        total_new_records = sync_databases(os.path.join(settings.BASE_DIR, "harness.sqlite3"), sqlite_path, sqlite_name)
 
         mdb_file.created_records = total_new_records
         mdb_file.save(update_fields=['created_records'], using="default")

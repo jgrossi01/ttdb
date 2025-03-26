@@ -123,13 +123,13 @@ else:
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": "db.sqlite3",
         },
-        'db2': {
+        'harness': {
             "ENGINE": "django.db.backends.sqlite3",  # Segunda base de datos
-            "NAME": "db2.sqlite3",        # Ruta a la segunda base de datos
+            "NAME": "harness.sqlite3",        # Ruta a la segunda base de datos
         }
     }
     
-DATABASE_ROUTERS = ['home.routers.DB2Router']
+DATABASE_ROUTERS = ['home.routers.HarnessRouter']
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
