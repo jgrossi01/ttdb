@@ -10,6 +10,8 @@ urlpatterns = [
     path('db-manager/edit', views.edit_db, name='edit_db'),
     path('db-manager/update', views.update_db, name='update_db'),
     path('new-test', views.new_test, name='new_test'),
+    path('test-summary/<int:session_id>/', views.test_summary, name='test_summary'),
+    path('test-log/', views.test_log, name='test_log'),
     
     # Funciones
     path('upload-mdb/', views.upload_mdb, name='upload_mdb'),
@@ -20,6 +22,7 @@ urlpatterns = [
     path('api/backup-harness/', views.backup_harness_ajax, name='backup_harness_ajax'),
     path('api/saveEditHarness/', views.saveConexionesHarness, name='save_edit_harness'),
     path('api/latest-db-update', views.getLastDbUpdate, name='get_last_update'),
+    path("api/delete-test-session/<int:session_id>/", views.delete_test_session, name="delete_test_session"),
     
     # Logs   
     path("events/", include(django_eventstream.urls), {"channels": ["dbupdate"]}),

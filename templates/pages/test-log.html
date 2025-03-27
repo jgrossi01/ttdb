@@ -1,0 +1,339 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Test Log - TTDB{% endblock title %}
+
+{% load static %}
+
+{% block content %}
+
+  <div class="page-wrapper">
+    <!-- Page header -->
+
+    <!-- Page body -->
+    <div class="page-body">
+      <div class="container-xl">
+        <div class="row row-cards">
+          <div class="col-lg-12">
+            <div class="card">
+
+              <div class="accordion accordion-inverted" id="accordion-inverted">
+                
+                {% for connector, sessions in grouped_sessions.items %}
+                <div class="accordion-item">
+                  <button class="accordion-header collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ forloop.counter }}" aria-expanded="false">
+                    <div class="accordion-header-text">
+                      <h4>
+                        <span class="badge bg-teal text-teal-fg me-1">{{ sessions|length }}</span> {{ connector }}
+                      </h4>
+                    </div>
+                    <div class="accordion-header-toggle">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1">
+                        <path d="M6 9l6 6l6 -6"></path>
+                      </svg>
+                    </div>
+                  </button>
+                  <div id="collapse-{{ forloop.counter }}" class="accordion-collapse collapse" data-bs-parent="#accordion-inverted">
+                    <div class="accordion-body">
+                      <table class="table table-striped">
+                        <thead>
+                          <tr>
+                            <th scope="col">Fecha de creación</th>
+                            <th scope="col">Conector</th>
+                            <th scope="col">Tipo de prueba</th>
+                            <th scope="col">Estado</th>
+                            <th scope="col">Acción</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for session in sessions %}
+                          <tr>
+                            <td>{{ session.created_at|date:"d/m/Y H:i" }}</td>
+                            <td>{{ session.connector }}</td>
+                            <td>{{ session.test_type }}</td>
+                            <td>
+                              {% if session.status == "Completado" %}
+                              <span class="badge bg-success ms-auto me-1"></span> {{ session.status }}
+                              {% elif session.status == "Pendiente" %}
+                              <span class="badge bg-warning ms-auto me-1"></span> {{ session.status }}
+                              {% else %}
+                              <span class="badge bg-danger ms-auto me-1"></span> {{ session.status }}
+                              {% endif %}
+                            </td>
+                            <td>
+                              <a href="{% url 'test_summary' session.id %}" class="btn-sm">
+                                <span class="text-info">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-eye m-0">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                    <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+                                    <path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" />
+                                  </svg>
+                                </span>
+                              </a>
+                              <a href="#" class="btn-sm delete-session" data-id="{{ session.id }}">
+                                <span class="text-red">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-trash m-0">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                    <path d="M4 7l16 0" />
+                                    <path d="M10 11l0 6" />
+                                    <path d="M14 11l0 6" />
+                                    <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                                    <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                                  </svg>
+                                </span>
+                              </a>
+                            </td>
+                          </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+
+      
+              
+              
+              
+             
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% include 'includes/footer.html' %}
+  </div>
+
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11" id="toastContainer"></div>
+
+  {% block modal %}
+  <div class="modal modal-blur fade" id="modal-confirm" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-status bg-danger"></div>
+        <div class="modal-body text-center py-4">
+          <!-- Download SVG icon from http://tabler-icons.io/i/alert-triangle -->
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon mb-2 text-danger icon-lg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10.24 3.957l-8.422 14.06a1.989 1.989 0 0 0 1.7 2.983h16.845a1.989 1.989 0 0 0 1.7 -2.983l-8.423 -14.06a1.989 1.989 0 0 0 -3.4 0z" /><path d="M12 9v4" /><path d="M12 17h.01" /></svg>
+          <h3>Eliminar</h3>
+          <div class="text-muted">¿Esta seguro que desea eliminar esta sesión, sus etapas y resultados?</div>
+        </div>
+        <div class="modal-footer">
+          <div class="w-100">
+            <div class="row">
+              <div class="col"><a href="#" class="btn w-100" data-bs-dismiss="modal">
+                  Cancelar
+                </a></div>
+              <div class="col"><a href="#" id="confirmDeleteBtn" class="btn btn-danger w-100" data-bs-dismiss="modal">
+                  Eliminar
+                </a></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endblock modal %}
+
+{% endblock content %}
+
+{% block extrajs %}
+<script src="{% static 'dist/libs/dropzone/dist/dropzone-min.js' %}?1684106062" defer></script>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/2.2.2/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/2.2.2/js/dataTables.bootstrap5.js"></script>
+
+<script src="{% static 'django_eventstream/eventsource.min.js' %}"></script>
+<script src="{% static 'django_eventstream/reconnecting-eventsource.js' %}"></script>
+
+<script src="{% static 'dist/libs/tom-select/dist/js/tom-select.base.min.js' %}?1684106062" defer></script>
+
+
+<script>
+
+document.addEventListener('DOMContentLoaded', function () {
+
+  let sessionIdToDelete = null;
+  let sessionRowToDelete = null;
+  let accordionItemToDelete = null;
+  let tableBodyToCheck = null;
+
+  // Capturar clic en el botón de eliminar y abrir el modal
+  document.querySelectorAll(".delete-session").forEach(button => {
+      button.addEventListener("click", function (event) {
+          event.preventDefault();
+          sessionIdToDelete = this.getAttribute("data-id");
+
+          // Buscar la fila <tr> de la tabla correspondiente a la sesión
+          sessionRowToDelete = this.closest("tr");
+
+          // Buscar el elemento del acordeón al que pertenece
+          accordionItemToDelete = this.closest(".accordion-item");
+
+          // Buscar el tbody de la tabla para contar las filas
+          tableBodyToCheck = sessionRowToDelete.closest("tbody");
+
+          var deleteModal = new bootstrap.Modal(document.getElementById("modal-confirm"));
+          deleteModal.show();
+      });
+  });
+
+  // Confirmar la eliminación
+  document.getElementById("confirmDeleteBtn").addEventListener("click", function () {
+      if (sessionIdToDelete) {
+          fetch(`/api/delete-test-session/${sessionIdToDelete}/`, {
+              method: "POST",
+              headers: {
+                  "X-CSRFToken": "{{ csrf_token }}",
+              }
+          })
+          .then(response => response.json())
+          .then(data => {
+              if (data.success) {
+                  if (sessionRowToDelete && tableBodyToCheck) {
+                      // Si solo hay una fila en la tabla, eliminar todo el accordion-item
+                      if (tableBodyToCheck.querySelectorAll("tr").length === 1) {
+                          accordionItemToDelete.remove();
+                      } else {
+                          sessionRowToDelete.remove(); // Si hay más filas, eliminar solo el <tr>
+                      }
+                  }
+                  var deleteModal = bootstrap.Modal.getInstance(document.getElementById("modal-confirm"));
+                  deleteModal.hide();
+                  showToast('Session eliminada correctamente.', 'success')
+              } else {
+                showToast("Error: " + data.message, 'danger');
+              }
+          })
+          .catch(error => console.error("Error:", error));
+      }
+  });
+
+  function showToast(mensaje, status = 'info') {
+    // Crear el elemento toast
+    const toast = document.createElement('div');
+    toast.className = `toast align-items-center text-white bg-${status} border-0 mb-1`;
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', 'assertive');
+    toast.setAttribute('aria-atomic', 'true');
+    
+    // Contenido del toast
+    toast.innerHTML = `
+      <div class="d-flex">
+        <div class="toast-body">
+          ${mensaje}
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    `;
+    
+    // Obtener el contenedor
+    const toastContainer = document.getElementById('toastContainer');
+    if (!toastContainer) {
+      console.error('No se encontró el contenedor con id="toastContainer"');
+      return;
+    }
+    
+    // Agregar el toast al contenedor
+    toastContainer.appendChild(toast);
+    
+    // Inicializar y mostrar el toast
+    const bootstrapToast = new bootstrap.Toast(toast);
+    bootstrapToast.show();
+    
+    // Eliminar el toast del DOM cuando se oculta
+    toast.addEventListener('hidden.bs.toast', () => {
+      toast.remove();
+    });
+  }
+
+
+
+});
+</script>
+{% endblock extrajs %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@x.x.x/dist/select2-bootstrap4.min.css">
+<style>
+
+/* Estilos base de Dropzone */
+.dropzone {
+    border-radius: 5px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.dropzone:hover {
+    background-color:#e3e4e5;
+    border-color: #007bff;
+}
+
+
+/* Estilos para el modo claro */
+[data-bs-theme="light"] .dropzone {
+    border: 1px dashed #ccc;
+    background-color: #fff;
+    color: #000;
+}
+
+[data-bs-theme="light"] .dropzone:hover {
+    background-color: #f9f9f9;
+    border-color: #007bff;
+}
+
+/* Estilos para el modo oscuro */
+[data-bs-theme="dark"] .dropzone {
+    border: 1px dashed #555;
+    background-color: #151f2c;
+    color: #fff;
+}
+
+[data-bs-theme="dark"] .dropzone:hover {
+    background-color: #182433;
+    border-color: #1e90ff;
+}
+
+/* Estilos para el modo automático (basado en la preferencia del sistema) */
+[data-bs-theme="auto"] .dropzone {
+    border: 2px dashed #ccc;
+    background-color: #fff;
+    color: #000;
+}
+
+@media (prefers-color-scheme: dark) {
+    [data-bs-theme="auto"] .dropzone {
+        border: 2px dashed #555;
+        background-color: #333;
+        color: #fff;
+    }
+
+    [data-bs-theme="auto"] .dropzone:hover {
+        background-color: #444;
+        border-color: #1e90ff;
+    }
+}
+
+.markdown>table>:not(caption)>*>*, .table>:not(caption)>*>* {
+  padding: .50rem .50rem !important;
+  
+}
+
+tbody, td, tfoot, th, thead, tr {
+  font-weight: 300;
+  padding: .50rem .50rem !important;
+}
+
+thead tr, tbody tr {
+  text-align: center;
+}
+
+.dt-empty {
+  text-align: center;
+}
+
+</style>
+{% endblock extrastyle %}

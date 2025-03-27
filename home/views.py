@@ -1,8 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
-from .models import MDBFile
+from django.db import transaction
+from .models import MDBFile, TestSession, TestStage, TestResult
 from .models_harness import Conexiones
 from django_eventstream import send_event
 from datetime import datetime
@@ -32,14 +33,6 @@ def edit_db(request):
         'segment': 'edit_db'
     }
     return render(request, 'pages/edit-db.html', context)
-
-def new_test(request):
-    context = {
-        'parent': '',
-        'segment': 'new_test',
-        'connectors': get_unique_connectors()
-    }
-    return render(request, 'pages/new-test.html', context)
 
 #@csrf_exempt
 
@@ -287,10 +280,129 @@ def upload_mdb(request):
         return JsonResponse({'success': False, 'message': str(e)}, status=400)
     
 def get_unique_connectors():
-    connectors = Conexiones.objects.using("harness").values_list("conector_orig", flat=True)
-    connectors_dest = Conexiones.objects.using("harness").values_list("conector_dest", flat=True)
+    connectors = Conexiones.objects.using("harness").exclude(activo_si_no_field="no").values_list("conector_orig", flat=True)
+    connectors_dest = Conexiones.objects.using("harness").exclude(activo_si_no_field="no").values_list("conector_dest", flat=True)
 
     # Unificar, eliminar None y duplicados
     unique_connectors = sorted(set(filter(None, connectors)).union(set(filter(None, connectors_dest))))
 
     return unique_connectors
+
+def new_test(request):
+    context = {
+        'parent': '',
+        'segment': 'new_test',
+        'connectors': get_unique_connectors()
+    }
+    
+    if request.method == "POST":
+        connector = request.POST.get("connector").strip() if request.POST.get("connector") else None
+        test_type = request.POST.get("test_type")
+        print(connector)
+
+        if not connector or not test_type:
+            return render(request, 'pages/new-test.html', {
+                "error": "Todos los campos son obligatorios",
+                "connectors": get_unique_connectors()
+            })
+
+        # Verificar que test_type sea válido
+        valid_test_types = ["Pin to chasis", "Pin to others", "Test pair", "Pin to pin"]
+        if test_type not in valid_test_types:
+            return render(request, 'pages/new-test.html', {
+                "error": "Tipo de prueba no válido",
+                "connectors": get_unique_connectors()
+            })
+
+        with transaction.atomic():
+            # Crear la sesión de prueba
+            session = TestSession.objects.create(connector=connector, test_type=test_type)
+
+            # Obtener conexiones relevantes de la base de datos externa
+            connections = Conexiones.objects.using("harness").filter(
+                conector_orig=connector
+            ).exclude(activo_si_no_field="no") | Conexiones.objects.using("harness").filter(
+                conector_dest=connector
+            ).exclude(activo_si_no_field="no")
+
+            # Obtener conectores de destino únicos
+            etapas = {}
+            for conn in connections:
+                destino = conn.conector_dest if conn.conector_orig == connector else conn.conector_orig
+                if destino not in etapas:
+                    etapas[destino] = []
+                etapas[destino].append(conn)
+                
+            # Configuración de valores esperados según el tipo de prueba
+            expected_values = {
+                "Pin to chasis": (100000000, "OL"),  # 100MOhm a OL
+                "Pin to others": (100000000, "OL"),  # 100MOhm a OL
+                "Pin to pin": (0, 10),  # 0 a 10 Ohm
+            }
+
+            min_expected, max_expected = expected_values.get(test_type, (None, None))
+
+            # Crear las etapas de prueba
+            for i, (dest, signals) in enumerate(etapas.items(), start=1):
+                stage = TestStage.objects.create(
+                    session=session,
+                    stage_number=i,
+                    connector_dest=dest,
+                    instructions=f"Conectar {connector} y {dest} para ejecutar la prueba.",
+                )
+                
+                # Crear TestResult vacío por cada señal
+                for signal in signals:
+                    TestResult.objects.create(
+                        stage=stage,
+                        signal_id=signal.field_de_señal,
+                        signal_name=signal.nombre,
+                        conector_orig=signal.conector_orig,
+                        pin_a=signal.pin_orig or "N/A",  # Assign default value if None
+                        conector_dest=signal.conector_dest,
+                        pin_b=signal.pin_dest or "N/A",  # Assign default value if None
+                        min_exp_value=min_expected or "0",
+                        max_exp_value=max_expected or "0",
+                        result="Pendiente",
+                    )
+
+        return redirect("test_summary", session_id=session.id)
+        
+
+    return render(request, 'pages/new-test.html', context)
+
+def test_summary(request, session_id):
+    session = get_object_or_404(TestSession, id=session_id)
+    stages = session.stages.all()  # Obtener las etapas de la sesión
+
+    return render(request, "pages/test-summary.html", {
+        "session": session,
+        "stages": stages
+    })
+    
+def test_log(request):
+    context = {
+        "parent": "",
+        "segment": "test_log",
+    }
+
+    # Obtener todas las sesiones de prueba agrupadas por conector
+    test_sessions = TestSession.objects.using("default").all().order_by("-created_at")
+    
+    grouped_sessions = {}
+    for session in test_sessions:
+        if session.connector not in grouped_sessions:
+            grouped_sessions[session.connector] = []
+        grouped_sessions[session.connector].append(session)
+
+    context["grouped_sessions"] = grouped_sessions
+
+    return render(request, "pages/test-log.html", context)
+
+@csrf_exempt
+def delete_test_session(request, session_id):
+    if request.method == "POST":
+        session = get_object_or_404(TestSession, id=session_id)
+        session.delete()
+        return JsonResponse({"success": True, "message": "Sesión eliminada correctamente."})
+    return JsonResponse({"success": False, "message": "Método no permitido."}, status=405)

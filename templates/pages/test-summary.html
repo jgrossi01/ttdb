@@ -1,0 +1,292 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Resumen de prueba - TTDB{% endblock title %}
+
+{% load static %}
+
+{% block content %}
+
+  <div class="page-wrapper">
+    <!-- Page header -->
+
+    <!-- Page body -->
+    <div class="page-body">
+      <div class="container-xl">
+        <div class="row row-cards">
+          <div class="col-lg-12">
+            
+            <div class="container mt-4">
+              <h2>Resumen de Prueba</h2>
+              <p><strong>Conector en prueba:</strong> {{ session.connector }}</p>
+              <p><strong>Tipo de prueba:</strong> {{ session.test_type }}</p>
+              <p><strong>Estado:</strong> {{ session.get_status_display }}</p>
+          
+              {% for stage in stages %}
+              <div class="card mt-4">
+                  <div class="card-header bg-teal-lt text-white">
+                      <h5>Etapa {{ stage.stage_number }} - Conectar: {{ stage.connector_dest }}</h5>
+                  </div>
+                  <div class="card-body">
+                      <p><strong>Instrucciones:</strong> {{ stage.instructions }}</p>
+          
+                      <table id="table-{{ stage.id }}" class="table table-striped">
+                          <thead>
+                              <tr>
+                                  <th>Señal</th>
+                                  <th>Conector Origen</th>
+                                  <th>Pin Origen</th>
+                                  <th>Conector Destino</th>
+                                  <th>Pin Destino</th>
+                                  <th>Esperado (min)</th>
+                                  <th>Esperado (max)</th>
+                                  <th>Medido</th>
+                                  <th>Resultado</th>
+                                  <th>Hora</th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                              {% for result in stage.results.all %}
+                              <tr>
+                                  <td>{{ result.signal_name }}</td>
+                                  <td>{{ result.conector_orig }}</td>
+                                  <td>{{ result.pin_a }}</td>
+                                  <td>{{ result.conector_dest }}</td>
+                                  <td>{{ result.pin_b }}</td>
+                                  <td>{{ result.min_exp_value|default:"-" }}</td>
+                                  <td>{{ result.max_exp_value|default:"-" }}</td>
+                                  <td>{{ result.measured_value|default:"-" }}</td>
+                                  <td>
+                                      {% if result.result == "Pass" %}
+                                          <span class="badge bg-success text-white">PASS</span>
+                                      {% elif result.result == "Fail" %}
+                                          <span class="badge bg-danger text-white">FAIL</span>
+                                      {% else %}
+                                          <span class="badge bg-secondary text-white">Pendiente</span>
+                                      {% endif %}
+                                  </td>
+                                  <td>{{ result.timestamp|date:"H:i:s" }}</td>
+                              </tr>
+                              {% endfor %}
+                          </tbody>
+                      </table>
+                  </div>
+              </div>
+              {% endfor %}
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+    {% include 'includes/footer.html' %}
+  </div>
+
+  {% block modal %}
+  <div class="modal modal-blur fade" id="dataModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Actualizar base de datos</h5>
+          <button type="button" id="closeBtn" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="modal-body">
+          <p class="text-center">Seleccione un archivo Access (.mdb) para actualizar la base de datos principal.</p>
+          <p class="text-center">Se creara una copia de seguridad de la versión que se está utilizando actualmente.</p>
+          <div class="mb-3">
+            <form class="dropzone mb-2" id="dropzone-custom" action="{% url 'edit_db' %}" autocomplete="off" novalidate >
+              {% csrf_token %}
+              <div class="fallback">
+                <input name="file" type="file" />
+              </div>
+              <div class="dz-message">
+                <h3 class="dropzone-msg-title">Cargar DB con actualizaciones</h3>
+                <span class="dropzone-msg-desc">Suelta o haz click aqui para cargar</span>
+              </div>
+            </form>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="inputName">Nombre</label>
+            <div class="input-icon" id="inputNameHolder">
+              <input type="text" class="form-control" name="name" id="inputName" placeholder="Nombre de la base de datos" autocomplete="off">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="inputVersion">Versión</label>
+            <div class="input-icon" id="inputVersionHolder">
+              <input type="text" class="form-control" name="version" id="inputVersion" placeholder="Versión de la base de datos">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div id="alert-container" class="row col-12">
+          </div>
+          <button id="cancelBtn" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+            Cancelar
+          </button>
+          <button id="saveBtn" onclick="saveData()" class="btn btn-primary ms-auto">
+            <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
+            Subir
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal modal-blur fade" id="processModal" tabindex="-1" style="display: none;">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="processTitle">Procesando..</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="btnCloseModalx" disabled></button>
+        </div>
+        <div class="modal-body" id="processBody">
+        <!--
+          <div class="d-block my-1"><span class="text-green">
+            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-circle-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M9 12l2 2l4 -4" /></svg>
+            </span><p class="text-muted d-inline mx-2">Cargando base de datos</p>
+          </div>
+          <div class="d-block my-1"><div class="spinner-border spinner-border-sm" style="margin-left: 2px;" role="status"></div><p class="text-muted d-inline" style="margin-left: 14px;">Cargando base de datos</p></div>
+          <div class="d-block my-1"><div class="spinner-border spinner-border-sm" style="margin-left: 2px;" role="status"></div><p class="text-muted d-inline" style="margin-left: 14px;">Cargando base de datos este es un texto un poco mas largo de lo normal para ver que pasa si alcanza el borde</p></div>
+          -->
+        </div>
+        <div class="modal-body" id="progressBody"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn" data-bs-dismiss="modal" id="btnCloseModal" disabled>Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endblock modal %}
+
+{% endblock content %}
+
+{% block extrajs %}
+<script src="{% static 'dist/libs/dropzone/dist/dropzone-min.js' %}?1684106062" defer></script>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/2.2.2/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/2.2.2/js/dataTables.bootstrap5.js"></script>
+
+<script src="{% static 'django_eventstream/eventsource.min.js' %}"></script>
+<script src="{% static 'django_eventstream/reconnecting-eventsource.js' %}"></script>
+
+<script src="{% static 'dist/libs/tom-select/dist/js/tom-select.base.min.js' %}?1684106062" defer></script>
+
+
+<script>
+
+document.addEventListener('DOMContentLoaded', function () {
+
+  var el;
+  window.TomSelect && (new TomSelect(el = document.getElementById('connector'), {
+    copyClassesToDropdown: false,
+    dropdownParent: 'body',
+    controlInput: '<input>',
+    maxOptions: null,
+    render:{
+      item: function(data,escape) {
+        if( data.customProperties ){
+          return '<div><span class="dropdown-item-indicator">' + data.customProperties + '</span>' + escape(data.text) + '</div>';
+        }
+        return '<div>' + escape(data.text) + '</div>';
+      },
+      option: function(data,escape){
+        if( data.customProperties ){
+          return '<div><span class="dropdown-item-indicator">' + data.customProperties + '</span>' + escape(data.text) + '</div>';
+        }
+        return '<div>' + escape(data.text) + '</div>';
+      },
+    },
+  }));
+
+  {% for stage in stages %}
+    $("#table-{{ stage.id }}").DataTable();
+  {% endfor %}
+
+});
+</script>
+{% endblock extrajs %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@x.x.x/dist/select2-bootstrap4.min.css">
+<style>
+
+/* Estilos base de Dropzone */
+.dropzone {
+    border-radius: 5px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.dropzone:hover {
+    background-color:#e3e4e5;
+    border-color: #007bff;
+}
+
+
+/* Estilos para el modo claro */
+[data-bs-theme="light"] .dropzone {
+    border: 1px dashed #ccc;
+    background-color: #fff;
+    color: #000;
+}
+
+[data-bs-theme="light"] .dropzone:hover {
+    background-color: #f9f9f9;
+    border-color: #007bff;
+}
+
+/* Estilos para el modo oscuro */
+[data-bs-theme="dark"] .dropzone {
+    border: 1px dashed #555;
+    background-color: #151f2c;
+    color: #fff;
+}
+
+[data-bs-theme="dark"] .dropzone:hover {
+    background-color: #182433;
+    border-color: #1e90ff;
+}
+
+/* Estilos para el modo automático (basado en la preferencia del sistema) */
+[data-bs-theme="auto"] .dropzone {
+    border: 2px dashed #ccc;
+    background-color: #fff;
+    color: #000;
+}
+
+@media (prefers-color-scheme: dark) {
+    [data-bs-theme="auto"] .dropzone {
+        border: 2px dashed #555;
+        background-color: #333;
+        color: #fff;
+    }
+
+    [data-bs-theme="auto"] .dropzone:hover {
+        background-color: #444;
+        border-color: #1e90ff;
+    }
+}
+
+.markdown>table>:not(caption)>*>*, .table>:not(caption)>*>* {
+  padding: .50rem .50rem !important;
+  
+}
+
+tbody, td, tfoot, th, thead, tr {
+  font-weight: 300;
+  padding: .50rem .50rem !important;
+}
+
+thead tr, tbody tr {
+  text-align: center;
+}
+
+.dt-empty {
+  text-align: center;
+}
+
+</style>
+{% endblock extrastyle %}
