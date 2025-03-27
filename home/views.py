@@ -36,7 +36,8 @@ def edit_db(request):
 def new_test(request):
     context = {
         'parent': '',
-        'segment': 'new_test'
+        'segment': 'new_test',
+        'connectors': get_unique_connectors()
     }
     return render(request, 'pages/new-test.html', context)
 
@@ -284,3 +285,12 @@ def upload_mdb(request):
     except Exception as e:
         send_event("dbupdate", "message", {"status": "error", "text": f"Error: {e}"})
         return JsonResponse({'success': False, 'message': str(e)}, status=400)
+    
+def get_unique_connectors():
+    connectors = Conexiones.objects.using("harness").values_list("conector_orig", flat=True)
+    connectors_dest = Conexiones.objects.using("harness").values_list("conector_dest", flat=True)
+
+    # Unificar, eliminar None y duplicados
+    unique_connectors = sorted(set(filter(None, connectors)).union(set(filter(None, connectors_dest))))
+
+    return unique_connectors
