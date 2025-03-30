@@ -56,11 +56,11 @@
                                   <td>{{ result.measured_value|default:"-" }}</td>
                                   <td>
                                       {% if result.result == "Pass" %}
-                                          <span class="badge bg-success text-white">PASS</span>
+                                          <span class="badge bg-success text-default-fg">PASS</span>
                                       {% elif result.result == "Fail" %}
-                                          <span class="badge bg-danger text-white">FAIL</span>
+                                          <span class="badge bg-danger text-default-fg">FAIL</span>
                                       {% else %}
-                                          <span class="badge bg-secondary text-white">Pendiente</span>
+                                          <span class="badge bg-default text-default-fg">Pendiente</span>
                                       {% endif %}
                                   </td>
                                   <td>{{ result.timestamp|date:"H:i:s" }}</td>

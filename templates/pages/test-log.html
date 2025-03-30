@@ -50,12 +50,12 @@
                             <td>{{ session.connector }}</td>
                             <td>{{ session.test_type }}</td>
                             <td>
-                              {% if session.status == "Completado" %}
-                              <span class="badge bg-success ms-auto me-1"></span> {{ session.status }}
-                              {% elif session.status == "Pendiente" %}
-                              <span class="badge bg-warning ms-auto me-1"></span> {{ session.status }}
+                              {% if session.status == "completed" %}
+                              <span class="badge bg-success me-1"></span> Completado
+                              {% elif session.status == "pending" %}
+                              <span class="badge bg-secondary me-1"></span>  Pendiente
                               {% else %}
-                              <span class="badge bg-danger ms-auto me-1"></span> {{ session.status }}
+                              <span class="badge bg-danger me-1"></span> {{ session.status }} 
                               {% endif %}
                             </td>
                             <td>
