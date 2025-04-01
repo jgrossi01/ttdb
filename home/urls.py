@@ -12,6 +12,7 @@ urlpatterns = [
     path('new-test', views.new_test, name='new_test'),
     path('test-summary/<int:session_id>/', views.test_summary, name='test_summary'),
     path('test-log/', views.test_log, name='test_log'),
+    path('tests/<int:session_id>/stage/<int:stage_id>/', views.test_stage_view, name='test_stage'),
     
     # Funciones
     path('upload-mdb/', views.upload_mdb, name='upload_mdb'),

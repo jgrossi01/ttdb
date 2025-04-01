@@ -23,7 +23,12 @@
               {% for stage in stages %}
               <div class="card mt-4">
                   <div class="card-header bg-teal-lt text-white">
-                      <h4>Etapa {{ stage.stage_number }} - Conectar: {{ stage.connector_dest }}</h4>
+                      <div>
+                        <h4 class="card-title">Etapa {{ stage.stage_number }} - Conectar: {{ stage.connector_dest }}</h4>
+                      </div>
+                      <div class="card-actions">
+                        <a href="{% url 'test_stage' session_id=stage.session.id stage_id=stage.id %}" class="btn btn-primary">Ver detalles</a>
+                      </div>
                   </div>
                   <div class="card-body">
                       <p><strong>Instrucciones:</strong> {{ stage.instructions }}</p>

@@ -298,15 +298,13 @@ def new_test(request):
     if request.method == "POST":
         connector = request.POST.get("connector").strip() if request.POST.get("connector") else None
         test_type = request.POST.get("test_type")
-        print(connector)
-
+        
         if not connector or not test_type:
             return render(request, 'pages/new-test.html', {
                 "error": "Todos los campos son obligatorios",
                 "connectors": get_unique_connectors()
             })
 
-        # Verificar que test_type sea válido
         valid_test_types = ["Pin a chasis", "Pin a otros", "Entre par de pines", "Pin a pin"]
         
         if test_type not in valid_test_types:
@@ -316,17 +314,14 @@ def new_test(request):
             })
 
         with transaction.atomic():
-            # Crear la sesión de prueba
             session = TestSession.objects.create(connector=connector, test_type=test_type)
-
-            # Obtener conexiones relevantes de la base de datos externa
+            
             connections = Conexiones.objects.using("harness").filter(
                 conector_orig=connector
             ).exclude(activo_si_no_field="no") | Conexiones.objects.using("harness").filter(
                 conector_dest=connector
             ).exclude(activo_si_no_field="no")
 
-            # Obtener conectores de destino únicos
             etapas = {}
             for conn in connections:
                 destino = conn.conector_dest if conn.conector_orig == connector else conn.conector_orig
@@ -334,46 +329,95 @@ def new_test(request):
                     etapas[destino] = []
                 etapas[destino].append(conn)
                 
-            # Configuración de valores esperados según el tipo de prueba
             expected_values = {
-                "Pin a chasis": (100000000, "OL"),  # 100MOhm a OL
-                "Pin a otros": (100000000, "OL"),  # 100MOhm a OL
-                "Pin a pin": (0, 10),  # 0 a 10 Ohm
+                "Pin a chasis": (100000000, "OL"),
+                "Pin a otros": (100000000, "OL"),
+                "Pin a pin": (0, 10),
             }
 
             min_expected, max_expected = expected_values.get(test_type, (None, None))
 
-            # Crear las etapas de prueba
             for i, (dest, signals) in enumerate(etapas.items(), start=1):
-                stage = TestStage.objects.create(
+                reference_stage = TestStage.objects.create(
                     session=session,
                     stage_number=i,
+                    stage_type='reference',
                     connector_dest=dest,
                     instructions=f"Conectar {connector} y {dest} para ejecutar la prueba.",
                 )
                 
-                # Crear TestResult vacío por cada señal
+                test_stage = TestStage.objects.create(
+                    session=session,
+                    stage_number=i,
+                    stage_type='test',
+                    connector_dest=dest,
+                    instructions=f"Conectar {connector} y {dest} para ejecutar la prueba.",
+                )
+                
                 for signal in signals:
+                    # Crear TestResult para referencia SIN modificaciones
                     TestResult.objects.create(
-                        stage=stage,
+                        stage=reference_stage,
                         signal_id=signal.field_de_señal,
                         signal_name=signal.nombre,
                         conector_orig=signal.conector_orig,
-                        pin_a=signal.pin_orig or "N/A",  # Assign default value if None
+                        pin_a=signal.pin_orig or "N/A",
                         conector_dest=signal.conector_dest,
-                        pin_b=signal.pin_dest or "N/A",  # Assign default value if None
+                        pin_b=signal.pin_dest or "N/A",
                         min_exp_value=min_expected or "0",
                         max_exp_value=max_expected or "0",
                         result="Pendiente",
                     )
-
+                    
+                    # Procesamiento de datos para test_stage
+                    pin_a, pin_b = signal.pin_orig or "N/A", signal.pin_dest or "N/A"
+                    
+                    invalid_values = {"TBD", "TBD*", "TBC", "TBC*", "---", "---*", "-", "+"}
+                    if pin_a in invalid_values or pin_b in invalid_values:
+                        continue
+                    
+                    pin_a = pin_a.replace("*", "").replace("(", "").replace(")", "")
+                    pin_b = pin_b.replace("*", "").replace("(", "").replace(")", "")
+                    
+                    letter_to_number = {chr(i + 64): i for i in range(1, 27)}  # A-Z (1-26)
+                    letter_to_number.update({chr(i + 70): i for i in range(27, 53)})  # a-z (27-52)
+                    letter_to_number.update({chr(i + 64) * 2: i for i in range(53, 79)})  # AA-ZZ (53-78)
+                    
+                    def expand_values(value):
+                        expanded = []
+                        for item in value.split(","):
+                            item = item.strip()
+                            if item in letter_to_number:
+                                expanded.append(str(letter_to_number[item]))
+                            else:
+                                expanded.append(item)
+                        return expanded
+                    
+                    expanded_pin_a = expand_values(pin_a)
+                    expanded_pin_b = expand_values(pin_b)
+                    
+                    for a in expanded_pin_a:
+                        for b in expanded_pin_b:
+                            TestResult.objects.create(
+                                stage=test_stage,
+                                signal_id=signal.field_de_señal,
+                                signal_name=signal.nombre,
+                                conector_orig=signal.conector_orig,
+                                pin_a=a,
+                                conector_dest=signal.conector_dest,
+                                pin_b=b,
+                                min_exp_value=min_expected or "0",
+                                max_exp_value=max_expected or "0",
+                                result="Pendiente",
+                            )
         return redirect("test_summary", session_id=session.id)
-        
+    
     return render(request, 'pages/new-test.html', context)
+
 
 def test_summary(request, session_id):
     session = get_object_or_404(TestSession, id=session_id)
-    stages = session.stages.all()  # Obtener las etapas de la sesión
+    stages = session.stages.filter(stage_type='reference')
 
     return render(request, "pages/test-summary.html", {
         "session": session,
@@ -407,3 +451,21 @@ def delete_test_session(request, session_id):
         session.delete()
         return JsonResponse({"success": True, "message": "Sesión eliminada correctamente."})
     return JsonResponse({"success": False, "message": "Método no permitido."}, status=405)
+
+def test_stage_view(request, session_id, stage_id):
+    session = get_object_or_404(TestSession, id=session_id)
+    stage_reference = get_object_or_404(TestStage, id=stage_id, session=session, stage_type='reference')
+    stage_test = get_object_or_404(TestStage, session=session, stage_number=stage_reference.stage_number, stage_type='test')
+    
+    # Obtener los resultados asociados a cada etapa
+    reference_results = TestResult.objects.filter(stage=stage_reference)
+    test_results = TestResult.objects.filter(stage=stage_test)
+    
+    context = {
+        'session': session,
+        'stage_reference': stage_reference,
+        'stage_test': stage_test,
+        'reference_results': reference_results,
+        'test_results': test_results,
+    }
+    return render(request, 'pages/test-stage.html', context)
