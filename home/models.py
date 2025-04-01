@@ -50,6 +50,7 @@ class TestSession(models.Model):
 class TestStage(models.Model):
     session = models.ForeignKey(TestSession, on_delete=models.CASCADE, related_name='stages')
     stage_number = models.PositiveIntegerField()
+    #stage_type = models.CharField(max_length=50)
     connector_dest = models.CharField(max_length=50)  # Conector que se conecta en esta etapa
     instructions = models.TextField()  # Instrucciones para el usuario
     status = models.CharField(max_length=20, choices=[('pending', 'Pendiente'), ('completed', 'Terminado')], default='pending')

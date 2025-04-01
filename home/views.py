@@ -307,7 +307,8 @@ def new_test(request):
             })
 
         # Verificar que test_type sea válido
-        valid_test_types = ["Pin to chasis", "Pin to others", "Test pair", "Pin to pin"]
+        valid_test_types = ["Pin a chasis", "Pin a otros", "Entre par de pines", "Pin a pin"]
+        
         if test_type not in valid_test_types:
             return render(request, 'pages/new-test.html', {
                 "error": "Tipo de prueba no válido",
@@ -335,9 +336,9 @@ def new_test(request):
                 
             # Configuración de valores esperados según el tipo de prueba
             expected_values = {
-                "Pin to chasis": (100000000, "OL"),  # 100MOhm a OL
-                "Pin to others": (100000000, "OL"),  # 100MOhm a OL
-                "Pin to pin": (0, 10),  # 0 a 10 Ohm
+                "Pin a chasis": (100000000, "OL"),  # 100MOhm a OL
+                "Pin a otros": (100000000, "OL"),  # 100MOhm a OL
+                "Pin a pin": (0, 10),  # 0 a 10 Ohm
             }
 
             min_expected, max_expected = expected_values.get(test_type, (None, None))
@@ -368,7 +369,6 @@ def new_test(request):
 
         return redirect("test_summary", session_id=session.id)
         
-
     return render(request, 'pages/new-test.html', context)
 
 def test_summary(request, session_id):
@@ -384,6 +384,7 @@ def test_log(request):
     context = {
         "parent": "",
         "segment": "test_log",
+        'connectors': get_unique_connectors()
     }
 
     # Obtener todas las sesiones de prueba agrupadas por conector
