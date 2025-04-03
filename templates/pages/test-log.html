@@ -57,17 +57,6 @@
                   </div>
                 </div>
 
-                {% comment %}     <div class="d-flex justify-content-between mb-3">
-                      <input type="text" id="searchConnector" class="form-control w-50" placeholder="Buscar por conector...">
-                      
-                      <select id="filterTestType" class="form-select w-25">
-                          <option value="">Filtrar por tipo de prueba</option>
-                          <option value="Pin to chasis">Pin to Chasis</option>
-                          <option value="Pin to Others">Pin to Others</option>
-                          <option value="Pin to pin">Pin to Pin</option>
-                      </select>
-                    </div> {% endcomment %}
-
                 <div class="accordion accordion-inverted" id="accordion-inverted">
                   
                   {% for connector, sessions in grouped_sessions.items %}
@@ -85,13 +74,14 @@
                       </div>
                     </button>
                     <div id="collapse-{{ forloop.counter }}" class="accordion-collapse collapse" data-bs-parent="#accordion-inverted">
-                      <div class="accordion-body">
-                        <table class="table">
+                      <div class="accordion-body" style="padding: 0">
+                        <table class="table" style="margin: 0">
                           <thead>
                             <tr>
                               <th scope="col">Fecha de creación</th>
                               <th scope="col">Conector</th>
                               <th scope="col">Tipo de prueba</th>
+                              <th scope="col">Etapas</th>
                               <th scope="col">Estado</th>
                               <th scope="col">Acción</th>
                             </tr>
@@ -102,13 +92,28 @@
                               <td>{{ session.created_at|date:"d/m/Y H:i" }}</td>
                               <td>{{ session.connector }}</td>
                               <td>{{ session.test_type }}</td>
+                              <td>{{ session.teststage_count }}</td>
                               <td>
-                                {% if session.status == "completed" %}
-                                <span class="badge bg-success me-1"></span> Completado
+                                {% if session.status == "in_progress" %}
+                                <span class="status status-warning">
+                                  <span class="status-dot"></span>
+                                  {{ session.get_status_display }}
+                                </span>
                                 {% elif session.status == "pending" %}
-                                <span class="badge bg-secondary me-1"></span>  Pendiente
+                                <span class="status status-secondary">
+                                  <span class="status-dot"></span>
+                                  {{ session.get_status_display }}
+                                </span>
+                                {% elif session.status == "completed" %}
+                                <span class="status status-success">
+                                  <span class="status-dot"></span>
+                                  {{ session.get_status_display }}
+                                </span>
                                 {% else %}
-                                <span class="badge bg-danger me-1"></span> {{ session.status }} 
+                                <span class="status status-secondary">
+                                  <span class="status-dot"></span>
+                                  {{ session.get_status_display }}
+                                </span>
                                 {% endif %}
                               </td>
                               <td>
@@ -591,12 +596,13 @@ document.addEventListener('DOMContentLoaded', function () {
 }
 
 tbody, td, tfoot, th, thead, tr {
-  font-weight: 300;
+  font-weight: 500;
   padding: .50rem .50rem !important;
 }
 
 thead tr, tbody tr {
   text-align: center;
+  color:rgb(231, 227, 227);
 }
 
 .dt-empty {

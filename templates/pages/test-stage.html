@@ -15,60 +15,129 @@
           <div class="col-lg-12">
             
             <div class="container mt-4">
-              <h2>Resultados de la prueba - Etapa {{ stage_test.stage_number }}</h2>
+              {% comment %} <h2>Resultados de la prueba - Etapa {{ stage_test.stage_number }}</h2>
               <p><strong>Conector Origen:</strong> {{ stage_test.session.connector }}</p>
-              <p><strong>Conector Destino:</strong> {{ stage_test.connector_dest }}</p>
-          
+              <p><strong>Conector Destino:</strong> {{ stage_test.connector_dest }}</p> {% endcomment %}
+              <ol class="breadcrumb breadcrumb-arrows mb-3">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'test_summary' session.id %}">Resumen</a>
+                </li>
+                {% for stage in test_stages %}
+                    <li class="breadcrumb-item {% if stage.id == stage_test.id %}active{% endif %}">
+                        <a href="{% url 'test_stage' session.id stage.id %}">
+                            Etapa {{ stage.stage_number }}
+                        </a>
+                    </li>
+                {% endfor %}
+              </ol>
+
+              
+
+              
               <div class="card mt-4">
                 <div class="card-header">
-                  <h3>Referencia (Reference)</h3>
-                </div>
-                <table id="testTable" class="table table-striped">
-                  <thead>
-                      <tr>
-                          <th>Señal</th>
-                          <th>Conector Origen</th>
-                          <th>Pin Origen</th>
-                          <th>Conector Destino</th>
-                          <th>Pin Destino</th>
-                          <th>Esperado (min)</th>
-                          <th>Esperado (max)</th>
-                          <th>Medido</th>
-                          <th>Resultado</th>
-                          <th>Hora</th>
-                      </tr>
-                  </thead>
-                  <tbody>
-                    {% for result in test_results %}
-                    <tr>
-                        <td>{{ result.signal_name }}</td>
-                        <td>{{ result.conector_orig }}</td>
-                        <td title="{{ result.tooltip_a }}" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="tooltip-table">{{ result.pin_a }}</td>
-                        <td>{{ result.conector_dest }}</td>
-                        <td title="{{ result.tooltip_b }}" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="tooltip-table">{{ result.pin_b }}</td>
-                        <td>{{ result.min_exp_value|default:"-" }}</td>
-                        <td>{{ result.max_exp_value|default:"-" }}</td>
-                        <td>{{ result.measured_value|default:"-" }}</td>
-                        <td>
-                            {% if result.result == "Pass" %}
-                                <span class="badge bg-success text-default-fg">PASS</span>
-                            {% elif result.result == "Fail" %}
-                                <span class="badge bg-danger text-default-fg">FAIL</span>
-                            {% else %}
-                                <span class="badge bg-default text-default-fg">Pendiente</span>
-                            {% endif %}
-                        </td>
-                        <td>{{ result.timestamp|date:"H:i:s" }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-                
-                </table>
-              
-      
-              
-              </div>
+                  <div>
+                    <h3 class="card-title">Etapa {{ stage_test.stage_number }} de {{ total_stages }} - {{ stage_test.connector_dest }}</h3>
+                  </div>
+                  <div class="card-actions">
           
+                    <button type="button" class="btn btn-success">
+                      <!-- SVG icon from http://tabler.io/icons/icon/check -->
+                      <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="currentColor"  class="icon icon-tabler icons-tabler-filled icon-tabler-player-play"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 4v16a1 1 0 0 0 1.524 .852l13 -8a1 1 0 0 0 0 -1.704l-13 -8a1 1 0 0 0 -1.524 .852z" /></svg>
+                      Comenzar
+                    </button>
+                  </div>
+                  
+                </div>
+                <div class="card-body" style="padding: 0;">
+                  <table id="testTable" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Señal</th>
+                            <th>Conector Origen</th>
+                            <th>Pin Origen</th>
+                            <th>Conector Destino</th>
+                            <th>Pin Destino</th>
+                            <th>Esperado (min)</th>
+                            <th>Esperado (max)</th>
+                            <th>Medido</th>
+                            <th>Resultado</th>
+                            <th>Hora</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                      {% for result in test_results %}
+                      <tr>
+                          <td>{{ result.signal_name }}</td>
+                          <td>{{ result.conector_orig }}</td>
+                          <td title="{{ result.tooltip_a }}" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="tooltip-table">{{ result.pin_a }}</td>
+                          <td>{{ result.conector_dest }}</td>
+                          <td title="{{ result.tooltip_b }}" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="tooltip-table">{{ result.pin_b }}</td>
+                          <td>{{ result.min_exp_value|default:"-" }}</td>
+                          <td>{{ result.max_exp_value|default:"-" }}</td>
+                          <td>{{ result.measured_value|default:"-" }}</td>
+                          <td>
+                              {% if result.result == "Pass" %}
+                                  <span class="badge bg-success text-default-fg">PASS</span>
+                              {% elif result.result == "Fail" %}
+                                  <span class="badge bg-danger text-default-fg">FAIL</span>
+                              {% else %}
+                                  <span class="badge bg-default text-default-fg">Pendiente</span>
+                              {% endif %}
+                          </td>
+                          <td>{{ result.timestamp|date:"H:i:s" }}</td>
+                      </tr>
+                      {% endfor %}
+                  </tbody>
+                  </table>
+                  
+                  <div class="px-3">
+                    <div class="alert alert-important alert-info alert-dismissible" role="alert">
+                      <div class="alert-icon">
+                        <!-- Download SVG icon from http://tabler.io/icons/icon/info-circle -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon icon-2">
+                          <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path>
+                          <path d="M12 9h.01"></path>
+                          <path d="M11 12h1v4h1"></path>
+                        </svg>
+                      </div>
+                      <div>
+                        <h4 class="alert-heading">Los datos pin origen y pin destino de esta tabla pueden haberse modificado para la correcta interpretación del hardware.</h4>
+                        <div class="alert-description">Puedes verificar los datos originales pasando el cursor por encima.</div>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+              </div>
+
+              {% if prev_stage_id or next_stage_id %}
+              <div class="card mt-4">
+                <div class="card-body">
+                  <ul class="pagination">
+                    {% if prev_stage_id %}
+                    <li class="page-item page-prev">
+                      <a class="page-link" href="{% url 'test_stage' session.id prev_stage_id %}">
+                        <div class="page-item-subtitle">anterior</div>
+                        <div class="page-item-title">Etapa {{ prev_stage_number }}</div>
+                      </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% if next_stage_id %}
+                    <li class="page-item page-next">
+                      <a class="page-link" href="{% url 'test_stage' session.id next_stage_id %}">
+                        <div class="page-item-subtitle">siguiente</div>
+                        <div class="page-item-title">Etapa {{ next_stage_number }}</div>
+                      </a>
+                    </li>
+                    {% endif %}
+                  </ul>
+                </div>
+              </div>
+              {% endif %}
+
               
 
 

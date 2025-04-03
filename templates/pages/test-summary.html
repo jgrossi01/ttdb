@@ -15,10 +15,58 @@
           <div class="col-lg-12">
             
             <div class="container mt-4">
-              <h2>Resumen de prueba</h2>
-              <p><strong>Conector en prueba:</strong> {{ session.connector }}</p>
-              <p><strong>Tipo de prueba:</strong> {{ session.test_type }}</p>
-              <p><strong>Estado:</strong> {{ session.get_status_display }}</p>
+              <div class="card">
+                <div class="card-header">
+                  <div>
+                    <h4 class="card-title">Resumen de prueba</h4>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div class="row text-center">
+                    <div class="col">
+                      <p>Conector en prueba:</p> 
+                      <h3><strong class="text-cyan">{{ session.connector }}</strong></h3>
+                    </div>
+                    <div class="col">
+                      <p>Tipo de prueba:</p>
+                      <h3><strong class="text-cyan">{{ session.test_type }}</strong></h3>
+                    </div>
+                    <div class="col">
+                      <p>Etapas:</p>
+                      <h3><strong class="text-cyan">{{ stages_count }}</strong></h3>
+                    </div>
+                    <div class="col">
+                      <p>Estado:</p> 
+                      {% if session.status == "in_progress" %}
+                      <span class="status status-warning">
+                        <span class="status-dot"></span>
+                        {{ session.get_status_display }}
+                      </span>
+                      {% elif session.status == "pending" %}
+                      <span class="status status-secondary">
+                        <span class="status-dot"></span>
+                        {{ session.get_status_display }}
+                      </span>
+                      {% elif session.status == "completed" %}
+                      <span class="status status-success">
+                        <span class="status-dot"></span>
+                        {{ session.get_status_display }}
+                      </span>
+                      {% else %}
+                      <span class="status status-secondary">
+                        <span class="status-dot"></span>
+                        {{ session.get_status_display }}
+                      </span>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+                
+              </div>
+              
+              
+              
+              
           
               {% for stage in stages %}
               <div class="card mt-4">

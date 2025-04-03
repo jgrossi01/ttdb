@@ -435,10 +435,12 @@ def new_test(request):
 def test_summary(request, session_id):
     session = get_object_or_404(TestSession, id=session_id)
     stages = session.stages.filter(stage_type='reference')
+    stages_count = session.stages.filter(stage_type='test').count()
 
     return render(request, "pages/test-summary.html", {
         "session": session,
-        "stages": stages
+        "stages": stages,
+        "stages_count": stages_count,
     })
     
 def test_log(request):
@@ -455,11 +457,16 @@ def test_log(request):
     for session in test_sessions:
         if session.connector not in grouped_sessions:
             grouped_sessions[session.connector] = []
+
+        # Contar cuántos TestStage tiene cada sesión
+        session.teststage_count = session.stages.filter(stage_type='test').count()
+        
         grouped_sessions[session.connector].append(session)
 
     context["grouped_sessions"] = grouped_sessions
 
     return render(request, "pages/test-log.html", context)
+
 
 @csrf_exempt
 def delete_test_session(request, session_id):
@@ -474,42 +481,59 @@ def test_stage_view(request, session_id, stage_id):
     stage_reference = get_object_or_404(TestStage, id=stage_id, session=session, stage_type='reference')
     stage_test = get_object_or_404(TestStage, session=session, stage_number=stage_reference.stage_number, stage_type='test')
 
+    # Contar todas las etapas en la sesión (solo las de prueba)
+    test_stages = session.stages.filter(stage_type='test').order_by("stage_number")
+    total_stages = test_stages.count()
+
+    # Obtener el número de la etapa actual
+    current_stage_number = stage_reference.stage_number
+
+    # Determinar el ID de la etapa anterior y siguiente (si existen)
+    prev_stage = session.stages.filter(stage_number=current_stage_number - 1, stage_type='reference').first()
+    next_stage = session.stages.filter(stage_number=current_stage_number + 1, stage_type='reference').first()
+
+    prev_stage_id = prev_stage.id if prev_stage else None
+    next_stage_id = next_stage.id if next_stage else None
+
     # Obtener los resultados de referencia y prueba
     reference_results = TestResult.objects.filter(stage=stage_reference)
     test_results = TestResult.objects.filter(stage=stage_test)
 
-    # Crear un diccionario de referencia basado solo en signal_id
-    reference_dict = {}
-    for r in reference_results:
-        if r.signal_id not in reference_dict:
-            reference_dict[r.signal_id] = {"pin_a": r.pin_a, "pin_b": r.pin_b}
+    # Crear un diccionario de referencia basado en signal_id
+    reference_dict = {r.signal_id: {"pin_a": r.pin_a, "pin_b": r.pin_b} for r in reference_results}
 
     # Crear una lista con los datos necesarios para la tabla
-    test_results_with_tooltips = []
-    for test in test_results:
-        reference_data = reference_dict.get(test.signal_id, {"pin_a": "No ref", "pin_b": "No ref"})
-
-        test_results_with_tooltips.append({
+    test_results_data = [
+        {
             "signal_name": test.signal_name,
             "conector_orig": test.conector_orig,
             "pin_a": test.pin_a,
-            "tooltip_a": reference_data["pin_a"],  # Tooltip del pin_a de referencia
+            "tooltip_a": reference_dict.get(test.signal_id, {}).get("pin_a", "No ref"),
             "conector_dest": test.conector_dest,
             "pin_b": test.pin_b,
-            "tooltip_b": reference_data["pin_b"],  # Tooltip del pin_b de referencia
+            "tooltip_b": reference_dict.get(test.signal_id, {}).get("pin_b", "No ref"),
             "min_exp_value": test.min_exp_value,
             "max_exp_value": test.max_exp_value,
             "measured_value": test.measured_value,
             "result": test.result,
             "timestamp": test.timestamp,
-        })
+        }
+        for test in test_results
+    ]
 
     context = {
         "session": session,
         "stage_reference": stage_reference,
         "stage_test": stage_test,
-        "test_results": test_results_with_tooltips,
+        "test_results": test_results_data,
+        "total_stages": total_stages,
+        "prev_stage_id": prev_stage_id,
+        "prev_stage_number": prev_stage.stage_number if prev_stage else None,
+        "next_stage_id": next_stage_id,
+        "next_stage_number": next_stage.stage_number if next_stage else None,
+        "test_stages": test_stages,  # Lista de etapas de prueba para el breadcrumb
     }
     return render(request, "pages/test-stage.html", context)
+
 
 
