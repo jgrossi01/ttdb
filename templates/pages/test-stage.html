@@ -1,5 +1,5 @@
 {% extends 'layouts/base.html' %}
-{% block title %}Resumen de prueba - TTDB{% endblock title %}
+{% block title %}Resumen de prueba - {% endblock title %}
 
 {% load static %}
 
@@ -23,9 +23,9 @@
                 <div class="card-header">
                   <h3>Referencia (Reference)</h3>
                 </div>
-                <table id="referenceTable" class="table table-striped">
-                    <thead>
-                        <tr>
+                <table id="testTable" class="table table-striped">
+                  <thead>
+                      <tr>
                           <th>Señal</th>
                           <th>Conector Origen</th>
                           <th>Pin Origen</th>
@@ -36,81 +36,40 @@
                           <th>Medido</th>
                           <th>Resultado</th>
                           <th>Hora</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for result in reference_results %}
-                        <tr>
-                          <td>{{ result.signal_name }}</td>
-                          <td>{{ result.conector_orig }}</td>
-                          <td>{{ result.pin_a }}</td>
-                          <td>{{ result.conector_dest }}</td>
-                          <td>{{ result.pin_b }}</td>
-                          <td>{{ result.min_exp_value|default:"-" }}</td>
-                          <td>{{ result.max_exp_value|default:"-" }}</td>
-                          <td>{{ result.measured_value|default:"-" }}</td>
-                          <td>
-                              {% if result.result == "Pass" %}
-                                  <span class="badge bg-success text-default-fg">PASS</span>
-                              {% elif result.result == "Fail" %}
-                                  <span class="badge bg-danger text-default-fg">FAIL</span>
-                              {% else %}
-                                  <span class="badge bg-default text-default-fg">Pendiente</span>
-                              {% endif %}
-                          </td>
-                          <td>{{ result.timestamp|date:"H:i:s" }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
+                      </tr>
+                  </thead>
+                  <tbody>
+                    {% for result in test_results %}
+                    <tr>
+                        <td>{{ result.signal_name }}</td>
+                        <td>{{ result.conector_orig }}</td>
+                        <td title="{{ result.tooltip_a }}" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="tooltip-table">{{ result.pin_a }}</td>
+                        <td>{{ result.conector_dest }}</td>
+                        <td title="{{ result.tooltip_b }}" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="tooltip-table">{{ result.pin_b }}</td>
+                        <td>{{ result.min_exp_value|default:"-" }}</td>
+                        <td>{{ result.max_exp_value|default:"-" }}</td>
+                        <td>{{ result.measured_value|default:"-" }}</td>
+                        <td>
+                            {% if result.result == "Pass" %}
+                                <span class="badge bg-success text-default-fg">PASS</span>
+                            {% elif result.result == "Fail" %}
+                                <span class="badge bg-danger text-default-fg">FAIL</span>
+                            {% else %}
+                                <span class="badge bg-default text-default-fg">Pendiente</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ result.timestamp|date:"H:i:s" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                
                 </table>
+              
+      
+              
               </div>
           
-              <div class="card mt-4">
-                <div class="card-header">
-                  <h3>Prueba (Test)</h3>
-                </div>
-                <table id="testTable" class="table table-striped">
-                    <thead>
-                      <tr>
-                        <th>Señal</th>
-                        <th>Conector Origen</th>
-                        <th>Pin Origen</th>
-                        <th>Conector Destino</th>
-                        <th>Pin Destino</th>
-                        <th>Esperado (min)</th>
-                        <th>Esperado (max)</th>
-                        <th>Medido</th>
-                        <th>Resultado</th>
-                        <th>Hora</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                        {% for result in test_results %}
-                        <tr>
-                          <td>{{ result.signal_name }}</td>
-                          <td>{{ result.conector_orig }}</td>
-                          <td>{{ result.pin_a }}</td>
-                          <td>{{ result.conector_dest }}</td>
-                          <td>{{ result.pin_b }}</td>
-                          <td>{{ result.min_exp_value|default:"-" }}</td>
-                          <td>{{ result.max_exp_value|default:"-" }}</td>
-                          <td>{{ result.measured_value|default:"-" }}</td>
-                          <td>
-                              {% if result.result == "Pass" %}
-                                  <span class="badge bg-success text-default-fg">PASS</span>
-                              {% elif result.result == "Fail" %}
-                                  <span class="badge bg-danger text-default-fg">FAIL</span>
-                              {% else %}
-                                  <span class="badge bg-default text-default-fg">Pendiente</span>
-                              {% endif %}
-                          </td>
-                          <td>{{ result.timestamp|date:"H:i:s" }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-              </div>
-            </div>
+              
 
 
           </div>
@@ -168,7 +127,12 @@
 
 document.addEventListener('DOMContentLoaded', function () {
 
-
+  document.addEventListener("DOMContentLoaded", function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach(function(tooltipTriggerEl) {
+        new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
 
 });
 </script>

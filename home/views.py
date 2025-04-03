@@ -288,6 +288,37 @@ def get_unique_connectors():
 
     return unique_connectors
 
+def get_letter_to_number_mapping():
+    letter_to_number = {}
+
+    # A-Z → 1-26
+    for i in range(26):
+        letter_to_number[chr(65 + i)] = i + 1  # A=1, B=2, ..., Z=26
+
+    # a-z → 27-52
+    for i in range(26):
+        letter_to_number[chr(97 + i)] = i + 27  # a=27, b=28, ..., z=52
+
+    # AA-ZZ → 53-78
+    for i in range(26):
+        letter_to_number[chr(65 + i) * 2] = i + 53  # AA=53, BB=54, ..., ZZ=78
+
+    return letter_to_number
+
+LETTER_TO_NUMBER = get_letter_to_number_mapping()
+
+
+def expand_values(value):
+    expanded = []
+    for item in value.split(","):
+        item = item.strip()
+        if item in LETTER_TO_NUMBER:
+            expanded.append(str(LETTER_TO_NUMBER[item]))
+        else:
+            expanded.append(item)
+    return expanded
+
+
 def new_test(request):
     context = {
         'parent': '',
@@ -378,21 +409,7 @@ def new_test(request):
                     
                     pin_a = pin_a.replace("*", "").replace("(", "").replace(")", "")
                     pin_b = pin_b.replace("*", "").replace("(", "").replace(")", "")
-                    
-                    letter_to_number = {chr(i + 64): i for i in range(1, 27)}  # A-Z (1-26)
-                    letter_to_number.update({chr(i + 70): i for i in range(27, 53)})  # a-z (27-52)
-                    letter_to_number.update({chr(i + 64) * 2: i for i in range(53, 79)})  # AA-ZZ (53-78)
-                    
-                    def expand_values(value):
-                        expanded = []
-                        for item in value.split(","):
-                            item = item.strip()
-                            if item in letter_to_number:
-                                expanded.append(str(letter_to_number[item]))
-                            else:
-                                expanded.append(item)
-                        return expanded
-                    
+
                     expanded_pin_a = expand_values(pin_a)
                     expanded_pin_b = expand_values(pin_b)
                     
@@ -456,16 +473,43 @@ def test_stage_view(request, session_id, stage_id):
     session = get_object_or_404(TestSession, id=session_id)
     stage_reference = get_object_or_404(TestStage, id=stage_id, session=session, stage_type='reference')
     stage_test = get_object_or_404(TestStage, session=session, stage_number=stage_reference.stage_number, stage_type='test')
-    
-    # Obtener los resultados asociados a cada etapa
+
+    # Obtener los resultados de referencia y prueba
     reference_results = TestResult.objects.filter(stage=stage_reference)
     test_results = TestResult.objects.filter(stage=stage_test)
-    
+
+    # Crear un diccionario de referencia basado solo en signal_id
+    reference_dict = {}
+    for r in reference_results:
+        if r.signal_id not in reference_dict:
+            reference_dict[r.signal_id] = {"pin_a": r.pin_a, "pin_b": r.pin_b}
+
+    # Crear una lista con los datos necesarios para la tabla
+    test_results_with_tooltips = []
+    for test in test_results:
+        reference_data = reference_dict.get(test.signal_id, {"pin_a": "No ref", "pin_b": "No ref"})
+
+        test_results_with_tooltips.append({
+            "signal_name": test.signal_name,
+            "conector_orig": test.conector_orig,
+            "pin_a": test.pin_a,
+            "tooltip_a": reference_data["pin_a"],  # Tooltip del pin_a de referencia
+            "conector_dest": test.conector_dest,
+            "pin_b": test.pin_b,
+            "tooltip_b": reference_data["pin_b"],  # Tooltip del pin_b de referencia
+            "min_exp_value": test.min_exp_value,
+            "max_exp_value": test.max_exp_value,
+            "measured_value": test.measured_value,
+            "result": test.result,
+            "timestamp": test.timestamp,
+        })
+
     context = {
-        'session': session,
-        'stage_reference': stage_reference,
-        'stage_test': stage_test,
-        'reference_results': reference_results,
-        'test_results': test_results,
+        "session": session,
+        "stage_reference": stage_reference,
+        "stage_test": stage_test,
+        "test_results": test_results_with_tooltips,
     }
-    return render(request, 'pages/test-stage.html', context)
+    return render(request, "pages/test-stage.html", context)
+
+
