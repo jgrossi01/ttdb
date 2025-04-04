@@ -2,6 +2,7 @@
 {% block title %}Resumen de prueba - {% endblock title %}
 
 {% load static %}
+{% load admin_tabler %}
 
 {% block content %}
 
@@ -11,6 +12,7 @@
     <!-- Page body -->
     <div class="page-body">
       <div class="container-xl">
+        
         <div class="row row-cards">
           <div class="col-lg-12">
             
@@ -24,12 +26,13 @@
                 </li>
                 {% for stage in test_stages %}
                     <li class="breadcrumb-item {% if stage.id == stage_test.id %}active{% endif %}">
-                        <a href="{% url 'test_stage' session.id stage.id %}">
+                        <a href="{% url 'test_stage' session.id reference_stage_map|get_dict_value:stage.stage_number %}">
                             Etapa {{ stage.stage_number }}
                         </a>
                     </li>
                 {% endfor %}
               </ol>
+            
 
               
 
@@ -41,7 +44,7 @@
                   </div>
                   <div class="card-actions">
           
-                    <button type="button" class="btn btn-success">
+                    <button type="button" class="btn btn-success" id="startTest">
                       <!-- SVG icon from http://tabler.io/icons/icon/check -->
                       <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="currentColor"  class="icon icon-tabler icons-tabler-filled icon-tabler-player-play"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 4v16a1 1 0 0 0 1.524 .852l13 -8a1 1 0 0 0 0 -1.704l-13 -8a1 1 0 0 0 -1.524 .852z" /></svg>
                       Comenzar
@@ -91,8 +94,8 @@
                   </tbody>
                   </table>
                   
-                  <div class="px-3">
-                    <div class="alert alert-important alert-info alert-dismissible" role="alert">
+                  <div class="px-3" id="alertContainer">
+                    <div class="alert alert-important alert-info alert-dismissible" role="alert" id="infoAlert">
                       <div class="alert-icon">
                         <!-- Download SVG icon from http://tabler.io/icons/icon/info-circle -->
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon icon-2">
@@ -196,12 +199,52 @@
 
 document.addEventListener('DOMContentLoaded', function () {
 
-  document.addEventListener("DOMContentLoaded", function() {
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.forEach(function(tooltipTriggerEl) {
-        new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-});
+  
+  let tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  tooltipTriggerList.forEach(function(tooltipTriggerEl) {
+      new bootstrap.Tooltip(tooltipTriggerEl);
+  });
+
+  function isMesurable () {
+    const table = document.querySelector('#testTable');
+    const tbody = table?.querySelector('tbody');
+    const startButton = document.querySelector('#startTest');
+    const infoAlert = document.querySelector('#infoAlert');
+    const alertContainer = document.querySelector('#alertContainer');
+
+    // Verificar si el tbody está vacío (sin filas)
+    if (tbody && tbody.children.length === 0) {
+      // 1. Insertar el alert después de la tabla
+      infoAlert.remove();
+      const alertHTML = `
+      <div class="alert alert-important alert-warning alert-dismissible mt-3" role="alert">
+          <div class="alert-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon icon-2">
+                  <path d="M12 9v4"></path>
+                  <path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z"></path>
+                  <path d="M12 16h.01"></path>
+              </svg>
+          </div>
+          <div>
+              <h4 class="alert-heading">Los datos de la tabla fueron limpiados para la interpretación del hardware.</h4>
+              <div class="alert-description">No hay conexiones medibles para este conector.</div>
+          </div>
+          <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+      </div>
+      `;
+      alertContainer.innerHTML = alertHTML;
+
+      // 2. Eliminar la tabla
+      table.remove();
+
+      // 3. Deshabilitar el botón #startTest (si existe)
+      if (startButton) {
+        startButton.disabled = true;
+      }
+    }
+  }
+
+  isMesurable();
 
 });
 </script>

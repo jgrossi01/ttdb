@@ -7,6 +7,7 @@ from .models import MDBFile, TestSession, TestStage, TestResult
 from .models_harness import Conexiones
 from django_eventstream import send_event
 from datetime import datetime
+from collections import defaultdict
 
 import pyodbc
 import sqlite3
@@ -478,60 +479,76 @@ def delete_test_session(request, session_id):
 
 def test_stage_view(request, session_id, stage_id):
     session = get_object_or_404(TestSession, id=session_id)
+
+    # Obtener la etapa de referencia y su correspondiente test
     stage_reference = get_object_or_404(TestStage, id=stage_id, session=session, stage_type='reference')
     stage_test = get_object_or_404(TestStage, session=session, stage_number=stage_reference.stage_number, stage_type='test')
 
-    # Contar todas las etapas en la sesión (solo las de prueba)
-    test_stages = session.stages.filter(stage_type='test').order_by("stage_number")
-    total_stages = test_stages.count()
+    # Obtener todas las etapas de prueba en una sola consulta
+    test_stages = list(session.stages.filter(stage_type='test').order_by("stage_number"))
 
-    # Obtener el número de la etapa actual
-    current_stage_number = stage_reference.stage_number
+    # Crear el mapeo stage_number -> id de reference en una sola consulta
+    reference_stage_map = dict(session.stages.filter(stage_type='reference').values_list("stage_number", "id"))
 
-    # Determinar el ID de la etapa anterior y siguiente (si existen)
-    prev_stage = session.stages.filter(stage_number=current_stage_number - 1, stage_type='reference').first()
-    next_stage = session.stages.filter(stage_number=current_stage_number + 1, stage_type='reference').first()
+    # Obtener prev y next en una sola consulta
+    prev_next_dict = dict(
+        session.stages.filter(
+            stage_number__in=[stage_reference.stage_number - 1, stage_reference.stage_number + 1],
+            stage_type="reference"
+        ).values_list("stage_number", "id")
+    )
 
-    prev_stage_id = prev_stage.id if prev_stage else None
-    next_stage_id = next_stage.id if next_stage else None
+    prev_stage_id = prev_next_dict.get(stage_reference.stage_number - 1)
+    next_stage_id = prev_next_dict.get(stage_reference.stage_number + 1)
 
-    # Obtener los resultados de referencia y prueba
-    reference_results = TestResult.objects.filter(stage=stage_reference)
-    test_results = TestResult.objects.filter(stage=stage_test)
+    # Obtener todos los resultados en una sola consulta
+    test_results = TestResult.objects.filter(stage__in=[stage_reference, stage_test]).select_related("stage")
 
-    # Crear un diccionario de referencia basado en signal_id
-    reference_dict = {r.signal_id: {"pin_a": r.pin_a, "pin_b": r.pin_b} for r in reference_results}
+    # Separar en referencia y test
+    reference_results = []
+    test_results_list = []
+    for result in test_results:
+        if result.stage_id == stage_reference.id:
+            reference_results.append(result)
+        else:
+            test_results_list.append(result)
 
-    # Crear una lista con los datos necesarios para la tabla
+    # Crear diccionario de referencia con defaultdict
+    reference_dict = defaultdict(lambda: {"pin_a": "No ref", "pin_b": "No ref"})
+    reference_dict.update({r.signal_id: {"pin_a": r.pin_a, "pin_b": r.pin_b} for r in reference_results})
+
+    # Formatear los datos para la tabla
     test_results_data = [
         {
             "signal_name": test.signal_name,
             "conector_orig": test.conector_orig,
             "pin_a": test.pin_a,
-            "tooltip_a": reference_dict.get(test.signal_id, {}).get("pin_a", "No ref"),
+            "tooltip_a": reference_dict[test.signal_id]["pin_a"],
             "conector_dest": test.conector_dest,
             "pin_b": test.pin_b,
-            "tooltip_b": reference_dict.get(test.signal_id, {}).get("pin_b", "No ref"),
+            "tooltip_b": reference_dict[test.signal_id]["pin_b"],
             "min_exp_value": test.min_exp_value,
             "max_exp_value": test.max_exp_value,
             "measured_value": test.measured_value,
             "result": test.result,
             "timestamp": test.timestamp,
         }
-        for test in test_results
+        for test in test_results_list
     ]
 
+    # Renderizar el template con el contexto
     context = {
         "session": session,
         "stage_reference": stage_reference,
         "stage_test": stage_test,
         "test_results": test_results_data,
-        "total_stages": total_stages,
+        "total_stages": len(test_stages),
         "prev_stage_id": prev_stage_id,
-        "prev_stage_number": prev_stage.stage_number if prev_stage else None,
+        "prev_stage_number": stage_reference.stage_number - 1 if prev_stage_id else None,
         "next_stage_id": next_stage_id,
-        "next_stage_number": next_stage.stage_number if next_stage else None,
-        "test_stages": test_stages,  # Lista de etapas de prueba para el breadcrumb
+        "next_stage_number": stage_reference.stage_number + 1 if next_stage_id else None,
+        "test_stages": test_stages,
+        "reference_stage_map": reference_stage_map,
     }
     return render(request, "pages/test-stage.html", context)
 

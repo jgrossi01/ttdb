@@ -7,208 +7,151 @@
 
   <div class="page-wrapper">
     <!-- Page header -->
+    <div class="page-header d-print-none">
+      <div class="container-xl">
+        <div class="row g-2 align-items-center">
+          <div class="col">
+            <!-- Page pre-title -->
+            <h2 class="page-title">
+              Resumen de prueba
+            </h2>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Page body -->
     <div class="page-body">
       <div class="container-xl">
-        <div class="row row-cards">
-          <div class="col-lg-12">
-            
-            <div class="container mt-4">
-              <div class="card">
-                <div class="card-header">
-                  <div>
-                    <h4 class="card-title">Resumen de prueba</h4>
-                  </div>
-                </div>
-                <div class="card-body">
-                  <div class="row text-center">
-                    <div class="col">
-                      <p>Conector en prueba:</p> 
-                      <h3><strong class="text-cyan">{{ session.connector }}</strong></h3>
-                    </div>
-                    <div class="col">
-                      <p>Tipo de prueba:</p>
-                      <h3><strong class="text-cyan">{{ session.test_type }}</strong></h3>
-                    </div>
-                    <div class="col">
-                      <p>Etapas:</p>
-                      <h3><strong class="text-cyan">{{ stages_count }}</strong></h3>
-                    </div>
-                    <div class="col">
-                      <p>Estado:</p> 
-                      {% if session.status == "in_progress" %}
-                      <span class="status status-warning">
-                        <span class="status-dot"></span>
-                        {{ session.get_status_display }}
-                      </span>
-                      {% elif session.status == "pending" %}
-                      <span class="status status-secondary">
-                        <span class="status-dot"></span>
-                        {{ session.get_status_display }}
-                      </span>
-                      {% elif session.status == "completed" %}
-                      <span class="status status-success">
-                        <span class="status-dot"></span>
-                        {{ session.get_status_display }}
-                      </span>
-                      {% else %}
-                      <span class="status status-secondary">
-                        <span class="status-dot"></span>
-                        {{ session.get_status_display }}
-                      </span>
-                      {% endif %}
-                    </div>
-                  </div>
-                </div>
-                
-              </div>
-              
-              
-              
-              
-          
-              {% for stage in stages %}
-              <div class="card mt-4">
-                  <div class="card-header bg-teal-lt text-white">
-                      <div>
-                        <h4 class="card-title">Etapa {{ stage.stage_number }} - Conectar: {{ stage.connector_dest }}</h4>
-                      </div>
-                      <div class="card-actions">
-                        <a href="{% url 'test_stage' session_id=stage.session.id stage_id=stage.id %}" class="btn btn-primary">Ver detalles</a>
-                      </div>
-                  </div>
-                  <div class="card-body">
-                      <p><strong>Instrucciones:</strong> {{ stage.instructions }}</p>
-          
-                      <table id="table-{{ stage.id }}" class="table table-striped">
-                          <thead>
-                              <tr>
-                                  <th>Señal</th>
-                                  <th>Conector Origen</th>
-                                  <th>Pin Origen</th>
-                                  <th>Conector Destino</th>
-                                  <th>Pin Destino</th>
-                                  <th>Esperado (min)</th>
-                                  <th>Esperado (max)</th>
-                                  <th>Medido</th>
-                                  <th>Resultado</th>
-                                  <th>Hora</th>
-                              </tr>
-                          </thead>
-                          <tbody>
-                              {% for result in stage.results.all %}
-                              <tr>
-                                  <td>{{ result.signal_name }}</td>
-                                  <td>{{ result.conector_orig }}</td>
-                                  <td>{{ result.pin_a }}</td>
-                                  <td>{{ result.conector_dest }}</td>
-                                  <td>{{ result.pin_b }}</td>
-                                  <td>{{ result.min_exp_value|default:"-" }}</td>
-                                  <td>{{ result.max_exp_value|default:"-" }}</td>
-                                  <td>{{ result.measured_value|default:"-" }}</td>
-                                  <td>
-                                      {% if result.result == "Pass" %}
-                                          <span class="badge bg-success text-default-fg">PASS</span>
-                                      {% elif result.result == "Fail" %}
-                                          <span class="badge bg-danger text-default-fg">FAIL</span>
-                                      {% else %}
-                                          <span class="badge bg-default text-default-fg">Pendiente</span>
-                                      {% endif %}
-                                  </td>
-                                  <td>{{ result.timestamp|date:"H:i:s" }}</td>
-                              </tr>
-                              {% endfor %}
-                          </tbody>
-                      </table>
-                  </div>
-              </div>
-              {% endfor %}
-            </div>
 
+        <div class="row row-deck row-cards">
+          <div class="col-sm-6 col-lg-3">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex align-items-center">
+                  <div class="subheader">Conector en prueba</div>
+                </div>
+                <div class="h2">{{ session.connector }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-3">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex align-items-center">
+                  <div class="subheader">Tipo de prueba</div>
+                </div>
+                <div class="h2">{{ session.test_type }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-3">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex align-items-center">
+                  <div class="subheader">Etapas</div>
+                </div>
+                <div class="h2">{{ stages_count }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-3">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex align-items-center">
+                  <div class="subheader">Estado</div>
+                </div>
+                <div class="h2">
+                  {% if session.status == "in_progress" %}
+                  <span class="status status-warning">
+                    <span class="status-dot"></span>
+                    {{ session.get_status_display }}
+                  </span>
+                  {% elif session.status == "pending" %}
+                  <span class="status status-secondary">
+                    <span class="status-dot"></span>
+                    {{ session.get_status_display }}
+                  </span>
+                  {% elif session.status == "completed" %}
+                  <span class="status status-success">
+                    <span class="status-dot"></span>
+                    {{ session.get_status_display }}
+                  </span>
+                  {% else %}
+                  <span class="status status-secondary">
+                    <span class="status-dot"></span>
+                    {{ session.get_status_display }}
+                  </span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+
+        {% for stage in stages %}
+        <div class="card mt-4">
+          <div class="card-header bg-teal-lt text-white">
+            <div>
+              <h4 class="card-title">Etapa {{ stage.stage_number }} - Conectar: {{ stage.connector_dest }}</h4>
+            </div>
+            <div class="card-actions">
+              <a href="{% url 'test_stage' session_id=stage.session.id stage_id=stage.id %}" class="btn btn-primary">Ver detalles</a>
+            </div>
+          </div>
+          <div class="card-body">
+            <p><strong>Instrucciones:</strong> {{ stage.instructions }}</p>
+
+            <table id="table-{{ stage.id }}" class="table table-striped">
+              <thead>
+                <tr>
+                    <th>Señal</th>
+                    <th>Conector Origen</th>
+                    <th>Pin Origen</th>
+                    <th>Conector Destino</th>
+                    <th>Pin Destino</th>
+                    <th>Esperado (min)</th>
+                    <th>Esperado (max)</th>
+                    <th>Medido</th>
+                    <th>Resultado</th>
+                    <th>Hora</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for result in stage.results.all %}
+                <tr>
+                    <td>{{ result.signal_name }}</td>
+                    <td>{{ result.conector_orig }}</td>
+                    <td>{{ result.pin_a }}</td>
+                    <td>{{ result.conector_dest }}</td>
+                    <td>{{ result.pin_b }}</td>
+                    <td>{{ result.min_exp_value|default:"-" }}</td>
+                    <td>{{ result.max_exp_value|default:"-" }}</td>
+                    <td>{{ result.measured_value|default:"-" }}</td>
+                    <td>
+                        {% if result.result == "Pass" %}
+                            <span class="badge bg-success text-default-fg">PASS</span>
+                        {% elif result.result == "Fail" %}
+                            <span class="badge bg-danger text-default-fg">FAIL</span>
+                        {% else %}
+                            <span class="badge bg-default text-default-fg">Pendiente</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ result.timestamp|date:"H:i:s" }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        {% endfor %}
+          
+      </div> <!-- Fin container-xl -->
+    </div> <!-- Fin page body -->
     {% include 'includes/footer.html' %}
-  </div>
+  </div> <!-- Fin wrapper -->
 
   {% block modal %}
-  <div class="modal modal-blur fade" id="dataModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-lg" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Actualizar base de datos</h5>
-          <button type="button" id="closeBtn" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body" id="modal-body">
-          <p class="text-center">Seleccione un archivo Access (.mdb) para actualizar la base de datos principal.</p>
-          <p class="text-center">Se creara una copia de seguridad de la versión que se está utilizando actualmente.</p>
-          <div class="mb-3">
-            <form class="dropzone mb-2" id="dropzone-custom" action="{% url 'edit_db' %}" autocomplete="off" novalidate >
-              {% csrf_token %}
-              <div class="fallback">
-                <input name="file" type="file" />
-              </div>
-              <div class="dz-message">
-                <h3 class="dropzone-msg-title">Cargar DB con actualizaciones</h3>
-                <span class="dropzone-msg-desc">Suelta o haz click aqui para cargar</span>
-              </div>
-            </form>
-          </div>
-          <div class="mb-3">
-            <label class="form-label" for="inputName">Nombre</label>
-            <div class="input-icon" id="inputNameHolder">
-              <input type="text" class="form-control" name="name" id="inputName" placeholder="Nombre de la base de datos" autocomplete="off">
-            </div>
-          </div>
-          <div class="mb-3">
-            <label class="form-label" for="inputVersion">Versión</label>
-            <div class="input-icon" id="inputVersionHolder">
-              <input type="text" class="form-control" name="version" id="inputVersion" placeholder="Versión de la base de datos">
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <div id="alert-container" class="row col-12">
-          </div>
-          <button id="cancelBtn" class="btn btn-link link-secondary" data-bs-dismiss="modal">
-            Cancelar
-          </button>
-          <button id="saveBtn" onclick="saveData()" class="btn btn-primary ms-auto">
-            <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
-            Subir
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal modal-blur fade" id="processModal" tabindex="-1" style="display: none;">
-    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="processTitle">Procesando..</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="btnCloseModalx" disabled></button>
-        </div>
-        <div class="modal-body" id="processBody">
-        <!--
-          <div class="d-block my-1"><span class="text-green">
-            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-circle-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M9 12l2 2l4 -4" /></svg>
-            </span><p class="text-muted d-inline mx-2">Cargando base de datos</p>
-          </div>
-          <div class="d-block my-1"><div class="spinner-border spinner-border-sm" style="margin-left: 2px;" role="status"></div><p class="text-muted d-inline" style="margin-left: 14px;">Cargando base de datos</p></div>
-          <div class="d-block my-1"><div class="spinner-border spinner-border-sm" style="margin-left: 2px;" role="status"></div><p class="text-muted d-inline" style="margin-left: 14px;">Cargando base de datos este es un texto un poco mas largo de lo normal para ver que pasa si alcanza el borde</p></div>
-          -->
-        </div>
-        <div class="modal-body" id="progressBody"></div>
-        <div class="modal-footer">
-          <button type="button" class="btn" data-bs-dismiss="modal" id="btnCloseModal" disabled>Cerrar</button>
-        </div>
-      </div>
-    </div>
-  </div>
   {% endblock modal %}
 
 {% endblock content %}
