@@ -158,17 +158,12 @@
 {% endblock content %}
 
 {% block extrajs %}
-<script src="{% static 'dist/libs/dropzone/dist/dropzone-min.js' %}?1684106062" defer></script>
 
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="https://cdn.datatables.net/2.2.2/js/dataTables.js"></script>
-<script src="https://cdn.datatables.net/2.2.2/js/dataTables.bootstrap5.js"></script>
-
-<script src="{% static 'django_eventstream/eventsource.min.js' %}"></script>
-<script src="{% static 'django_eventstream/reconnecting-eventsource.js' %}"></script>
+<script src="{% static 'js/jquery-3.7.0.min.js' %}"></script>
+<script src="{% static 'js/dataTables.js' %}"></script>
+<script src="{% static 'js/dataTables.bootstrap5.js' %}"></script>
 
 <script src="{% static 'dist/libs/tom-select/dist/js/tom-select.base.min.js' %}?1684106062" defer></script>
-
 
 <script>
 
@@ -203,85 +198,4 @@ document.addEventListener('DOMContentLoaded', function () {
 {% endblock extrajs %}
 
 {% block extrastyle %}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@x.x.x/dist/select2-bootstrap4.min.css">
-<style>
-
-/* Estilos base de Dropzone */
-.dropzone {
-    border-radius: 5px;
-    padding: 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: background-color 0.3s ease, border-color 0.3s ease;
-}
-
-.dropzone:hover {
-    background-color:#e3e4e5;
-    border-color: #007bff;
-}
-
-
-/* Estilos para el modo claro */
-[data-bs-theme="light"] .dropzone {
-    border: 1px dashed #ccc;
-    background-color: #fff;
-    color: #000;
-}
-
-[data-bs-theme="light"] .dropzone:hover {
-    background-color: #f9f9f9;
-    border-color: #007bff;
-}
-
-/* Estilos para el modo oscuro */
-[data-bs-theme="dark"] .dropzone {
-    border: 1px dashed #555;
-    background-color: #151f2c;
-    color: #fff;
-}
-
-[data-bs-theme="dark"] .dropzone:hover {
-    background-color: #182433;
-    border-color: #1e90ff;
-}
-
-/* Estilos para el modo automático (basado en la preferencia del sistema) */
-[data-bs-theme="auto"] .dropzone {
-    border: 2px dashed #ccc;
-    background-color: #fff;
-    color: #000;
-}
-
-@media (prefers-color-scheme: dark) {
-    [data-bs-theme="auto"] .dropzone {
-        border: 2px dashed #555;
-        background-color: #333;
-        color: #fff;
-    }
-
-    [data-bs-theme="auto"] .dropzone:hover {
-        background-color: #444;
-        border-color: #1e90ff;
-    }
-}
-
-.markdown>table>:not(caption)>*>*, .table>:not(caption)>*>* {
-  padding: .50rem .50rem !important;
-  
-}
-
-tbody, td, tfoot, th, thead, tr {
-  font-weight: 300;
-  padding: .50rem .50rem !important;
-}
-
-thead tr, tbody tr {
-  text-align: center;
-}
-
-.dt-empty {
-  text-align: center;
-}
-
-</style>
 {% endblock extrastyle %}

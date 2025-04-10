@@ -18,9 +18,7 @@
             </span>
           </div>
           <div class="col">
-            <h2 class="page-title">
-              harness.sqlite3
-            </h2>
+            <h2 class="page-title">harness.sqlite3</h2>
             <div class="text-muted">
               <ul class="list-inline list-inline-dots mb-0">
                 <li class="list-inline-item"><span class="text-green">Online</span></li>
@@ -51,8 +49,10 @@
         <div class="row row-cards">
           <div class="col-lg-12">
             <div class="card">
-              <div class="">
-                <h3 class="my-3 mx-3">Log de actualizaciones</h3>
+              <div class="card-header">
+                <h3 class="card-title">Log de actualizaciones</h3>
+              </div>
+              <div class="card-body card-body-dt">
                 <table class="table table-vcenter card-table table-striped" id="databases-table">
                   <thead>
                     <tr>
@@ -162,13 +162,14 @@
 {% endblock content %}
 
 {% block extrajs %}
-<script src="{% static 'dist/libs/dropzone/dist/dropzone-min.js' %}?1684106062" defer></script>
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="https://cdn.datatables.net/2.2.2/js/dataTables.js"></script>
-<script src="https://cdn.datatables.net/2.2.2/js/dataTables.bootstrap5.js"></script>
 
+<script src="{% static 'dist/libs/dropzone/dist/dropzone-min.js' %}?1684106062" defer></script>
+<script src="{% static 'js/jquery-3.7.0.min.js' %}"></script>
+<script src="{% static 'js/dataTables.js' %}"></script>
+<script src="{% static 'js/dataTables.bootstrap5.js' %}"></script>
 <script src="{% static 'django_eventstream/eventsource.min.js' %}"></script>
 <script src="{% static 'django_eventstream/reconnecting-eventsource.js' %}"></script>
+
 <script>
 
 let myDropzone;
@@ -199,37 +200,11 @@ document.addEventListener('DOMContentLoaded', function () {
     ],
     order: [[0, "desc"]],
     language: {
-      url: '{% static "static/es-ES.json" %}' // Lenguaje en español
+      url: '{% static "datatables/datatables_es-ES.json" %}' // Lenguaje en español
     },
     searching: false, // Desactiva el buscador
     pageLength: 10,   // Muestra 10 registros por página
     paging: true      // Activa el paginador
-  });
-
-  table.on('draw', function () {
-    /* Ajuste de estilos*/
-
-    // Texto bajo tabla
-    const dt = document.querySelector('.dt-info');
-    dt.style.marginLeft = '15px';
-    dt.style.marginBottom = '8px';
-
-    // Cantidad de registros
-    const dtLengthContainer = document.querySelector('.dt-length');
-    const dtLengthContainerLabel = document.querySelector('.dt-length > label');
-    const dtLengthContainerSelect = document.querySelector('.dt-length > select');
-
-    dtLengthContainer.style.paddingLeft = '10px';
-    dtLengthContainer.style.height = 'auto';
-    dtLengthContainerLabel.style.display = 'inline-block';
-    dtLengthContainerSelect.style.width = 'auto';
-    dtLengthContainerSelect.style.marginRight = '5px';
-    dtLengthContainerSelect.style.display = 'inline-block';
-
-    // Paginador
-    const dtPaging = document.querySelector('.dt-paging');
-    dtPaging.style.paddingTop = '10px';
-    dtPaging.style.paddingRight = '20px';
   });
 
   const inputName = document.querySelector('#inputName');
@@ -254,7 +229,8 @@ document.addEventListener('DOMContentLoaded', function () {
           <div class="dz-error-message"><span data-dz-errormessage></span></div>
       </div>
       `,
-      dictInvalidFileType: "Debes seleccionar un archivo .mdb (Access)",
+      
+      dictInvalidFileType: `Debes seleccionar un archivo .mdb (Access)`,
       dictMaxFilesExceeded: "No puedes subir más archivos.",
       init: function () {
           // Evento cuando se añade un archivo
@@ -625,6 +601,9 @@ function cleanForm(){
     border-color: #007bff;
 }
 
+#dropzone-custom > div.dz-preview.dz-file-preview.dz-error.dz-complete > div.dz-error-message > span {
+  color: var(--tblr-warning);
+}
 
 /* Estilos para el modo claro */
 [data-bs-theme="light"] .dropzone {
@@ -668,24 +647,6 @@ function cleanForm(){
         background-color: #444;
         border-color: #1e90ff;
     }
-}
-
-.markdown>table>:not(caption)>*>*, .table>:not(caption)>*>* {
-  padding: .50rem .50rem !important;
-  
-}
-
-tbody, td, tfoot, th, thead, tr {
-  font-weight: 300;
-  padding: .50rem .50rem !important;
-}
-
-thead tr, tbody tr {
-  text-align: center;
-}
-
-.dt-empty {
-  text-align: center;
 }
 
 </style>

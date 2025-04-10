@@ -55,14 +55,14 @@
                   <div class="card-body">
                     <div class="d-flex align-items-center pb-3">
                       <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-file-description me-2"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M9 17h6" /><path d="M9 13h6" /></svg>
-                      <h3 class="card-title mb-0">Testlog</h3>
+                      <h3 class="card-title mb-0">Log de pruebas</h3>
                     </div>
 
                     <p class="text-muted">Historial de pruebas realizadas y sus resultados.</p>
                   </div>
                   <!-- Card footer -->
                   <div class="card-footer d-flex justify-content-end">
-                    <a href="#" class="btn btn-primary">Acceder</a>
+                    <a href="{% url 'test_log' %}" class="btn btn-primary">Acceder</a>
                   </div>
                 </div>
               </div>
@@ -73,13 +73,13 @@
                   <div class="card-body">
                     <div class="d-flex align-items-center pb-3">
                       <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-player-play me-2"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 4v16l13 -8z" /></svg>
-                      <h3 class="card-title mb-0">New test</h3>
+                      <h3 class="card-title mb-0">Nueva prueba</h3>
                     </div>
                     <p class="text-muted">Inicie una nueva prueba de cableado en el sistema.</p>
                   </div>
                   <!-- Card footer -->
                   <div class="card-footer d-flex justify-content-end">
-                    <a href="#" class="btn btn-primary">Acceder</a>
+                    <a href="{% url 'new_test' %}" class="btn btn-primary">Acceder</a>
                   </div>
                 </div>
               </div>

@@ -542,6 +542,8 @@ def test_stage_view(request, session_id, stage_id):
         "stage_reference": stage_reference,
         "stage_test": stage_test,
         "test_results": test_results_data,
+        "test_results_raw": test_results_list,
+        "reference_results": reference_results,
         "total_stages": len(test_stages),
         "prev_stage_id": prev_stage_id,
         "prev_stage_number": stage_reference.stage_number - 1 if prev_stage_id else None,

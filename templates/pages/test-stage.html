@@ -1,5 +1,5 @@
 {% extends 'layouts/base.html' %}
-{% block title %}Resumen de prueba - {% endblock title %}
+{% block title %}{{ session.connector }} ({{ stage_test.stage_number }}) - {% endblock title %}
 
 {% load static %}
 {% load admin_tabler %}
@@ -8,6 +8,18 @@
 
   <div class="page-wrapper">
     <!-- Page header -->
+    <div class="page-header d-print-none">
+      <div class="container-xl">
+        <div class="row g-2 align-items-center">
+          <div class="col">
+            <!-- Page pre-title -->
+            <h2 class="page-title">
+              {{ session.connector }}
+            </h2>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Page body -->
     <div class="page-body">
@@ -16,61 +28,97 @@
         <div class="row row-cards">
           <div class="col-lg-12">
             
-            <div class="container mt-4">
-              {% comment %} <h2>Resultados de la prueba - Etapa {{ stage_test.stage_number }}</h2>
-              <p><strong>Conector Origen:</strong> {{ stage_test.session.connector }}</p>
-              <p><strong>Conector Destino:</strong> {{ stage_test.connector_dest }}</p> {% endcomment %}
-              <ol class="breadcrumb breadcrumb-arrows mb-3">
-                <li class="breadcrumb-item">
-                    <a href="{% url 'test_summary' session.id %}">Resumen</a>
-                </li>
-                {% for stage in test_stages %}
-                    <li class="breadcrumb-item {% if stage.id == stage_test.id %}active{% endif %}">
+
+            <ol class="breadcrumb breadcrumb-arrows mb-3">
+              <li class="breadcrumb-item">
+                  <a href="{% url 'test_summary' session.id %}">Resumen</a>
+              </li>
+              {% comment %} 
+              Breadcrumb sin tachar en el caso de no tener tabla de tipo test
+              {% for stage in test_stages %}
+                  <li class="breadcrumb-item {% if stage.id == stage_test.id %}active{% endif %}">
+                      <a href="{% url 'test_stage' session.id reference_stage_map|get_dict_value:stage.stage_number %}">
+                          Etapa {{ stage.stage_number }}
+                      </a>
+                  </li>
+              {% endfor %} 
+              {% endcomment %}
+
+              {% for stage in test_stages %}
+                {% with stage.results.all|length as result_count %}
+                  <li class="breadcrumb-item {% if stage.id == stage_test.id %}active{% endif %}">
+                    {% if result_count == 0 %}
+                      <del>
                         <a href="{% url 'test_stage' session.id reference_stage_map|get_dict_value:stage.stage_number %}">
-                            Etapa {{ stage.stage_number }}
+                          Etapa {{ stage.stage_number }}
                         </a>
-                    </li>
-                {% endfor %}
-              </ol>
-            
-
-              
-
-              
-              <div class="card mt-4">
-                <div class="card-header">
-                  <div>
-                    <h3 class="card-title">Etapa {{ stage_test.stage_number }} de {{ total_stages }} - {{ stage_test.connector_dest }}</h3>
-                  </div>
-                  <div class="card-actions">
-          
-                    <button type="button" class="btn btn-success" id="startTest">
-                      <!-- SVG icon from http://tabler.io/icons/icon/check -->
-                      <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="currentColor"  class="icon icon-tabler icons-tabler-filled icon-tabler-player-play"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 4v16a1 1 0 0 0 1.524 .852l13 -8a1 1 0 0 0 0 -1.704l-13 -8a1 1 0 0 0 -1.524 .852z" /></svg>
-                      Comenzar
-                    </button>
-                  </div>
-                  
+                      </del>
+                    {% else %}
+                      <a href="{% url 'test_stage' session.id reference_stage_map|get_dict_value:stage.stage_number %}">
+                        Etapa {{ stage.stage_number }}
+                      </a>
+                    {% endif %}
+                  </li>
+                {% endwith %}
+              {% endfor %}
+            </ol>
+                      
+            <div class="card mt-5">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Etapa {{ stage_test.stage_number }} de {{ total_stages }} - <span class="text-azure">{{ stage_test.connector_dest }}</span></h3>
                 </div>
-                <div class="card-body" style="padding: 0;">
-                  <table id="testTable" class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Señal</th>
-                            <th>Conector Origen</th>
-                            <th>Pin Origen</th>
-                            <th>Conector Destino</th>
-                            <th>Pin Destino</th>
-                            <th>Esperado (min)</th>
-                            <th>Esperado (max)</th>
-                            <th>Medido</th>
-                            <th>Resultado</th>
-                            <th>Hora</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                      {% for result in test_results %}
+                <div class="card-actions">
+                  <div class="row align-items-center">
+                    <div class="col-auto">
+                        {% if stage_test.status == "pending" %}
+                        <span class="status status-secondary">
+                          <span class="status-dot"></span>
+                          {{ stage_test.get_status_display }}
+                        </span>
+                        {% elif stage_test.status == "completed" %}
+                        <span class="status status-success">
+                          <span class="status-dot"></span>
+                          {{ stage_test.get_status_display }}
+                        </span>
+                        {% else %}
+                        <span class="status status-secondary">
+                          <span class="status-dot"></span>
+                          {{ stage_test.get_status_display }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    <div class="col-auto">
+                      <button type="button" class="btn btn-success" id="startTest">
+                        <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="currentColor"  class="icon icon-tabler icons-tabler-filled icon-tabler-player-play"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 4v16a1 1 0 0 0 1.524 .852l13 -8a1 1 0 0 0 0 -1.704l-13 -8a1 1 0 0 0 -1.524 .852z" /></svg>
+                        Comenzar
+                      </button>
+                    </div>
+                  </div>
+        
+                </div>        
+              </div>
+              <div class="card-body" style="padding: 0;">
+                <table id="testTable" class="table table-striped">
+                  <thead>
                       <tr>
+                          <th>Señal</th>
+                          <th>Conector Origen</th>
+                          <th>Pin Origen</th>
+                          <th>Conector Destino</th>
+                          <th>Pin Destino</th>
+                          <th>Esperado (min)</th>
+                          <th>Esperado (max)</th>
+                          <th>Medido</th>
+                          <th>Resultado</th>
+                          <th>Hora</th>
+                      </tr>
+                  </thead>
+                  
+                    {% if test_results_raw %}
+                    <tbody data-type="test">
+                      {% for result in test_results %}
+                        <tr>
                           <td>{{ result.signal_name }}</td>
                           <td>{{ result.conector_orig }}</td>
                           <td title="{{ result.tooltip_a }}" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="tooltip-table">{{ result.pin_a }}</td>
@@ -81,71 +129,94 @@
                           <td>{{ result.measured_value|default:"-" }}</td>
                           <td>
                               {% if result.result == "Pass" %}
-                                  <span class="badge bg-success text-default-fg">PASS</span>
+                                <span class="badge bg-success text-default-fg">PASS</span>
                               {% elif result.result == "Fail" %}
-                                  <span class="badge bg-danger text-default-fg">FAIL</span>
+                                <span class="badge bg-danger text-default-fg">FAIL</span>
                               {% else %}
-                                  <span class="badge bg-default text-default-fg">Pendiente</span>
+                                <span class="badge bg-default text-default-fg">Pendiente</span>
                               {% endif %}
                           </td>
                           <td>{{ result.timestamp|date:"H:i:s" }}</td>
-                      </tr>
+                        </tr>
                       {% endfor %}
+                      </tbody>
+                    {% else %}
+                    <tbody data-type="reference">
+                      {% for result in reference_results %}
+                        <tr>
+                          <td>{{ result.signal_name }}</td>
+                          <td>{{ result.conector_orig }}</td>
+                          <td>{{ result.pin_a }}</td>
+                          <td>{{ result.conector_dest }}</td>
+                          <td>{{ result.pin_b }}</td>
+                          <td>{{ result.min_exp_value|default:"-" }}</td>
+                          <td>{{ result.max_exp_value|default:"-" }}</td>
+                          <td>{{ result.measured_value|default:"-" }}</td>
+                          <td>
+                              {% if result.result == "Pass" %}
+                                <span class="badge bg-success text-default-fg">PASS</span>
+                              {% elif result.result == "Fail" %}
+                                <span class="badge bg-danger text-default-fg">FAIL</span>
+                              {% else %}
+                                <span class="badge bg-default text-default-fg">Pendiente</span>
+                              {% endif %}
+                          </td>
+                          <td>{{ result.timestamp|date:"H:i:s" }}</td>
+                        </tr>
+                      {% endfor %}
+                      </tbody>
+                    {% endif %}
                   </tbody>
-                  </table>
-                  
-                  <div class="px-3" id="alertContainer">
-                    <div class="alert alert-important alert-info alert-dismissible" role="alert" id="infoAlert">
-                      <div class="alert-icon">
-                        <!-- Download SVG icon from http://tabler.io/icons/icon/info-circle -->
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon icon-2">
-                          <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path>
-                          <path d="M12 9h.01"></path>
-                          <path d="M11 12h1v4h1"></path>
-                        </svg>
-                      </div>
-                      <div>
-                        <h4 class="alert-heading">Los datos pin origen y pin destino de esta tabla pueden haberse modificado para la correcta interpretación del hardware.</h4>
-                        <div class="alert-description">Puedes verificar los datos originales pasando el cursor por encima.</div>
-                      </div>
+                </table>
+                
+                <div class="px-3" id="alertContainer">
+                  <div class="alert alert-important alert-info alert-dismissible" role="alert" id="infoAlert">
+                    <div class="alert-icon">
+                      <!-- Download SVG icon from http://tabler.io/icons/icon/info-circle -->
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon icon-2">
+                        <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path>
+                        <path d="M12 9h.01"></path>
+                        <path d="M11 12h1v4h1"></path>
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 class="alert-heading">Los datos pin origen y pin destino de esta tabla pueden haberse modificado para la correcta interpretación del hardware.</h4>
+                      <div class="alert-description">Puedes verificar los datos originales pasando el cursor por encima o ver la tabla de referencia en resumen.</div>
                     </div>
                   </div>
-
                 </div>
 
               </div>
+            </div>
 
-              {% if prev_stage_id or next_stage_id %}
-              <div class="card mt-4">
-                <div class="card-body">
-                  <ul class="pagination">
-                    {% if prev_stage_id %}
-                    <li class="page-item page-prev">
-                      <a class="page-link" href="{% url 'test_stage' session.id prev_stage_id %}">
-                        <div class="page-item-subtitle">anterior</div>
-                        <div class="page-item-title">Etapa {{ prev_stage_number }}</div>
-                      </a>
-                    </li>
-                    {% endif %}
-                    
-                    {% if next_stage_id %}
-                    <li class="page-item page-next">
-                      <a class="page-link" href="{% url 'test_stage' session.id next_stage_id %}">
-                        <div class="page-item-subtitle">siguiente</div>
-                        <div class="page-item-title">Etapa {{ next_stage_number }}</div>
-                      </a>
-                    </li>
-                    {% endif %}
-                  </ul>
-                </div>
+            {% if prev_stage_id or next_stage_id %}
+            <div class="card mt-4">
+              <div class="card-body">
+                <ul class="pagination">
+                  {% if prev_stage_id %}
+                  <li class="page-item page-prev">
+                    <a class="page-link" href="{% url 'test_stage' session.id prev_stage_id %}">
+                      <div class="page-item-subtitle">anterior</div>
+                      <div class="page-item-title">Etapa {{ prev_stage_number }}</div>
+                    </a>
+                  </li>
+                  {% endif %}
+                  
+                  {% if next_stage_id %}
+                  <li class="page-item page-next">
+                    <a class="page-link" href="{% url 'test_stage' session.id next_stage_id %}">
+                      <div class="page-item-subtitle">siguiente</div>
+                      <div class="page-item-title">Etapa {{ next_stage_number }}</div>
+                    </a>
+                  </li>
+                  {% endif %}
+                </ul>
               </div>
-              {% endif %}
+            </div>
+            {% endif %}
 
-              
-
-
-          </div>
-        </div>
+          </div> 
+        </div>     
       </div>
     </div>
     {% include 'includes/footer.html' %}
@@ -183,17 +254,10 @@
 {% endblock content %}
 
 {% block extrajs %}
-<script src="{% static 'dist/libs/dropzone/dist/dropzone-min.js' %}?1684106062" defer></script>
 
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="https://cdn.datatables.net/2.2.2/js/dataTables.js"></script>
-<script src="https://cdn.datatables.net/2.2.2/js/dataTables.bootstrap5.js"></script>
-
-<script src="{% static 'django_eventstream/eventsource.min.js' %}"></script>
-<script src="{% static 'django_eventstream/reconnecting-eventsource.js' %}"></script>
-
-<script src="{% static 'dist/libs/tom-select/dist/js/tom-select.base.min.js' %}?1684106062" defer></script>
-
+<script src="{% static 'js/jquery-3.7.0.min.js' %}"></script>
+<script src="{% static 'js/dataTables.js' %}"></script>
+<script src="{% static 'js/dataTables.bootstrap5.js' %}"></script>
 
 <script>
 
@@ -207,14 +271,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function isMesurable () {
     const table = document.querySelector('#testTable');
-    const tbody = table?.querySelector('tbody');
+    const hasReferenceTbody = document.querySelector('tbody[data-type="reference"]') !== null;
     const startButton = document.querySelector('#startTest');
     const infoAlert = document.querySelector('#infoAlert');
     const alertContainer = document.querySelector('#alertContainer');
+    
 
     // Verificar si el tbody está vacío (sin filas)
-    if (tbody && tbody.children.length === 0) {
+    if (hasReferenceTbody) {
       // 1. Insertar el alert después de la tabla
+      
       infoAlert.remove();
       const alertHTML = `
       <div class="alert alert-important alert-warning alert-dismissible mt-3" role="alert">
@@ -226,16 +292,14 @@ document.addEventListener('DOMContentLoaded', function () {
               </svg>
           </div>
           <div>
-              <h4 class="alert-heading">Los datos de la tabla fueron limpiados para la interpretación del hardware.</h4>
-              <div class="alert-description">No hay conexiones medibles para este conector.</div>
+              <h4 class="alert-heading">No hay conexiones medibles para este conector.</h4>
+              <div class="alert-description">Se muestra tabla con datos reales que fueron descartados para medición.</div>
           </div>
           <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
       </div>
       `;
       alertContainer.innerHTML = alertHTML;
-
-      // 2. Eliminar la tabla
-      table.remove();
+      table.style.opacity = '0.5';
 
       // 3. Deshabilitar el botón #startTest (si existe)
       if (startButton) {
@@ -251,88 +315,4 @@ document.addEventListener('DOMContentLoaded', function () {
 {% endblock extrajs %}
 
 {% block extrastyle %}
-
-<style>
-
-/* Estilos base de Dropzone */
-.dropzone {
-    border-radius: 5px;
-    padding: 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: background-color 0.3s ease, border-color 0.3s ease;
-}
-
-.dropzone:hover {
-    background-color:#e3e4e5;
-    border-color: #007bff;
-}
-
-
-/* Estilos para el modo claro */
-[data-bs-theme="light"] .dropzone {
-    border: 1px dashed #ccc;
-    background-color: #fff;
-    color: #000;
-}
-
-[data-bs-theme="light"] .dropzone:hover {
-    background-color: #f9f9f9;
-    border-color: #007bff;
-}
-
-/* Estilos para el modo oscuro */
-[data-bs-theme="dark"] .dropzone {
-    border: 1px dashed #555;
-    background-color: #151f2c;
-    color: #fff;
-}
-
-[data-bs-theme="dark"] .dropzone:hover {
-    background-color: #182433;
-    border-color: #1e90ff;
-}
-
-/* Estilos para el modo automático (basado en la preferencia del sistema) */
-[data-bs-theme="auto"] .dropzone {
-    border: 2px dashed #ccc;
-    background-color: #fff;
-    color: #000;
-}
-
-@media (prefers-color-scheme: dark) {
-    [data-bs-theme="auto"] .dropzone {
-        border: 2px dashed #555;
-        background-color: #333;
-        color: #fff;
-    }
-
-    [data-bs-theme="auto"] .dropzone:hover {
-        background-color: #444;
-        border-color: #1e90ff;
-    }
-}
-
-.markdown>table>:not(caption)>*>*, .table>:not(caption)>*>* {
-  padding: .50rem .50rem !important;
-  
-}
-
-tbody, td, tfoot, th, thead, tr {
-  font-weight: 300;
-  padding: .50rem .50rem !important;
-  white-space: normal !important;
-  word-wrap: break-word;
-  max-width: 200px; 
-}
-
-thead tr, tbody tr {
-  text-align: center;
-}
-
-.dt-empty {
-  text-align: center;
-}
-
-</style>
 {% endblock extrastyle %}

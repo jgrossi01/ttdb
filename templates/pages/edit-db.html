@@ -51,8 +51,11 @@
         <div class="row row-cards">
           <div class="col-lg-12">
             <div class="card">
-              <div class="">
-                <h3 class="my-3 mx-3">Editar harness.sqlite</h3>
+              <div class="card-header">
+                <h3 class="card-title">Editar harness.sqlite</h3>
+              </div>
+              <div class="card-body card-body-dt">
+
                 <table class="table table-vcenter card-table table-striped" id="harness-table">
                   <thead>
                     <tr>
@@ -102,14 +105,11 @@
 {% endblock content %}
 
 {% block extrajs %}
-<script src="{% static 'dist/libs/dropzone/dist/dropzone-min.js' %}?1684106062" defer></script>
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="https://cdn.datatables.net/2.2.2/js/dataTables.js"></script>
-<script src="https://cdn.datatables.net/2.2.2/js/dataTables.bootstrap5.js"></script>
-<script src="https://cdn.datatables.net/plug-ins/1.13.4/api/row().edit().js"></script>
 
-<script src="{% static 'django_eventstream/eventsource.min.js' %}"></script>
-<script src="{% static 'django_eventstream/reconnecting-eventsource.js' %}"></script>
+<script src="{% static 'js/jquery-3.7.0.min.js' %}"></script>
+<script src="{% static 'js/dataTables.js' %}"></script>
+<script src="{% static 'js/dataTables.bootstrap5.js' %}"></script>
+
 <script>
 
 let myDropzone;
@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function () {
         { data: 'PEM_Telemetria', className: 'editable' }
     ],
     language: {
-      url: '{% static "static/es-ES.json" %}' // Lenguaje en español
+      url: '{% static "datatables/datatables_es-ES.json" %}' // Lenguaje en español
     },
     stateSave: true,  // Actilet guardado de estado
     stateDuration: -1,  // Guardar en sessionStorage (0 para localStorage)
@@ -283,129 +283,10 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  table.on('draw', function () {
-    /* Ajuste de estilos*/
-
-    // Texto bajo tabla
-    const dt = document.querySelector('.dt-info');
-
-    dt.style.marginLeft = '15px';
-    dt.style.marginBottom = '8px';
-
-    // Busqueda
-    const dtSearchContainer = document.querySelector('.dt-search');
-    const dtSearchContainerLabel = document.querySelector('.dt-search > label');
-    const dtSearchContainerInput = document.querySelector('.dt-search > input');
-
-    dtSearchContainer.style.paddingRight = '10px';
-    dtSearchContainer.style.height = 'auto';
-    dtSearchContainerLabel.style.display = 'inline-block';
-    dtSearchContainerLabel.style.marginRight = '10px';
-    dtSearchContainerInput.style.width = 'auto';
-    dtSearchContainerInput.style.marginRight = '5px';
-    dtSearchContainerInput.style.display = 'inline-block';
-    
-    // Cantidad de registros
-    const dtLengthContainer = document.querySelector('.dt-length');
-    const dtLengthContainerLabel = document.querySelector('.dt-length > label');
-    const dtLengthContainerSelect = document.querySelector('.dt-length > select');
-
-    dtLengthContainer.style.paddingLeft = '10px';
-    dtLengthContainer.style.height = 'auto';
-    dtLengthContainerLabel.style.display = 'inline-block';
-    dtLengthContainerSelect.style.width = 'auto';
-    dtLengthContainerSelect.style.marginRight = '5px';
-    dtLengthContainerSelect.style.display = 'inline-block';
-
-    // Paginador
-    const dtPaging = document.querySelector('.dt-paging');
-    dtPaging.style.paddingTop = '10px';
-    dtPaging.style.paddingRight = '20px';
-  });
-
 }); // FIN DOM LOAD
 
 </script>
 {% endblock extrajs %}
 
 {% block extrastyle %}
-<style>
-/* Estilos base de Dropzone */
-.dropzone {
-    border-radius: 5px;
-    padding: 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: background-color 0.3s ease, border-color 0.3s ease;
-}
-
-.dropzone:hover {
-    background-color:#e3e4e5;
-    border-color: #007bff;
-}
-
-
-/* Estilos para el modo claro */
-[data-bs-theme="light"] .dropzone {
-    border: 1px dashed #ccc;
-    background-color: #fff;
-    color: #000;
-}
-
-[data-bs-theme="light"] .dropzone:hover {
-    background-color: #f9f9f9;
-    border-color: #007bff;
-}
-
-/* Estilos para el modo oscuro */
-[data-bs-theme="dark"] .dropzone {
-    border: 1px dashed #555;
-    background-color: #151f2c;
-    color: #fff;
-}
-
-[data-bs-theme="dark"] .dropzone:hover {
-    background-color: #182433;
-    border-color: #1e90ff;
-}
-
-/* Estilos para el modo automático (basado en la preferencia del sistema) */
-[data-bs-theme="auto"] .dropzone {
-    border: 2px dashed #ccc;
-    background-color: #fff;
-    color: #000;
-}
-
-@media (prefers-color-scheme: dark) {
-    [data-bs-theme="auto"] .dropzone {
-        border: 2px dashed #555;
-        background-color: #333;
-        color: #fff;
-    }
-
-    [data-bs-theme="auto"] .dropzone:hover {
-        background-color: #444;
-        border-color: #1e90ff;
-    }
-}
-
-.markdown>table>:not(caption)>*>*, .table>:not(caption)>*>* {
-  padding: .50rem .50rem !important;
-  
-}
-
-tbody, td, tfoot, th, thead, tr {
-  font-weight: 300;
-  padding: .50rem .50rem !important;
-}
-
-thead tr, tbody tr {
-  text-align: center;
-}
-
-.dt-empty {
-  text-align: center;
-}
-
-</style>
 {% endblock extrastyle %}
