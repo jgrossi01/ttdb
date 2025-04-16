@@ -70,7 +70,7 @@
                 </div>
                 <div class="card-actions">
                   <div class="row align-items-center">
-                    <div class="col-auto">
+                    <div class="col-auto" id="stageStatusContainer">
                         {% if stage_test.status == "pending" %}
                         <span class="status status-secondary">
                           <span class="status-dot"></span>
@@ -88,11 +88,13 @@
                         </span>
                         {% endif %}
                     </div>
-                    <div class="col-auto">
+                    <div class="col-auto" id="btnStartTestContainer">
+                      {% if stage_test.status == "pending" %}
                       <button type="button" class="btn btn-success" id="startTest">
                         <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="currentColor"  class="icon icon-tabler icons-tabler-filled icon-tabler-player-play"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 4v16a1 1 0 0 0 1.524 .852l13 -8a1 1 0 0 0 0 -1.704l-13 -8a1 1 0 0 0 -1.524 .852z" /></svg>
                         Comenzar
                       </button>
+                      {% endif %}
                     </div>
                   </div>
         
@@ -101,73 +103,73 @@
               <div class="card-body" style="padding: 0;">
                 <table id="testTable" class="table table-striped">
                   <thead>
-                      <tr>
-                          <th>Señal</th>
-                          <th>Conector Origen</th>
-                          <th>Pin Origen</th>
-                          <th>Conector Destino</th>
-                          <th>Pin Destino</th>
-                          <th>Esperado (min)</th>
-                          <th>Esperado (max)</th>
-                          <th>Medido</th>
-                          <th>Resultado</th>
-                          <th>Hora</th>
-                      </tr>
+                    <tr>
+                      <th>Señal</th>
+                      <th>Conector Origen</th>
+                      <th>Pin Origen</th>
+                      <th>Conector Destino</th>
+                      <th>Pin Destino</th>
+                      <th>Esperado (min)</th>
+                      <th>Esperado (max)</th>
+                      <th>Medido</th>
+                      <th>Resultado</th>
+                      <th>Hora</th>
+                    </tr>
                   </thead>
-                  
-                    {% if test_results_raw %}
-                    <tbody data-type="test">
-                      {% for result in test_results %}
-                        <tr>
-                          <td>{{ result.signal_name }}</td>
-                          <td>{{ result.conector_orig }}</td>
-                          <td title="{{ result.tooltip_a }}" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="tooltip-table">{{ result.pin_a }}</td>
-                          <td>{{ result.conector_dest }}</td>
-                          <td title="{{ result.tooltip_b }}" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="tooltip-table">{{ result.pin_b }}</td>
-                          <td>{{ result.min_exp_value|default:"-" }}</td>
-                          <td>{{ result.max_exp_value|default:"-" }}</td>
-                          <td>{{ result.measured_value|default:"-" }}</td>
-                          <td>
-                              {% if result.result == "Pass" %}
-                                <span class="badge bg-success text-default-fg">PASS</span>
-                              {% elif result.result == "Fail" %}
-                                <span class="badge bg-danger text-default-fg">FAIL</span>
-                              {% else %}
-                                <span class="badge bg-default text-default-fg">Pendiente</span>
-                              {% endif %}
-                          </td>
-                          <td>{{ result.timestamp|date:"H:i:s" }}</td>
-                        </tr>
-                      {% endfor %}
-                      </tbody>
-                    {% else %}
-                    <tbody data-type="reference">
-                      {% for result in reference_results %}
-                        <tr>
-                          <td>{{ result.signal_name }}</td>
-                          <td>{{ result.conector_orig }}</td>
-                          <td>{{ result.pin_a }}</td>
-                          <td>{{ result.conector_dest }}</td>
-                          <td>{{ result.pin_b }}</td>
-                          <td>{{ result.min_exp_value|default:"-" }}</td>
-                          <td>{{ result.max_exp_value|default:"-" }}</td>
-                          <td>{{ result.measured_value|default:"-" }}</td>
-                          <td>
-                              {% if result.result == "Pass" %}
-                                <span class="badge bg-success text-default-fg">PASS</span>
-                              {% elif result.result == "Fail" %}
-                                <span class="badge bg-danger text-default-fg">FAIL</span>
-                              {% else %}
-                                <span class="badge bg-default text-default-fg">Pendiente</span>
-                              {% endif %}
-                          </td>
-                          <td>{{ result.timestamp|date:"H:i:s" }}</td>
-                        </tr>
-                      {% endfor %}
-                      </tbody>
-                    {% endif %}
+                
+                  {% if test_results %}
+                  <tbody data-type="test">
+                    {% for result in test_results %}
+                    <tr data-signal-id="{{ result.signal_id }}">
+                      <td class="cell-signal">{{ result.signal_name }}</td>
+                      <td class="cell-orig">{{ result.conector_orig }}</td>
+                      <td class="cell-pin-a" title="{{ result.tooltip_a }}" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="tooltip-table">{{ result.pin_a }}</td>
+                      <td class="cell-dest">{{ result.conector_dest }}</td>
+                      <td class="cell-pin-b" title="{{ result.tooltip_b }}" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="tooltip-table">{{ result.pin_b }}</td>
+                      <td class="cell-min">{{ result.min_exp_value|default:"-" }}</td>
+                      <td class="cell-max">{{ result.max_exp_value|default:"-" }}</td>
+                      <td class="cell-measured">{{ result.measured_value|default:"-" }}</td>
+                      <td class="cell-result">
+                        {% if result.result == "pass" %}
+                        <span class="badge badge-outline text-green">{{ result.result_display }}</span>
+                        {% elif result.result == "fail" %}
+                        <span class="badge badge-outline text-red">{{ result.result_display }}</span>
+                        {% else %}
+                        <span class="badge bg-default text-default-fg">{{ result.result_display }}</span>
+                        {% endif %}
+                      </td>
+                      <td class="cell-time">{{ result.timestamp|date:"H:i:s" }}</td>
+                    </tr>
+                    {% endfor %}
                   </tbody>
+                  {% else %}
+                  <tbody data-type="reference">
+                    {% for result in reference_results %}
+                    <tr data-signal-id="{{ result.signal_id }}">
+                      <td class="cell-signal">{{ result.signal_name }}</td>
+                      <td class="cell-orig">{{ result.conector_orig }}</td>
+                      <td class="cell-pin-a">{{ result.pin_a }}</td>
+                      <td class="cell-dest">{{ result.conector_dest }}</td>
+                      <td class="cell-pin-b">{{ result.pin_b }}</td>
+                      <td class="cell-min">{{ result.min_exp_value|default:"-" }}</td>
+                      <td class="cell-max">{{ result.max_exp_value|default:"-" }}</td>
+                      <td class="cell-measured">{{ result.measured_value|default:"-" }}</td>
+                      <td class="cell-result">
+                        {% if result.result == "pass" %}
+                        <span class="badge badge-outline text-green">{{ result.result_display }}</span>
+                        {% elif result.result == "fail" %}
+                        <span class="badge badge-outline text-red">{{ result.result_display }}</span>
+                        {% else %}
+                        <span class="badge bg-default text-default-fg">{{ result.result_display }}</span>
+                        {% endif %}
+                      </td>
+                      <td class="cell-time">{{ result.timestamp|date:"H:i:s" }}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                  {% endif %}
                 </table>
+                
                 
                 <div class="px-3" id="alertContainer">
                   <div class="alert alert-important alert-info alert-dismissible" role="alert" id="infoAlert">
@@ -309,6 +311,123 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   isMesurable();
+
+  
+  /* 
+  //Simulacion Frontend
+  const table = new DataTable('#testTable', {
+    paging: false,            // sin paginación
+    searching: false,         // sin barra de búsqueda
+    info: false,              // sin texto "mostrando x de x"
+    ordering: false,           // opcional: podés desactivarlo con false
+    lengthChange: false,      // sin selector de cantidad de registros
+    language: {
+      url: '{% static "datatables/datatables_es-ES.json" %}' // opcional: si querés mantener el idioma
+    }
+  });
+
+  const startButton = document.getElementById("startTest");
+  startButton.addEventListener("click", async function () {
+      startButton.disabled = true;
+      startButton.textContent = "Ejecutando...";
+
+      const rows = document.querySelectorAll("#testTable tbody tr");
+
+      for (const row of rows) {
+        const signalId = row.dataset.signalId;
+
+        // Datos que podrías enviar a la view en el futuro
+        const pinA = row.querySelector(".cell-pin-a").textContent.trim();
+        const pinB = row.querySelector(".cell-pin-b").textContent.trim();
+
+        // Simulación: Esperar 500ms por "medición"
+        await new Promise(res => setTimeout(res, 500));
+
+        // Simular resultado
+        const measured = Math.floor(Math.random() * 100);
+        const min = parseFloat(row.querySelector(".cell-min").textContent) || 0;
+        const max = row.querySelector(".cell-max").textContent.trim();
+        const expectedMax = max === "OL" ? Infinity : parseFloat(max);
+
+        const result = (measured >= min && measured <= expectedMax) ? "Pass" : "Fail";
+        const badgeClass = result === "Pass" ? "text-green" : "text-red";
+        const now = new Date().toLocaleTimeString();
+
+        // Actualizar valores
+        row.querySelector(".cell-measured").textContent = `${measured}`;
+        row.querySelector(".cell-result").innerHTML = `<span class="badge badge-outline ${badgeClass}">${result}</span>`;
+        row.querySelector(".cell-time").textContent = now;
+      }
+
+      // Redibujar tabla (si querés aplicar estilos actualizados o algún efecto)
+      table.draw();
+      const stageStatusContainer = document.querySelector("#stageStatusContainer");
+      stageStatusContainer.innerHTML = `
+      <span class="status status-success">
+        <span class="status-dot"></span>
+        Completado
+      </span>
+      `
+      const btnStartTestContainer = document.querySelector("#btnStartTestContainer");
+      btnStartTestContainer.innerHTML = '';
+
+      //startButton.disabled = false;
+      //startButton.textContent = "Repetir prueba";
+  });*/
+  const table = new DataTable("#testTable", {
+    paging: false,
+    searching: false,
+    info: false,
+    ordering: false,
+    lengthChange: false,
+    language: {
+      url: "{% static 'datatables/datatables_es-ES.json' %}"
+    }
+  });
+
+  const startButton = document.getElementById("startTest");
+
+  if(!startButton){ return }
+  startButton.addEventListener("click", async () => {
+    startButton.disabled = true;
+    startButton.textContent = "Ejecutando...";
+
+    const rows = document.querySelectorAll("#testTable tbody[data-type='test'] tr");
+    const sessionId = "{{ session.id }}";
+    const stageId = "{{ stage_test.id }}";
+
+    for (const row of rows) {
+      const signalId = row.dataset.signalId;
+
+      const response = await fetch("{% url 'run_test_stage' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify({ session_id: sessionId, stage_id: stageId, signal_id: signalId })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        row.querySelector(".cell-measured").textContent = data.measured;
+        const badgeClass = data.result === "pass" ? "text-green" : "text-red";
+        row.querySelector(".cell-result").innerHTML = `<span class="badge badge-outline ${badgeClass}">${data.result_display}</span>`;
+        row.querySelector(".cell-time").textContent = data.timestamp;
+      } else {
+        console.error("Error al medir:", data.message);
+      }
+    }
+
+    // Actualizar status visual
+    document.querySelector("#stageStatusContainer").innerHTML = `
+      <span class="status status-success">
+        <span class="status-dot"></span> Completado
+      </span>`;
+    document.querySelector("#btnStartTestContainer").innerHTML = "";
+    table.draw();
+  });
 
 });
 </script>

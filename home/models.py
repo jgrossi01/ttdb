@@ -68,8 +68,8 @@ class TestResult(models.Model):
     pin_b = models.CharField(max_length=50)
     min_exp_value = models.CharField(max_length=50)
     max_exp_value = models.CharField(max_length=50)
-    measured_value = models.CharField(max_length=50)
-    result = models.CharField(max_length=50)
+    measured_value = models.CharField(max_length=50, null=True, blank=True)
+    result = models.CharField(max_length=50, choices=[('pending', 'Pendiente'), ('pass', 'OK'), ('fail', 'NO OK')], default='pending') # OK , NO OK , PENDIENTE
     timestamp = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):

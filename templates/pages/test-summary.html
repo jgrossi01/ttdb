@@ -152,13 +152,13 @@
                     <td>{{ result.max_exp_value|default:"-" }}</td>
                     <td>{{ result.measured_value|default:"-" }}</td>
                     <td>
-                        {% if result.result == "Pass" %}
-                            <span class="badge bg-success text-default-fg">PASS</span>
-                        {% elif result.result == "Fail" %}
-                            <span class="badge bg-danger text-default-fg">FAIL</span>
-                        {% else %}
-                            <span class="badge bg-default text-default-fg">Pendiente</span>
-                        {% endif %}
+                      {% if result.result == "pass" %}
+                      <span class="badge badge-outline text-green">{{ result.get_result_display }}</span>
+                      {% elif result.result == "fail" %}
+                      <span class="badge badge-outline text-red">{{ result.get_result_display }}</span>
+                      {% else %}
+                      <span class="badge bg-default text-default-fg">{{ result.get_result_display }}</span>
+                      {% endif %}
                     </td>
                     <td>{{ result.timestamp|date:"H:i:s" }}</td>
                   </tr>

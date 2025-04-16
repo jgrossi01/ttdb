@@ -24,6 +24,7 @@ urlpatterns = [
     path('api/saveEditHarness/', views.saveConexionesHarness, name='save_edit_harness'),
     path('api/latest-db-update', views.getLastDbUpdate, name='get_last_update'),
     path("api/delete-test-session/<int:session_id>/", views.delete_test_session, name="delete_test_session"),
+    path('api/run-test-stage/', views.run_test_stage, name='run_test_stage'),
     
     # Logs   
     path("events/", include(django_eventstream.urls), {"channels": ["dbupdate"]}),

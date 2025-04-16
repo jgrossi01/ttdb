@@ -3,6 +3,7 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.db import transaction
+from django.utils import timezone
 from .models import MDBFile, TestSession, TestStage, TestResult
 from .models_harness import Conexiones
 from django_eventstream import send_event
@@ -16,6 +17,7 @@ import os
 import json
 import uuid
 import shutil
+import random
 
 
 def index(request):
@@ -531,10 +533,13 @@ def test_stage_view(request, session_id, stage_id):
             "max_exp_value": test.max_exp_value,
             "measured_value": test.measured_value,
             "result": test.result,
+            "result_display": test.get_result_display(),
             "timestamp": test.timestamp,
         }
         for test in test_results_list
     ]
+    
+    print(test_results_data)
 
     # Renderizar el template con el contexto
     context = {
@@ -553,6 +558,83 @@ def test_stage_view(request, session_id, stage_id):
         "reference_stage_map": reference_stage_map,
     }
     return render(request, "pages/test-stage.html", context)
+
+@csrf_exempt
+def run_test_stage(request):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "message": "Método no permitido"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        session_id = data.get("session_id")
+        stage_id = data.get("stage_id")
+        signal_id = data.get("signal_id")
+
+        session = TestSession.objects.get(id=session_id)
+        stage_test = TestStage.objects.get(id=stage_id, session=session, stage_type="test")
+
+        # Obtener el resultado de prueba
+        result_test = TestResult.objects.filter(stage=stage_test, signal_id=signal_id).first()
+
+        if not result_test:
+            return JsonResponse({"success": False, "message": "Resultado de prueba no encontrado."}, status=404)
+
+        # Buscar el resultado de referencia si existe
+        stage_reference = TestStage.objects.filter(
+            session=session, stage_number=stage_test.stage_number, stage_type="reference"
+        ).first()
+
+        result_reference = None
+        if stage_reference:
+            result_reference = TestResult.objects.filter(stage=stage_reference, signal_id=signal_id).first()
+
+        # Simulación de medición
+        measured_value = random.choice([random.randint(0, 500000000), "OL"])
+        min_val = float(result_test.min_exp_value or 0)
+        max_val = float("inf") if result_test.max_exp_value == "OL" else float(result_test.max_exp_value or 0)
+
+        if measured_value == "OL":
+            result_status = "pass"
+        else:
+            result_status = "pass" if min_val <= measured_value <= max_val else "fail"
+        timestamp = timezone.now()
+
+        # Guardar datos en ambos resultados
+        for result in [r for r in [result_test, result_reference] if r]:
+            result.measured_value = str(measured_value)
+            result.result = result_status
+            result.timestamp = timestamp
+            result.save()
+
+        # Si todos los resultados del stage están completados, marcar como terminado
+        if not TestResult.objects.filter(stage=stage_test, result="pending").exists():
+            stage_test.status = "completed"
+            stage_test.save()
+            
+        if not TestResult.objects.filter(stage=stage_reference, result="pending").exists():
+            stage_reference.status = "completed"
+            stage_reference.save()
+
+        # Si alguno de los stages fue completado, la sesión está en progreso
+        if session.status == "pending":
+            session.status = "in_progress"
+            session.save()
+
+        # Si todas las etapas están completas, cerrar la sesión
+        if not TestStage.objects.filter(session=session, stage_type="test", status="pending").exists():
+            session.status = "completed"
+            session.save()
+
+        return JsonResponse({
+            "success": True,
+            "measured": measured_value,
+            "result": result_status,
+            "result_display": result_test.get_result_display(),
+            "timestamp": timestamp.strftime("%H:%M:%S")
+        })
+
+    except Exception as e:
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
 
 
 
