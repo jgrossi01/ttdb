@@ -226,31 +226,6 @@
 
   {% block modal %}
 
-
-  <div class="modal modal-blur fade" id="processModal" tabindex="-1" style="display: none;">
-    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="processTitle">Procesando..</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="btnCloseModalx" disabled></button>
-        </div>
-        <div class="modal-body" id="processBody">
-        <!--
-          <div class="d-block my-1"><span class="text-green">
-            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-circle-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M9 12l2 2l4 -4" /></svg>
-            </span><p class="text-muted d-inline mx-2">Cargando base de datos</p>
-          </div>
-          <div class="d-block my-1"><div class="spinner-border spinner-border-sm" style="margin-left: 2px;" role="status"></div><p class="text-muted d-inline" style="margin-left: 14px;">Cargando base de datos</p></div>
-          <div class="d-block my-1"><div class="spinner-border spinner-border-sm" style="margin-left: 2px;" role="status"></div><p class="text-muted d-inline" style="margin-left: 14px;">Cargando base de datos este es un texto un poco mas largo de lo normal para ver que pasa si alcanza el borde</p></div>
-          -->
-        </div>
-        <div class="modal-body" id="progressBody"></div>
-        <div class="modal-footer">
-          <button type="button" class="btn" data-bs-dismiss="modal" id="btnCloseModal" disabled>Cerrar</button>
-        </div>
-      </div>
-    </div>
-  </div>
   {% endblock modal %}
 
 {% endblock content %}
@@ -374,6 +349,7 @@ document.addEventListener('DOMContentLoaded', function () {
       //startButton.disabled = false;
       //startButton.textContent = "Repetir prueba";
   });*/
+
   const table = new DataTable("#testTable", {
     paging: false,
     searching: false,

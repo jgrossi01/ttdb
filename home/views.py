@@ -479,6 +479,7 @@ def delete_test_session(request, session_id):
         return JsonResponse({"success": True, "message": "Sesión eliminada correctamente."})
     return JsonResponse({"success": False, "message": "Método no permitido."}, status=405)
 
+'''
 def test_stage_view(request, session_id, stage_id):
     session = get_object_or_404(TestSession, id=session_id)
 
@@ -506,6 +507,8 @@ def test_stage_view(request, session_id, stage_id):
     # Obtener todos los resultados en una sola consulta
     test_results = TestResult.objects.filter(stage__in=[stage_reference, stage_test]).select_related("stage")
 
+    
+    
     # Separar en referencia y test
     reference_results = []
     test_results_list = []
@@ -522,6 +525,7 @@ def test_stage_view(request, session_id, stage_id):
     # Formatear los datos para la tabla
     test_results_data = [
         {
+            "signal_id": test.signal_id, 
             "signal_name": test.signal_name,
             "conector_orig": test.conector_orig,
             "pin_a": test.pin_a,
@@ -539,7 +543,7 @@ def test_stage_view(request, session_id, stage_id):
         for test in test_results_list
     ]
     
-    print(test_results_data)
+    #print(test_results_data)
 
     # Renderizar el template con el contexto
     context = {
@@ -554,6 +558,70 @@ def test_stage_view(request, session_id, stage_id):
         "prev_stage_number": stage_reference.stage_number - 1 if prev_stage_id else None,
         "next_stage_id": next_stage_id,
         "next_stage_number": stage_reference.stage_number + 1 if next_stage_id else None,
+        "test_stages": test_stages,
+        "reference_stage_map": reference_stage_map,
+    }
+    return render(request, "pages/test-stage.html", context)'''
+
+def test_stage_view(request, session_id, stage_id):
+    session = get_object_or_404(TestSession, id=session_id)
+
+    # Etapa de referencia y test
+    stage_reference = get_object_or_404(TestStage, id=stage_id, session=session, stage_type='reference')
+    stage_test = get_object_or_404(TestStage, session=session, stage_number=stage_reference.stage_number, stage_type='test')
+
+    # Stages para breadcrumb
+    test_stages = list(session.stages.filter(stage_type='test').order_by("stage_number"))
+    reference_stage_map = dict(session.stages.filter(stage_type='reference').values_list("stage_number", "id"))
+
+    # Etapa anterior y siguiente
+    prev_next = dict(session.stages.filter(
+        stage_number__in=[stage_reference.stage_number - 1, stage_reference.stage_number + 1],
+        stage_type="reference"
+    ).values_list("stage_number", "id"))
+
+    # Resultados
+    all_results = TestResult.objects.filter(stage__in=[stage_reference, stage_test]).select_related("stage")
+    reference_results = {r.signal_id: r for r in all_results if r.stage_id == stage_reference.id}
+    test_results = [r for r in all_results if r.stage_id == stage_test.id]
+
+    # Si hay resultados de prueba usamos esos, sino los de referencia
+    results_to_show = test_results if test_results else reference_results.values()
+
+    # Formatear para la tabla
+    test_results_data = []
+    for result in results_to_show:
+        reference = reference_results.get(result.signal_id)
+        tooltip_a = reference.pin_a if reference else "No ref"
+        tooltip_b = reference.pin_b if reference else "No ref"
+
+        test_results_data.append({
+            "signal_id": result.signal_id,
+            "signal_name": result.signal_name,
+            "conector_orig": result.conector_orig,
+            "pin_a": result.pin_a,
+            "tooltip_a": tooltip_a,
+            "conector_dest": result.conector_dest,
+            "pin_b": result.pin_b,
+            "tooltip_b": tooltip_b,
+            "min_exp_value": result.min_exp_value,
+            "max_exp_value": result.max_exp_value,
+            "measured_value": result.measured_value,
+            "result": result.result,
+            "result_display": result.get_result_display(),
+            "timestamp": result.timestamp,
+        })
+
+    context = {
+        "session": session,
+        "stage_reference": stage_reference,
+        "stage_test": stage_test,
+        "test_results": test_results_data,
+        "total_stages": len(test_stages),
+        "prev_stage_id": prev_next.get(stage_reference.stage_number - 1),
+        "prev_stage_number": stage_reference.stage_number - 1 if prev_next.get(stage_reference.stage_number - 1) else None,
+        "next_stage_id": prev_next.get(stage_reference.stage_number + 1),
+        "next_stage_number": stage_reference.stage_number + 1 if prev_next.get(stage_reference.stage_number + 1) else None,
         "test_stages": test_stages,
         "reference_stage_map": reference_stage_map,
     }
