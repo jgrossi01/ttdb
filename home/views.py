@@ -400,51 +400,67 @@ def new_test(request):
                         pin_b=signal.pin_dest or "N/A",
                         min_exp_value=min_expected or "0",
                         max_exp_value=max_expected or "0",
-                        result="Pendiente",
+                        #result="Pendiente",
                     )
                     
-                    # Procesamiento de datos para test_stage
-                    pin_a, pin_b = signal.pin_orig or "N/A", signal.pin_dest or "N/A"
-                    
-                    invalid_values = {"TBD", "TBD*", "TBC", "TBC*", "---", "---*", "-", "+"}
-                    if pin_a in invalid_values or pin_b in invalid_values:
-                        continue
-                    
-                    pin_a = pin_a.replace("*", "").replace("(", "").replace(")", "")
-                    pin_b = pin_b.replace("*", "").replace("(", "").replace(")", "")
+                    pin_a_raw = signal.pin_orig or "N/A"
+                    pin_b_raw = signal.pin_dest or "N/A"
 
-                    expanded_pin_a = expand_values(pin_a)
-                    expanded_pin_b = expand_values(pin_b)
-                    
-                    for a in expanded_pin_a:
-                        for b in expanded_pin_b:
+                    invalid_values = {"TBD", "TBD*", "TBC", "TBC*", "---", "---*", "-", "+"}
+                    if pin_a_raw in invalid_values or pin_b_raw in invalid_values:
+                        continue
+
+                    # Limpiar caracteres no útiles
+                    clean_pin_a = pin_a_raw.replace("*", "").replace("(", "").replace(")", "")
+                    clean_pin_b = pin_b_raw.replace("*", "").replace("(", "").replace(")", "")
+
+                    # Separar los valores por coma
+                    pin_a_parts = [p.strip() for p in clean_pin_a.split(",")]
+                    pin_b_parts = [p.strip() for p in clean_pin_b.split(",")]
+
+                    # Expandir y mapear cada valor individual
+                    for original_a in pin_a_parts:
+                        mapped_a = str(LETTER_TO_NUMBER.get(original_a, original_a))
+                        for original_b in pin_b_parts:
+                            mapped_b = str(LETTER_TO_NUMBER.get(original_b, original_b))
+
                             TestResult.objects.create(
                                 stage=test_stage,
                                 signal_id=signal.field_de_señal,
                                 signal_name=signal.nombre,
                                 conector_orig=signal.conector_orig,
-                                pin_a=a,
+                                pin_a=mapped_a,
+                                tooltip_a=original_a,
                                 conector_dest=signal.conector_dest,
-                                pin_b=b,
+                                pin_b=mapped_b,
+                                tooltip_b=original_b,
                                 min_exp_value=min_expected or "0",
                                 max_exp_value=max_expected or "0",
-                                result="Pendiente",
+                                result="pending",
                             )
-        return redirect("test_summary", session_id=session.id)
+                            
+        return redirect("test_preview", session_id=session.id)
     
     return render(request, 'pages/new-test.html', context)
 
 
-def test_summary(request, session_id):
+def test_preview(request, session_id):
     session = get_object_or_404(TestSession, id=session_id)
-    stages = session.stages.filter(stage_type='reference')
-    stages_count = session.stages.filter(stage_type='test').count()
 
-    return render(request, "pages/test-summary.html", {
+    reference_stages = session.stages.filter(stage_type='reference').order_by("stage_number")
+    test_stages = session.stages.filter(stage_type='test')
+
+    stage_pairs = []
+    for ref_stage in reference_stages:
+        test_stage = test_stages.filter(stage_number=ref_stage.stage_number).first()
+        stage_pairs.append((ref_stage, test_stage))  # Puede ser None si no existe test
+
+    return render(request, "pages/test-preview.html", {
         "session": session,
-        "stages": stages,
-        "stages_count": stages_count,
+        "stage_pairs": stage_pairs,
+        "stages_count": test_stages.count(),
     })
+
     
 def test_log(request):
     context = {
@@ -478,152 +494,94 @@ def delete_test_session(request, session_id):
         session.delete()
         return JsonResponse({"success": True, "message": "Sesión eliminada correctamente."})
     return JsonResponse({"success": False, "message": "Método no permitido."}, status=405)
-
-'''
+    
 def test_stage_view(request, session_id, stage_id):
     session = get_object_or_404(TestSession, id=session_id)
 
-    # Obtener la etapa de referencia y su correspondiente test
-    stage_reference = get_object_or_404(TestStage, id=stage_id, session=session, stage_type='reference')
-    stage_test = get_object_or_404(TestStage, session=session, stage_number=stage_reference.stage_number, stage_type='test')
+    # Etapa de prueba actual (stage_type = 'test') desde URL
+    stage_test = get_object_or_404(TestStage, id=stage_id, session=session, stage_type='test')
 
-    # Obtener todas las etapas de prueba en una sola consulta
-    test_stages = list(session.stages.filter(stage_type='test').order_by("stage_number"))
-
-    # Crear el mapeo stage_number -> id de reference en una sola consulta
-    reference_stage_map = dict(session.stages.filter(stage_type='reference').values_list("stage_number", "id"))
-
-    # Obtener prev y next en una sola consulta
-    prev_next_dict = dict(
-        session.stages.filter(
-            stage_number__in=[stage_reference.stage_number - 1, stage_reference.stage_number + 1],
-            stage_type="reference"
-        ).values_list("stage_number", "id")
+    # Etapa de referencia asociada (mismo stage_number)
+    stage_reference = get_object_or_404(
+        TestStage,
+        session=session,
+        stage_number=stage_test.stage_number,
+        stage_type='reference'
     )
 
-    prev_stage_id = prev_next_dict.get(stage_reference.stage_number - 1)
-    next_stage_id = prev_next_dict.get(stage_reference.stage_number + 1)
+    # Todas las etapas de tipo test (para breadcrumbs/paginador)
+    all_test_stages = list(session.stages.filter(stage_type='test').order_by('stage_number'))
 
-    # Obtener todos los resultados en una sola consulta
-    test_results = TestResult.objects.filter(stage__in=[stage_reference, stage_test]).select_related("stage")
+    # Diccionario de navegación para breadcrumb: stage_number -> stage_id (test)
+    test_stage_map = {stage.stage_number: stage.id for stage in all_test_stages}
 
-    
-    
-    # Separar en referencia y test
-    reference_results = []
-    test_results_list = []
-    for result in test_results:
-        if result.stage_id == stage_reference.id:
-            reference_results.append(result)
-        else:
-            test_results_list.append(result)
+    # Obtener etapas anterior y siguiente
+    prev_stage = session.stages.filter(stage_type='test', stage_number=stage_test.stage_number - 1).first()
+    next_stage = session.stages.filter(stage_type='test', stage_number=stage_test.stage_number + 1).first()
 
-    # Crear diccionario de referencia con defaultdict
-    reference_dict = defaultdict(lambda: {"pin_a": "No ref", "pin_b": "No ref"})
-    reference_dict.update({r.signal_id: {"pin_a": r.pin_a, "pin_b": r.pin_b} for r in reference_results})
+    prev_stage_id = prev_stage.id if prev_stage else None
+    prev_stage_number = prev_stage.stage_number if prev_stage else None
+    next_stage_id = next_stage.id if next_stage else None
+    next_stage_number = next_stage.stage_number if next_stage else None
 
-    # Formatear los datos para la tabla
-    test_results_data = [
+    # Traer todos los resultados en una sola consulta
+    results = TestResult.objects.filter(stage__in=[stage_reference, stage_test]).select_related("stage")
+
+    # Separar por tipo
+    reference_results = [r for r in results if r.stage_id == stage_reference.id]
+    test_results = [r for r in results if r.stage_id == stage_test.id]
+
+    # Formateo para mostrar
+    formatted_test_results = [
         {
-            "signal_id": test.signal_id, 
-            "signal_name": test.signal_name,
-            "conector_orig": test.conector_orig,
-            "pin_a": test.pin_a,
-            "tooltip_a": reference_dict[test.signal_id]["pin_a"],
-            "conector_dest": test.conector_dest,
-            "pin_b": test.pin_b,
-            "tooltip_b": reference_dict[test.signal_id]["pin_b"],
-            "min_exp_value": test.min_exp_value,
-            "max_exp_value": test.max_exp_value,
-            "measured_value": test.measured_value,
-            "result": test.result,
-            "result_display": test.get_result_display(),
-            "timestamp": test.timestamp,
+            "id": r.id,  
+            "signal_id": r.signal_id,
+            "signal_name": r.signal_name,
+            "conector_orig": r.conector_orig,
+            "pin_a": r.pin_a,
+            "tooltip_a": r.tooltip_a or "",
+            "conector_dest": r.conector_dest,
+            "pin_b": r.pin_b,
+            "tooltip_b": r.tooltip_b or "",
+            "min_exp_value": r.min_exp_value,
+            "max_exp_value": r.max_exp_value,
+            "measured_value": r.measured_value,
+            "result": r.result,
+            "result_display": r.get_result_display(),
+            "timestamp": r.timestamp,
         }
-        for test in test_results_list
+        for r in test_results
     ]
-    
-    #print(test_results_data)
 
-    # Renderizar el template con el contexto
+    formatted_reference_results = [
+        {
+            "signal_id": r.signal_id,
+            "signal_name": r.signal_name,
+            "conector_orig": r.conector_orig,
+            "pin_a": r.pin_a,
+            "conector_dest": r.conector_dest,
+            "pin_b": r.pin_b,
+            "min_exp_value": r.min_exp_value,
+            "max_exp_value": r.max_exp_value,
+            "measured_value": r.measured_value,
+            "result": r.result,
+            "result_display": r.get_result_display(),
+            "timestamp": r.timestamp,
+        } for r in reference_results
+    ]
+
     context = {
         "session": session,
-        "stage_reference": stage_reference,
         "stage_test": stage_test,
-        "test_results": test_results_data,
-        "test_results_raw": test_results_list,
-        "reference_results": reference_results,
-        "total_stages": len(test_stages),
+        "stage_reference": stage_reference,
+        "test_results": formatted_test_results,
+        "reference_results": formatted_reference_results,
         "prev_stage_id": prev_stage_id,
-        "prev_stage_number": stage_reference.stage_number - 1 if prev_stage_id else None,
+        "prev_stage_number": prev_stage_number,
         "next_stage_id": next_stage_id,
-        "next_stage_number": stage_reference.stage_number + 1 if next_stage_id else None,
-        "test_stages": test_stages,
-        "reference_stage_map": reference_stage_map,
-    }
-    return render(request, "pages/test-stage.html", context)'''
-
-def test_stage_view(request, session_id, stage_id):
-    session = get_object_or_404(TestSession, id=session_id)
-
-    # Etapa de referencia y test
-    stage_reference = get_object_or_404(TestStage, id=stage_id, session=session, stage_type='reference')
-    stage_test = get_object_or_404(TestStage, session=session, stage_number=stage_reference.stage_number, stage_type='test')
-
-    # Stages para breadcrumb
-    test_stages = list(session.stages.filter(stage_type='test').order_by("stage_number"))
-    reference_stage_map = dict(session.stages.filter(stage_type='reference').values_list("stage_number", "id"))
-
-    # Etapa anterior y siguiente
-    prev_next = dict(session.stages.filter(
-        stage_number__in=[stage_reference.stage_number - 1, stage_reference.stage_number + 1],
-        stage_type="reference"
-    ).values_list("stage_number", "id"))
-
-    # Resultados
-    all_results = TestResult.objects.filter(stage__in=[stage_reference, stage_test]).select_related("stage")
-    reference_results = {r.signal_id: r for r in all_results if r.stage_id == stage_reference.id}
-    test_results = [r for r in all_results if r.stage_id == stage_test.id]
-
-    # Si hay resultados de prueba usamos esos, sino los de referencia
-    results_to_show = test_results if test_results else reference_results.values()
-
-    # Formatear para la tabla
-    test_results_data = []
-    for result in results_to_show:
-        reference = reference_results.get(result.signal_id)
-        tooltip_a = reference.pin_a if reference else "No ref"
-        tooltip_b = reference.pin_b if reference else "No ref"
-
-        test_results_data.append({
-            "signal_id": result.signal_id,
-            "signal_name": result.signal_name,
-            "conector_orig": result.conector_orig,
-            "pin_a": result.pin_a,
-            "tooltip_a": tooltip_a,
-            "conector_dest": result.conector_dest,
-            "pin_b": result.pin_b,
-            "tooltip_b": tooltip_b,
-            "min_exp_value": result.min_exp_value,
-            "max_exp_value": result.max_exp_value,
-            "measured_value": result.measured_value,
-            "result": result.result,
-            "result_display": result.get_result_display(),
-            "timestamp": result.timestamp,
-        })
-
-    context = {
-        "session": session,
-        "stage_reference": stage_reference,
-        "stage_test": stage_test,
-        "test_results": test_results_data,
-        "total_stages": len(test_stages),
-        "prev_stage_id": prev_next.get(stage_reference.stage_number - 1),
-        "prev_stage_number": stage_reference.stage_number - 1 if prev_next.get(stage_reference.stage_number - 1) else None,
-        "next_stage_id": prev_next.get(stage_reference.stage_number + 1),
-        "next_stage_number": stage_reference.stage_number + 1 if prev_next.get(stage_reference.stage_number + 1) else None,
-        "test_stages": test_stages,
-        "reference_stage_map": reference_stage_map,
+        "next_stage_number": next_stage_number,
+        "all_test_stages": all_test_stages,
+        "test_stage_map": test_stage_map,
     }
     return render(request, "pages/test-stage.html", context)
 
@@ -634,29 +592,15 @@ def run_test_stage(request):
 
     try:
         data = json.loads(request.body)
-        session_id = data.get("session_id")
-        stage_id = data.get("stage_id")
-        signal_id = data.get("signal_id")
 
-        session = TestSession.objects.get(id=session_id)
-        stage_test = TestStage.objects.get(id=stage_id, session=session, stage_type="test")
-
-        # Obtener el resultado de prueba
-        result_test = TestResult.objects.filter(stage=stage_test, signal_id=signal_id).first()
+        result_test = get_object_or_404(TestResult, id=data.get("result_id"))
+        stage_test = result_test.stage
+        session = stage_test.session
 
         if not result_test:
             return JsonResponse({"success": False, "message": "Resultado de prueba no encontrado."}, status=404)
 
-        # Buscar el resultado de referencia si existe
-        stage_reference = TestStage.objects.filter(
-            session=session, stage_number=stage_test.stage_number, stage_type="reference"
-        ).first()
-
-        result_reference = None
-        if stage_reference:
-            result_reference = TestResult.objects.filter(stage=stage_reference, signal_id=signal_id).first()
-
-        # Simulación de medición
+        # Simular medición
         measured_value = random.choice([random.randint(0, 500000000), "OL"])
         min_val = float(result_test.min_exp_value or 0)
         max_val = float("inf") if result_test.max_exp_value == "OL" else float(result_test.max_exp_value or 0)
@@ -665,30 +609,26 @@ def run_test_stage(request):
             result_status = "pass"
         else:
             result_status = "pass" if min_val <= measured_value <= max_val else "fail"
+
         timestamp = timezone.now()
 
-        # Guardar datos en ambos resultados
-        for result in [r for r in [result_test, result_reference] if r]:
-            result.measured_value = str(measured_value)
-            result.result = result_status
-            result.timestamp = timestamp
-            result.save()
+        # Guardar SOLO en result_test
+        result_test.measured_value = str(measured_value)
+        result_test.result = result_status
+        result_test.timestamp = timestamp
+        result_test.save()
 
-        # Si todos los resultados del stage están completados, marcar como terminado
+        # Marcar etapa como completada si ya no hay pendientes
         if not TestResult.objects.filter(stage=stage_test, result="pending").exists():
             stage_test.status = "completed"
             stage_test.save()
-            
-        if not TestResult.objects.filter(stage=stage_reference, result="pending").exists():
-            stage_reference.status = "completed"
-            stage_reference.save()
 
-        # Si alguno de los stages fue completado, la sesión está en progreso
+        # Si al menos un stage se completó, la sesión pasa a "in_progress"
         if session.status == "pending":
             session.status = "in_progress"
             session.save()
 
-        # Si todas las etapas están completas, cerrar la sesión
+        # Si todas las etapas están completadas, cerrar la sesión
         if not TestStage.objects.filter(session=session, stage_type="test", status="pending").exists():
             session.status = "completed"
             session.save()
@@ -703,6 +643,42 @@ def run_test_stage(request):
 
     except Exception as e:
         return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+
+def test_result(request, session_id):
+    session = get_object_or_404(TestSession, id=session_id)
+
+    # Obtener todas las etapas test y reference, agrupadas por stage_number
+    all_stages = session.stages.all().select_related().order_by("stage_number", "stage_type")
+
+    # Separar por tipo
+    reference_stages = {s.stage_number: s for s in all_stages if s.stage_type == "reference"}
+    test_stages = {s.stage_number: s for s in all_stages if s.stage_type == "test"}
+
+    # Generar pares (reference_stage, test_stage)
+    stage_numbers = sorted(set(reference_stages) | set(test_stages))
+    stage_pairs = [(reference_stages.get(n), test_stages.get(n)) for n in stage_numbers]
+
+    # Para el breadcrumb
+    all_test_stages = list(test_stages.values())
+    test_stage_map = {stage.stage_number: stage.id for stage in all_test_stages}
+    
+    stage_links = []
+    for stage in all_test_stages:
+        stage_links.append({
+            "id": stage.id,
+            "stage_number": stage.stage_number,
+            "result_count": stage.results.count()
+        })
+
+    context = {
+        "session": session,
+        "stage_pairs": stage_pairs,
+        "stages_count": len(all_test_stages),
+        "all_test_stages": all_test_stages,
+        "stage_links": stage_links,
+    }
+    return render(request, "pages/test-result.html", context)
 
 
 

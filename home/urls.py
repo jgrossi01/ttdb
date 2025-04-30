@@ -10,7 +10,8 @@ urlpatterns = [
     path('db-manager/edit', views.edit_db, name='edit_db'),
     path('db-manager/update', views.update_db, name='update_db'),
     path('new-test', views.new_test, name='new_test'),
-    path('test-summary/<int:session_id>/', views.test_summary, name='test_summary'),
+    path("tests/<int:session_id>/preview/", views.test_preview, name="test_preview"),
+    path("tests/<int:session_id>/result/", views.test_result, name="test_result"),
     path('test-log/', views.test_log, name='test_log'),
     path('tests/<int:session_id>/stage/<int:stage_id>/', views.test_stage_view, name='test_stage'),
     

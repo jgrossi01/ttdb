@@ -1,0 +1,189 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Resultados de la prueba - {% endblock title %}
+
+{% load static %}
+
+{% block content %}
+
+  <div class="page-wrapper">
+    <!-- Page header -->
+    <div class="page-header d-print-none">
+      <div class="container-xl">
+        <div class="row g-2 align-items-center">
+          <div class="col">
+            <h2 class="page-title">Resultados de la prueba</h2>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Page body -->
+      <div class="page-body">
+        <div class="container-xl">
+      
+          <ol class="breadcrumb breadcrumb-arrows mb-3">
+            <li class="breadcrumb-item">
+              <a href="{% url 'test_preview' session.id %}">Previsualización</a>
+            </li>
+          
+            {% for stage in stage_links %}
+              <li class="breadcrumb-item">
+                {% if stage.result_count == 0 %}
+                  <del>
+                    <a href="{% url 'test_stage' session.id stage.id %}">
+                      Etapa {{ stage.stage_number }}
+                    </a>
+                  </del>
+                {% else %}
+                  <a href="{% url 'test_stage' session.id stage.id %}">
+                    Etapa {{ stage.stage_number }}
+                  </a>
+                {% endif %}
+              </li>
+            {% endfor %}
+            
+            <li class="breadcrumb-item active">Resultados</li>
+          </ol>
+      
+          <div class="row row-deck row-cards">
+            <div class="col-sm-6 col-lg-3">
+              <div class="card"><div class="card-body">
+                <div class="subheader">Conector en prueba</div>
+                <div class="h2">{{ session.connector }}</div>
+              </div></div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+              <div class="card"><div class="card-body">
+                <div class="subheader">Tipo de prueba</div>
+                <div class="h2">{{ session.test_type }}</div>
+              </div></div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+              <div class="card"><div class="card-body">
+                <div class="subheader">Etapas</div>
+                <div class="h2">{{ all_test_stages|length }}</div>
+              </div></div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+              <div class="card"><div class="card-body">
+                <div class="subheader">Estado</div>
+                <div class="h2">
+                  {% if session.status == "in_progress" %}
+                    <span class="status status-warning"><span class="status-dot"></span>{{ session.get_status_display }}</span>
+                  {% elif session.status == "pending" %}
+                    <span class="status status-secondary"><span class="status-dot"></span>{{ session.get_status_display }}</span>
+                  {% elif session.status == "completed" %}
+                    <span class="status status-success"><span class="status-dot"></span>{{ session.get_status_display }}</span>
+                  {% endif %}
+                </div>
+              </div></div>
+            </div>
+          </div>
+      
+          {% for reference_stage, test_stage in stage_pairs %}
+          <div class="card mt-4">
+            <div class="card-header bg-teal-lt text-white">
+              <div><h4 class="card-title">Etapa {{ reference_stage.stage_number }} - Conectar: {{ reference_stage.connector_dest }}</h4></div>
+              <div class="card-actions">
+                <div class="row align-items-center">
+                  <div class="col-auto">
+                    {% if not test_stage or test_stage.results.count == 0 %}
+                      <span class="status status-warning"><span class="status-dot"></span>No medible</span>
+                    {% elif test_stage.status == "completed" %}
+                      <span class="status status-success"><span class="status-dot"></span>{{ test_stage.get_status_display }}</span>
+                    {% else %}
+                      <span class="status status-secondary"><span class="status-dot"></span>{{ test_stage.get_status_display }}</span>
+                    {% endif %}
+                  </div>
+                  <div class="col-auto">
+                    {% if test_stage and test_stage.results.count > 0 %}
+                      <a href="{% url 'test_stage' session.id test_stage.id %}" class="btn btn-primary">Ver detalles</a>
+                    {% else %}
+                      <span class="btn btn-outline-secondary disabled">Sin datos</span>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+      
+            <div class="card-body">
+              <p><strong>Instrucciones:</strong> {{ reference_stage.instructions }}</p>
+            </div>
+      
+            {% if test_stage and test_stage.results.exists %}
+            <div class="card-body card-body-dt">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Señal</th>
+                    <th>Conector Origen</th>
+                    <th>Pin A</th>
+                    <th>Conector Destino</th>
+                    <th>Pin B</th>
+                    <th>Esperado (min)</th>
+                    <th>Esperado (max)</th>
+                    <th>Medido</th>
+                    <th>Resultado</th>
+                    <th>Hora</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for result in test_stage.results.all %}
+                  <tr>
+                    <td>{{ result.signal_name }}</td>
+                    <td>{{ result.conector_orig }}</td>
+                    <td title="{{ result.tooltip_a }}">{{ result.pin_a }}</td>
+                    <td>{{ result.conector_dest }}</td>
+                    <td title="{{ result.tooltip_b }}">{{ result.pin_b }}</td>
+                    <td>{{ result.min_exp_value }}</td>
+                    <td>{{ result.max_exp_value }}</td>
+                    <td>{{ result.measured_value|default:"-" }}</td>
+                    <td>
+                      {% if result.result == "pass" %}
+                        <span class="badge badge-outline text-green">{{ result.get_result_display }}</span>
+                      {% elif result.result == "fail" %}
+                        <span class="badge badge-outline text-red">{{ result.get_result_display }}</span>
+                      {% else %}
+                        <span class="badge bg-default text-default-fg">{{ result.get_result_display }}</span>
+                      {% endif %}
+                    </td>
+                    <td>{{ result.timestamp|date:"H:i:s" }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      
+    </div> <!-- Fin page body -->
+    {% include 'includes/footer.html' %}
+  </div> <!-- Fin wrapper -->
+
+  {% block modal %}
+  {% endblock modal %}
+
+{% endblock content %}
+
+{% block extrajs %}
+
+<script src="{% static 'js/jquery-3.7.0.min.js' %}"></script>
+<script src="{% static 'js/dataTables.js' %}"></script>
+<script src="{% static 'js/dataTables.bootstrap5.js' %}"></script>
+
+<script>
+
+document.addEventListener('DOMContentLoaded', function () {
+
+
+
+
+
+});
+</script>
+{% endblock extrajs %}
+
+{% block extrastyle %}
+{% endblock extrastyle %}

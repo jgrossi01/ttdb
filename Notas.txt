@@ -1,0 +1,166 @@
+
+-- TPtC-03 Test Pin to chasis (1) Valor esperado: > 100MOhm / OL (FIJO)
+-- TPtO-02 Test Pin to Others (2) Valor esperado: > 10MOhm (FIJO) Descartar su par para evitar falso positivo.
+-- TP-04 Test Pair (3) Valor esperado: Dependiendo tipo de señal.
+-- TPtP-01 Test Pin to pin (4) Valor esperado: < 1Oohm (FIJO)
+
+TPtC-03 Test Pin to Chasis - Pin a chasis
+TPtO-02 Test Pin to Others - Pin a otros
+TP-04 Test Pair - Entre par de pines
+TPtP-01 Test Pin to pin - Pin a pin 
+
+Ver default DB:
+# de señal
+Nombre 
+Tipo de señal - modificable
+PEM-Polarizacion - modificable
+PEM-Telemetria - modificable
+
+-- Borrar la tabla mediciones si existe
+DROP TABLE IF EXISTS Mediciones;
+
+-- Se cambia estructura tabla para mejor rendimiento 
+-- Crear la nueva tabla Mediciones
+
+CREATE TABLE Mediciones (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,  -- Identificador único
+    fecha DATETIME DEFAULT CURRENT_TIMESTAMP,  -- Fecha de la medición
+    id_señal INT,                         -- Clave foránea
+    tipo_medicion TEXT NOT NULL,          -- Tipo de medición (tptp-01, tptr-02, etc.)
+    pinA INT,                             -- Solo para tptp-01
+    pinB INT,                             -- Solo para tptp-01
+    val_esperado_min FLOAT,               -- Valor esperado mínimo
+    val_esperado_max FLOAT,               -- Valor esperado máximo
+    val_medido FLOAT,                     -- Valor medido
+    resultado TEXT,                    	-- Resultado (true/false)
+    obs TEXT,                             -- Observaciones
+    FOREIGN KEY (id_señal) REFERENCES Conexiones("# de Señal")
+);
+
+Agregar en Conexiones: Polaridad, Telemetria, Tipo de señal.
+
+Datos repo:
+
+TTDB
+Test to data base
+Fork del repositorio de automatización de puesta en marcha para mediciones pasivas de harness.
+- TPtP-01 Test Pin to pin
+- TPtR-02 Test Pin to Rest
+- TPtC-03 Test Pin to chasis
+- TP-04 Test Pair
+
+MAINRELE = 2
+FAULT_BUS_1 = 3
+FAULT_BUS_2 = 4
+F1_to_F4 = 5
+F5_to_F8 = 6
+MONITOR_RELE = 7
+
+# close_relay(FAULT_BUS_1, 0, "tcp://125.1.67.152:5555") 
+# close_relay(MONITOR_RELE, 0, "tcp://125.1.67.152:5555") 
+
+TIPO_SEÑALES = (
+        "PWRHP",
+        "PWRLP",
+        "PWR",
+        "RS422",
+        "RS422-R", 
+        "RS422-RC",     
+        "HPC-HV",
+        "HPC-LV",
+        "HPCDIODE-HV",
+        "HPCDIODE-LV",
+        "PT200",
+        "PT2000",
+        "G10K",       
+        "RCTN0805",
+        "LVDS",
+        "BDM-DC",        
+        "GPI_LVCMOS",      
+        "GPI_CMOS_LS_XT",
+        "AIN5",
+        "AIN5-",
+        "AOUT10-",
+        "CAN", 
+        "SpW",  
+        "1553", 
+        "TAM", 
+        "MTC", 
+        "CSS", 
+        "TAMBTE",  
+        "TS-MON", 
+        "ARM-CON", 
+        "Chasis")
+
+SEÑALES_PASIVAS = {
+    "pwr_max": "OL",
+    "pwr_min": "10K",
+    "422_max": "OL",
+    "422_min": "4K",
+    "422-r_max": 135,
+    "422-r_min": 95,
+    "hpchv_max": "1,5K",
+    "hpchv_min": 180, 
+    "hpclv_max": "1,5K",
+    "hpclv_min": 180,
+    "hpcdhv_max": "100K",
+    "hpcdhv_min": "1K",
+    "hpcdlv_max": "100K",
+    "hpcdlv_min": "1K",
+    "pt200_max": 220,
+    "pt200_min": 210,
+    "pt2000_max": 2200,
+    "pt2000_min": 2100,
+    "g10k_max": "14K",
+    "g10k_min": "10K",
+    "rctn_max": "TBD",
+    "rctn_min": "TBD",
+    "lvds_max": 132,
+    "lvds_min": 90,
+    "bdm_max": "OL", 
+    "bdm_min": "1M",
+    "lvcmos_max": "OL",
+    "lvcmos_min": "10K",
+    "cmosxt_max": "OL",
+    "cmosxt_min": "10K",
+    "ain5_max": "OL",
+    "ain5_min": "10K",
+    "ain5-_max": "OL",
+    "ain5-_min": "10K",
+    "aout10-_max": "OL", 
+    "aout10-_min": "50K",
+    "can_max": 132, 
+    "can_min": 108, 
+    "spw_max": 132, 
+    "spw_min": 90, 
+    "1553_max": 5, 
+    "1553_min": 2, 
+    "tam_max": 100, 
+    "tam_min": 40,
+    "mtc_max": 100,
+    "mtc_min": 40,
+    "tambte_max": "OL",
+    "tambte_min": "10K",
+    "ts_max": "11K",
+    "ts_min": "4K",
+    "armcon_max": "OL",
+    "armcon_min": "10K",
+    "armcon_cont_max": 2,
+    "armcon_cont_min": 0,
+    "chasis_max": 2,
+    "chasis_min": 0    
+}
+
+Conectores para buenas pruebas:
+H-TPT-N-J07 Multiples origen/destino
+H-ARM-SADM-CNT1 Letras
+H-ARM-PYRO-CNT2 Letras
+H-PDU-PDM_F-CNT2 Descartes stage completas
+UMB-CNT2 Descarte completo
+H-TM-TX_TCR_01_N-J02 Limpieza datos y descarte de lineas
+
+
+A terminar Lunes 5/05:
+Acomodar estilo de breadscrumb (margin) e incluirlo tambien en Previsualización - ver si es mejor abstraer la generacion -
+Ver si se puede generar pdf de la pagina Resultados.
+    

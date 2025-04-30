@@ -31,42 +31,36 @@
 
             <ol class="breadcrumb breadcrumb-arrows mb-3">
               <li class="breadcrumb-item">
-                  <a href="{% url 'test_summary' session.id %}">Resumen</a>
+                  <a href="{% url 'test_preview' session.id %}">Previsualización</a>
               </li>
-              {% comment %} 
-              Breadcrumb sin tachar en el caso de no tener tabla de tipo test
-              {% for stage in test_stages %}
-                  <li class="breadcrumb-item {% if stage.id == stage_test.id %}active{% endif %}">
-                      <a href="{% url 'test_stage' session.id reference_stage_map|get_dict_value:stage.stage_number %}">
-                          Etapa {{ stage.stage_number }}
-                      </a>
-                  </li>
-              {% endfor %} 
-              {% endcomment %}
 
-              {% for stage in test_stages %}
+              {% for stage in all_test_stages %}
                 {% with stage.results.all|length as result_count %}
                   <li class="breadcrumb-item {% if stage.id == stage_test.id %}active{% endif %}">
                     {% if result_count == 0 %}
                       <del>
-                        <a href="{% url 'test_stage' session.id reference_stage_map|get_dict_value:stage.stage_number %}">
+                        <a href="{% url 'test_stage' session.id test_stage_map|get_dict_value:stage.stage_number %}">
                           Etapa {{ stage.stage_number }}
                         </a>
                       </del>
                     {% else %}
-                      <a href="{% url 'test_stage' session.id reference_stage_map|get_dict_value:stage.stage_number %}">
+                      <a href="{% url 'test_stage' session.id test_stage_map|get_dict_value:stage.stage_number %}">
                         Etapa {{ stage.stage_number }}
                       </a>
                     {% endif %}
                   </li>
                 {% endwith %}
               {% endfor %}
+
+              <li class="breadcrumb-item">
+                <a href="{% url 'test_result' session.id %}">Resultados</a>
+              </li>
             </ol>
                       
             <div class="card mt-5">
               <div class="card-header">
                 <div>
-                  <h3 class="card-title">Etapa {{ stage_test.stage_number }} de {{ total_stages }} - <span class="text-azure">{{ stage_test.connector_dest }}</span></h3>
+                  <h3 class="card-title">Etapa {{ stage_test.stage_number }} de {{ all_test_stages|length }} - <span class="text-azure">{{ stage_test.connector_dest }}</span></h3>
                 </div>
                 <div class="card-actions">
                   <div class="row align-items-center">
@@ -120,7 +114,7 @@
                   {% if test_results %}
                   <tbody data-type="test">
                     {% for result in test_results %}
-                    <tr data-signal-id="{{ result.signal_id }}">
+                    <tr data-result-id="{{ result.id }}">
                       <td class="cell-signal">{{ result.signal_name }}</td>
                       <td class="cell-orig">{{ result.conector_orig }}</td>
                       <td class="cell-pin-a" title="{{ result.tooltip_a }}" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="tooltip-table">{{ result.pin_a }}</td>
@@ -145,7 +139,7 @@
                   {% else %}
                   <tbody data-type="reference">
                     {% for result in reference_results %}
-                    <tr data-signal-id="{{ result.signal_id }}">
+                    <tr>
                       <td class="cell-signal">{{ result.signal_name }}</td>
                       <td class="cell-orig">{{ result.conector_orig }}</td>
                       <td class="cell-pin-a">{{ result.pin_a }}</td>
@@ -373,19 +367,23 @@ document.addEventListener('DOMContentLoaded', function () {
     const stageId = "{{ stage_test.id }}";
 
     for (const row of rows) {
-      const signalId = row.dataset.signalId;
-
+      const resultId = row.dataset.resultId;
+      if (!resultId) {
+        console.warn("Fila sin resultId, se omite");
+        continue;
+      }
+    
       const response = await fetch("{% url 'run_test_stage' %}", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "X-CSRFToken": "{{ csrf_token }}"
         },
-        body: JSON.stringify({ session_id: sessionId, stage_id: stageId, signal_id: signalId })
+        body: JSON.stringify({ result_id: resultId })
       });
-
+    
       const data = await response.json();
-
+    
       if (data.success) {
         row.querySelector(".cell-measured").textContent = data.measured;
         const badgeClass = data.result === "pass" ? "text-green" : "text-red";
@@ -395,11 +393,12 @@ document.addEventListener('DOMContentLoaded', function () {
         console.error("Error al medir:", data.message);
       }
     }
+    
 
     // Actualizar status visual
     document.querySelector("#stageStatusContainer").innerHTML = `
       <span class="status status-success">
-        <span class="status-dot"></span> Completado
+        <span class="status-dot"></span> Terminado
       </span>`;
     document.querySelector("#btnStartTestContainer").innerHTML = "";
     table.draw();
