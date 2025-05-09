@@ -111,7 +111,7 @@ class Commander:
 
     # ------------------------------------------------------------------------
     def __init__(
-        self, hostname: str = "tcp://localhost:6003", timeout: int = 2000
+        self, hostname: str = "tcp://10.245.1.103:9194", timeout: int = 2000
     ):
         """Initializes the Client class of the library and which it instantiates
          a JSON-RPC client which is used to connect with the
@@ -584,7 +584,7 @@ class Commander:
     # ---- Funciones/comandos de CSV
     # -----------------------------------
 
-    def csv_start_record_in_file(file_name: str = None) -> tuple:
+    def csv_start_record_in_file(self, file_name: str = None) -> tuple:
         """
         * csv_start_record_in_file()
           * Action: Start record commands and telemetry in CSV file
@@ -990,7 +990,7 @@ class Commander:
 # ---- FUNCIONES SECUNDARIAS
 def test():
     try:
-        cmder = Commander("tcp://localhost:9194", 5000)  #DN 9094  y 50000 ori
+        cmder = Commander("tcp://10.245.1.103:9194", 5000)  #DN 9094  y 50000 ori
          
         print('pik_open')
         print(cmder.pik_open("1","25","8"))
@@ -1195,5 +1195,88 @@ if __name__ == '__main__':
         arg = '0'
     if arg != '0':
         print('Parametros ingresados: ' + arg)
+        
+    """ 
+    SUB-UNIT 1: Rele, Fault Bus 1 y 2, Fault MUX 1 y 2 y Monitor 1 y 2 (Todo)
+    SUB-UNIT 2: consists of Break Relays for each channel. <- Rele principal
+    SUB-UNIT 3: consists of Fault insertion Bus 1 for each channel. 
+    SUB-UNIT 4: consists of Fault insertion Bus 2 for each channel.  
+    SUB-UNIT 5: consists of the Fault MUX 1 connection. 
+    SUB-UNIT 6: consists of the Fault MUX 2 connection. 
+    SUB-UNIT 7: consists of the Monitor connections 1 and 2. <-
 
-    run(arg)
+    WARNING: Fault and monitor MUX connection switches should not have multiple connections. Multiple 
+    connections can short the MUX circuitry resulting in possible card failure. It is recommended to customers to use 
+    Mode B as it ensures that the Fault MUX has only a single connection operating at any one time.
+    """
+
+    
+
+    cmder = Commander()
+    card = 1 #OK
+    bus = 25 #OK Se ve en PXI -> Device manager -> Network adapters -> Intel(R) Ethernet Connection I217-LM -> General, location (PCI bus 0, device 25, function 0)
+    dev = 8 #OK Slot PXI
+    
+    # Abre conexión con placa 
+    print(cmder.pik_open(card,bus,dev)) 
+    print()
+    
+    print("Subinfo 1")
+    print(cmder.pik_subinfo(card, "1")) # Todos los rele
+    # [True, [1, 1, 232, 'SWITCH(232)']]
+    print("Subinfo 2")
+    print(cmder.pik_subinfo(card, "2")) # Rele principal
+    # [True, [1, 1, 74, 'SWITCH(74)']]
+    print("Subinfo 3")
+    print(cmder.pik_subinfo(card, "3")) # Fault insertion 1
+    # [True, [1, 1, 74, 'SWITCH(74)']]new_columnpxi_
+    print("Subinfo 4")
+    print(cmder.pik_subinfo(card, "4")) # Fault insertion 2
+    # [True, [1, 1, 74, 'SWITCH(74)']]
+    print("Subinfo 5")
+    print(cmder.pik_subinfo(card, "5")) # Fault MUX 1
+    # [True, [2, 1, 4, 'MUX(4)']]
+    print("Subinfo 6")
+    print(cmder.pik_subinfo(card, "6")) # Fault MUX 2
+    # [True, [2, 1, 4, 'MUX(4)']]
+    print("Subinfo 7")
+    print(cmder.pik_subinfo(card, "7")) # Monitor 1 y 2
+    # [True, [1, 1, 2, 'SWITCH(2)']]
+    
+    # [True/False[switch type,rows,cols,switch_type_in_text_format(qty)]] 
+    
+    
+    print()
+    
+    print("View:", cmder.pik_view_sub(card,"7"))
+    print("Op-bit:", cmder.pik_op_bit(card,"7","1","1")) # Card, Sub-unit, Rele, Abrir/Cerrar (0,1)
+    print("Op-bit:", cmder.pik_op_bit(card,"7","1","1")) # Card, Sub-unit, Rele, Abrir/Cerrar (0,1)
+    print("Op-bit:", cmder.pik_op_bit(card,"7","2","1")) # Card, Sub-unit, Rele, Abrir/Cerrar (0,1)
+    print("View:", cmder.pik_view_sub(card,"7"))
+    print("Op-bit:", cmder.pik_op_bit(card,"2","30","1")) # Card, Sub-unit, Rele, Abrir/Cerrar (0,1)
+    
+    print(cmder.pik_clear_card(card)) # Abre todos los reles
+    
+    
+    
+    print("View:", cmder.pik_view_sub(card,"7"))
+    print("View:", cmder.pik_view_sub(card,"2"))
+    
+    print("Op-bit:", cmder.pik_op_bit(card,"2","30","1")) # Card, Sub-unit, Rele, Abrir/Cerrar (0,1)
+    
+    print("View:", cmder.pik_view_sub(card,"2"))
+    
+    
+        
+    print()
+
+        
+        #time.sleep(0.1)    
+        
+        
+        #print(cmder.pik_close(card))
+        #print(cmder.pik_close("1")) # Cierra conexión con placa FUNCIONA
+
+    
+    
+                

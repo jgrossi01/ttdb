@@ -163,4 +163,5 @@ H-TM-TX_TCR_01_N-J02 Limpieza datos y descarte de lineas
 A terminar Lunes 5/05:
 Acomodar estilo de breadscrumb (margin) e incluirlo tambien en Previsualización - ver si es mejor abstraer la generacion -
 Ver si se puede generar pdf de la pagina Resultados.
+Agregar Fecha a los resultados (se muestra solo hora)
     

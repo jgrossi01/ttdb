@@ -14,6 +14,14 @@ urlpatterns = [
     path("tests/<int:session_id>/result/", views.test_result, name="test_result"),
     path('test-log/', views.test_log, name='test_log'),
     path('tests/<int:session_id>/stage/<int:stage_id>/', views.test_stage_view, name='test_stage'),
+    path("hardware-admin/", views.hardware_admin, name="hardware_admin"),
+    path("api/hardware/<str:model_name>/", views.api_get_hardware_model, name="get_hardware_model"),
+    path("api/hardware/save/", views.api_save_hardware_edit, name="save_hardware_edit"),
+    path("api/hardware/create/", views.api_create_hardware_record, name="create_hardware_record"),
+    
+    #Hardware
+    path('test-hardware/', views.test_hardware, name='test_hardware'),
+
     
     # Funciones
     path('upload-mdb/', views.upload_mdb, name='upload_mdb'),

@@ -109,12 +109,18 @@
                                   <span class="status-dot"></span>
                                   {{ session.get_status_display }}
                                 </span>
+                                {% elif session.status == "unmeasurable" %}
+                                <span class="status status-danger">
+                                  <span class="status-dot"></span>
+                                  {{ session.get_status_display }}
+                                </span>
                                 {% else %}
                                 <span class="status status-secondary">
                                   <span class="status-dot"></span>
                                   {{ session.get_status_display }}
                                 </span>
                                 {% endif %}
+                                
                               </td>
                               <td>
                                 <a href="{% url 'test_preview' session.id %}" class="btn-sm">

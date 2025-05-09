@@ -11,10 +11,7 @@
       <div class="container-xl">
         <div class="row g-2 align-items-center">
           <div class="col">
-            <!-- Page pre-title -->
-            <h2 class="page-title">
-              Previsualización de la prueba
-            </h2>
+            <h2 class="page-title">Previsualización de la prueba</h2>
           </div>
         </div>
       </div>
@@ -24,7 +21,33 @@
     <div class="page-body">
       <div class="container-xl">
 
-        <div class="row row-deck row-cards">
+        <ol class="breadcrumb breadcrumb-arrows mb-3">
+          <li class="breadcrumb-item active">
+            <a href="{% url 'test_preview' session.id %}">Previsualización</a>
+          </li>
+        
+          {% for stage in stage_links %}
+            <li class="breadcrumb-item">
+              {% if stage.result_count == 0 %}
+                <del>
+                  <a href="{% url 'test_stage' session.id stage.id %}">
+                    Etapa {{ stage.stage_number }}
+                  </a>
+                </del>
+              {% else %}
+                <a href="{% url 'test_stage' session.id stage.id %}">
+                  Etapa {{ stage.stage_number }}
+                </a>
+              {% endif %}
+            </li>
+          {% endfor %}
+          
+          <li class="breadcrumb-item">
+            <a href="{% url 'test_result' session.id %}">Resultados</a>
+          </li>
+        </ol>
+
+        <div class="row row-deck row-cards mt-2">
           <div class="col-sm-6 col-lg-3">
             <div class="card">
               <div class="card-body">
@@ -63,25 +86,13 @@
                 </div>
                 <div class="h2">
                   {% if session.status == "in_progress" %}
-                    <span class="status status-warning">
-                      <span class="status-dot"></span>
-                      {{ session.get_status_display }}
-                    </span>
+                    <span class="status status-warning"><span class="status-dot"></span>{{ session.get_status_display }}</span>
                   {% elif session.status == "pending" %}
-                    <span class="status status-secondary">
-                      <span class="status-dot"></span>
-                      {{ session.get_status_display }}
-                    </span>
+                    <span class="status status-secondary"><span class="status-dot"></span>{{ session.get_status_display }}</span>
                   {% elif session.status == "completed" %}
-                    <span class="status status-success">
-                      <span class="status-dot"></span>
-                      {{ session.get_status_display }}
-                    </span>
-                  {% else %}
-                    <span class="status status-secondary">
-                      <span class="status-dot"></span>
-                      {{ session.get_status_display }}
-                    </span>
+                    <span class="status status-success"><span class="status-dot"></span>{{ session.get_status_display }}</span>
+                  {% elif session.status == "unmeasurable" %}
+                    <span class="status status-danger"><span class="status-dot"></span>{{ session.get_status_display }}</span>
                   {% endif %}
                 </div>
               </div>
@@ -98,8 +109,8 @@
             <div class="card-actions">
               <div class="row align-items-center">
                 <div class="col-auto">
-                  {% if not test_stage or test_stage.results.count == 0 %}
-                    <span class="status status-warning">
+                  {% if test_stage.status == "unmeasurable" %}
+                    <span class="status status-danger">
                       <span class="status-dot"></span> No medible
                     </span>
                   {% elif test_stage.status == "completed" %}
@@ -113,7 +124,7 @@
                   {% endif %}
                 </div>
                 <div class="col-auto">
-                  {% if test_stage and test_stage.results.count > 0 %}
+                  {% if not test_stage.status == "unmeasurable" %}
                     <a href="{% url 'test_stage' session_id=session.id stage_id=test_stage.id %}" class="btn btn-primary">Ver detalles</a>
                   {% else %}
                     <span class="btn btn-outline-secondary disabled">Sin datos</span>

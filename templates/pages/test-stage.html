@@ -65,31 +65,45 @@
                 <div class="card-actions">
                   <div class="row align-items-center">
                     <div class="col-auto" id="stageStatusContainer">
-                        {% if stage_test.status == "pending" %}
+                      {% if stage_test.status == "pending" %}
                         <span class="status status-secondary">
                           <span class="status-dot"></span>
                           {{ stage_test.get_status_display }}
                         </span>
-                        {% elif stage_test.status == "completed" %}
+                      {% elif stage_test.status == "completed" %}
                         <span class="status status-success">
                           <span class="status-dot"></span>
                           {{ stage_test.get_status_display }}
                         </span>
-                        {% else %}
+                      {% elif stage_test.status == "unmeasurable" %}
+                        <span class="status status-danger">
+                          <span class="status-dot"></span>
+                          {{ stage_test.get_status_display }}
+                        </span>
+                      {% else %}
                         <span class="status status-secondary">
                           <span class="status-dot"></span>
                           {{ stage_test.get_status_display }}
                         </span>
-                        {% endif %}
-                    </div>
-                    <div class="col-auto" id="btnStartTestContainer">
-                      {% if stage_test.status == "pending" %}
-                      <button type="button" class="btn btn-success" id="startTest">
-                        <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="currentColor"  class="icon icon-tabler icons-tabler-filled icon-tabler-player-play"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 4v16a1 1 0 0 0 1.524 .852l13 -8a1 1 0 0 0 0 -1.704l-13 -8a1 1 0 0 0 -1.524 .852z" /></svg>
-                        Comenzar
-                      </button>
                       {% endif %}
                     </div>
+                    
+                    <div class="col-auto" id="btnStartTestContainer">
+                      {% if stage_test.status == "pending" %}
+                        <button type="button" class="btn btn-success" id="startTest">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="icon icon-tabler icons-tabler-filled icon-tabler-player-play">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                            <path d="M6 4v16a1 1 0 0 0 1.524 .852l13 -8a1 1 0 0 0 0 -1.704l-13 -8a1 1 0 0 0 -1.524 .852z" />
+                          </svg>
+                          Comenzar
+                        </button>
+                      {% elif stage_test.status == "unmeasurable" %}
+                        <button type="button" class="btn btn-outline-secondary disabled" disabled>
+                          Sin datos
+                        </button>
+                      {% endif %}
+                    </div>
+                    
                   </div>
         
                 </div>        

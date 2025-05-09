@@ -1,0 +1,7 @@
+-- database: ../db.sqlite3
+
+-- Vaciar Sesiones, Stages y Resultados
+
+DELETE FROM home_testresult;
+DELETE FROM home_teststage;
+DELETE FROM home_testsession;

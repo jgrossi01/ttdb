@@ -42,7 +42,17 @@ class TestSession(models.Model):
     connector = models.CharField(max_length=50)  # Conector en prueba
     test_type = models.CharField(max_length=50)  # Tipo de prueba
     created_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=20, choices=[('pending', 'Pendiente'), ('in_progress', 'En curso'), ('completed', 'Terminado')], default='pending')
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('pending', 'Pendiente'),
+            ('in_progress', 'En curso'),
+            ('completed', 'Terminado'),
+            ('unmeasurable', 'No medible'),  
+        ],
+        default='pending'
+    )
+
     
     def __str__(self):
         return f"Test {self.id} - {self.connector} ({self.test_type})"
@@ -53,7 +63,15 @@ class TestStage(models.Model):
     stage_type = models.CharField(max_length=50)
     connector_dest = models.CharField(max_length=50)  # Conector que se conecta en esta etapa
     instructions = models.TextField()  # Instrucciones para el usuario
-    status = models.CharField(max_length=20, choices=[('pending', 'Pendiente'), ('completed', 'Terminado')], default='pending')
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('pending', 'Pendiente'),
+            ('completed', 'Terminado'),
+            ('unmeasurable', 'No medible'),  
+        ],
+        default='pending'
+    )
     
     def __str__(self):
         return f"Stage {self.stage_number} - {self.connector_dest}"
@@ -76,3 +94,63 @@ class TestResult(models.Model):
     
     def __str__(self):
         return f"{self.signal_name}: {self.result}"
+    
+class ConnectionConfig(models.Model):
+    """Placa PXI con canales de relé."""
+    ip_port = models.CharField(max_length=50, unique=True)  # ej. "tcp://10.245.1.103:9194"
+    
+    def __str__(self):
+        return self.ip_port
+    
+class RelayCard(models.Model):
+    """Placa PXI con canales de relé."""
+    name = models.CharField(max_length=50, unique=True)  # ej. "PXI-1"
+    bus = models.IntegerField() # ej. "25"
+    device = models.IntegerField() # ej. "8"
+
+    def __str__(self):
+        return self.name
+
+
+class ConnectorType(models.Model):
+    """Tipo de conector: DB15-M, DB78-H, etc."""
+    name = models.CharField(max_length=20, unique=True)  # ej. "DB15M"
+    pin_count = models.PositiveIntegerField() # ej. "15"
+    connector_family = models.CharField(max_length=20)  # ej. "DB", "MIL"
+    gender = models.CharField(max_length=1, choices=[("M", "Macho"), ("H", "Hembra")])
+
+    def __str__(self):
+        return self.name
+
+
+class Adapter(models.Model):
+    """
+    Adaptador físico entre conector de prueba y conector PXI.
+    Un adaptador define la relación entre pines del conector de test y canales de PXI.
+    """
+    name = models.CharField(max_length=100, unique=True)
+    test_connector = models.ForeignKey(
+        ConnectorType, on_delete=models.CASCADE, related_name="adapters_as_test"
+    )
+    pxi_connector = models.ForeignKey(
+        ConnectorType, on_delete=models.CASCADE, related_name="adapters_as_pxi"
+    )
+
+    def __str__(self):
+        return self.name
+
+
+class AdapterPinMap(models.Model):
+    """
+    Mapea los pines de un conector del adaptador a canales de una tarjeta PXI.
+    """
+    adapter = models.ForeignKey(Adapter, on_delete=models.CASCADE, related_name="adapter_name")
+    relay_card = models.ForeignKey(RelayCard, on_delete=models.CASCADE, related_name="pxi_card")
+    adapter_pin = models.PositiveIntegerField()  # número de pin del adaptador
+    pxi_channel = models.PositiveIntegerField()  # índice de canal PXI (1..74)
+
+    class Meta:
+        unique_together = ("adapter", "adapter_pin", "pxi_channel")
+
+    def __str__(self):
+        return f"{self.adapter.name}: {self.relay_card.name} - ch{self.pxi_channel} → {self.adapter_pin}"

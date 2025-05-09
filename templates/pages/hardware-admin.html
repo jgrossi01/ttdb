@@ -1,0 +1,249 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Editar DB - {% endblock title %}
+
+{% load static %}
+
+{% block content %}
+
+  <div class="page-wrapper">
+    <!-- Page header -->
+    <div class="page-header d-print-none">
+      <div class="container-xl">
+        <div class="row g-2 align-items-center">
+          <div class="col">
+            <!-- Page pre-title -->
+            <div class="page-pretitle">
+              Configuración
+            </div>
+            <h2 class="page-title">
+              Hardware
+            </h2>
+          </div>
+          <!-- Page title actions -->
+          
+        </div>
+      </div>
+    </div>
+    <!-- Page body -->
+    <div class="page-body">
+      <div class="container-xl">
+        <div class="row row-cards">
+          <div class="col-lg-12">
+            
+            
+            <div class="card">
+              <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs" role="tablist">
+                  <li class="nav-item" role="presentation">
+                    <a href="#tabs-placas-pxi" class="nav-link active" data-bs-toggle="tab" aria-selected="true" role="tab">Placas PXI</a>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                    <a href="#tabs-conectores" class="nav-link" data-bs-toggle="tab" aria-selected="false" tabindex="-1" role="tab">Tipos de conectores</a>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                    <a href="#tabs-adaptadores" class="nav-link" data-bs-toggle="tab" aria-selected="false" tabindex="-1" role="tab">Adaptadores</a>
+                  </li>
+                  <li class="nav-item ms-auto" role="presentation">
+                    <a href="#tabs-settings" class="nav-link" title="Settings" data-bs-toggle="tab" aria-selected="false" tabindex="-1" role="tab">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1">
+                        <path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z"></path>
+                        <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"></path>
+                      </svg>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+              <div class="card-body">
+                <div class="tab-content">
+                  <div class="tab-pane active show" id="tabs-placas-pxi" role="tabpanel">
+                    <h4>Placas PXI</h4>
+                    <button class="btn btn-sm btn-primary mb-2" id="btn-add-placas-pxi">+ Agregar</button>
+                    <table id="table-placas-pxi" class="table table-bordered w-100"></table>
+                  </div>
+            
+                  <div class="tab-pane" id="tabs-conectores" role="tabpanel">
+                    <h4>Tipos de conectores</h4>
+                    <button class="btn btn-sm btn-primary mb-2" id="btn-add-conectores">+ Agregar</button>
+                    <table id="table-conectores" class="table table-bordered w-100"></table>
+                  </div>
+            
+                  <div class="tab-pane" id="tabs-adaptadores" role="tabpanel">
+                    <h4>Adaptadores</h4>
+                    <button class="btn btn-sm btn-primary mb-2" id="btn-add-adaptadores">+ Agregar</button>
+                    <table id="table-adaptadores" class="table table-bordered w-100"></table>
+                    <h5 class="mt-4">Mapeo de pines</h5>
+                    <button class="btn btn-sm btn-primary mb-2" id="btn-add-adaptadores-pinmap">+ Agregar PinMap</button>
+                    <table id="table-adaptadores-pinmap" class="table table-bordered w-100"></table>
+                  </div>
+            
+                  <div class="tab-pane" id="tabs-settings" role="tabpanel">
+                    <h4>Configuración</h4>
+                    <div class="mb-3">
+                      <label class="form-label">Dirección del bus (IP y puerto)</label>
+                      <input type="text" id="input-ip-port" class="form-control" value="tcp://localhost:6003">
+                    </div>
+                    <button class="btn btn-success" id="btn-save-config">Guardar configuración</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Contenedor para toasts -->
+            <div id="toastContainer" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055"></div>
+
+        </div>
+      </div>
+    </div>
+    {% include 'includes/footer.html' %}
+  </div>
+
+  {% block modal %}
+  
+  <div class="modal modal-blur fade" id="backupModal" tabindex="-1" style="display: none;" aria-modal="true" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Copia de seguridad</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          ¿Esta seguro que desea crear una copia de seguridad?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn me-auto" data-bs-dismiss="modal">Cerrar</button>
+          <button type="button" class="btn btn-primary" id="btnCrearBackup">Crear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endblock modal %}
+
+{% endblock content %}
+
+{% block extrajs %}
+
+<script src="{% static 'js/jquery-3.7.0.min.js' %}"></script>
+<script src="{% static 'js/dataTables.js' %}"></script>
+<script src="{% static 'js/dataTables.bootstrap5.js' %}"></script>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+  const modelos = [
+    { id: 'placas-pxi', nombre: 'relaycard', columnas: ['name', 'bus', 'device'] },
+    { id: 'conectores', nombre: 'connectortype', columnas: ['name', 'pin_count', 'connector_family', 'gender'] },
+    { id: 'adaptadores', nombre: 'adapter', columnas: ['name', 'test_connector_id', 'pxi_connector_id'] },
+    { id: 'adaptadores-pinmap', nombre: 'adapterpinmap', columnas: ['adapter_id', 'relay_card_id', 'adapter_pin', 'pxi_channel'] }
+  ];
+
+  modelos.forEach(({ id, nombre, columnas }) => {
+    const tabla = $(`#table-${id}`).DataTable({
+      ajax: `/api/hardware/${nombre}/`,
+      dataSrc: "data",
+      columns: columnas.map(c => ({ data: c, className: 'editable' })),
+      language: { url: '{% static "datatables/datatables_es-ES.json" %}' },
+      pageLength: 25,
+      stateSave: true,
+      order: [[0, 'asc']],
+    });
+
+    $(`#table-${id} tbody`).on("click", "td.editable", function () {
+      const cell = tabla.cell(this);
+      const rowData = tabla.row(this).data();
+      const column = tabla.column(this).dataSrc();
+      const input = $('<input type="text" class="form-control form-control-sm" />');
+      input.val(cell.data());
+      $(this).html(input);
+      input.focus();
+
+      input.on("blur", function () {
+        const newValue = input.val().trim();
+        if (newValue === rowData[column]) {
+          cell.data(rowData[column]).draw();
+          return;
+        }
+
+        const payload = {
+          id: rowData.id,
+          model_name = d
+          column: column,
+          value: newValue,
+        };
+
+        $.ajax({
+          url: `/api/hardware/edit/${nombre}/`,
+          method: "POST",
+          contentType: "application/json",
+          headers: { "X-CSRFToken": getCSRFToken() },
+          data: JSON.stringify(payload),
+          success: function () {
+            cell.data(newValue).draw();
+            showToast("Actualizado con éxito", "success");
+          },
+          error: function () {
+            cell.data(rowData[column]).draw();
+            showToast("Error al actualizar", "danger");
+          },
+        });
+      });
+    });
+
+    $(`#btn-add-${id}`).on("click", function () {
+      const row = {};
+      columnas.forEach(c => row[c] = "");
+      tabla.row.add(row).draw(false);
+    });
+  });
+
+  // Config única: editar directamente campos de ConnectionConfig
+  $("#btn-save-config").on("click", function () {
+    const ip_port = $("#input-ip-port").val().trim();
+    $.ajax({
+      url: "/api/hardware/edit/connectionconfig/",
+      method: "POST",
+      contentType: "application/json",
+      headers: { "X-CSRFToken": getCSRFToken() },
+      data: JSON.stringify({ id: 1, column: "ip_port", value: ip_port }),
+      success: function () {
+        showToast("Configuración actualizada", "success");
+      },
+      error: function () {
+        showToast("Error al guardar", "danger");
+      }
+    });
+  });
+
+  function getCSRFToken() {
+    let value = null;
+    if (document.cookie) {
+      document.cookie.split(";").forEach(cookie => {
+        if (cookie.trim().startsWith("csrftoken=")) {
+          value = cookie.trim().substring("csrftoken=".length);
+        }
+      });
+    }
+    return value;
+  }
+
+  function showToast(msg, type = "info") {
+    const toast = document.createElement("div");
+    toast.className = `toast align-items-center text-white bg-${type} border-0`;
+    toast.setAttribute("role", "alert");
+    toast.setAttribute("aria-live", "assertive");
+    toast.setAttribute("aria-atomic", "true");
+    toast.innerHTML = `
+      <div class="d-flex">
+        <div class="toast-body">${msg}</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>`;
+    document.getElementById("toastContainer").appendChild(toast);
+    new bootstrap.Toast(toast).show();
+    toast.addEventListener("hidden.bs.toast", () => toast.remove());
+  }
+});
+
+</script>
+{% endblock extrajs %}
+
+{% block extrastyle %}
+{% endblock extrastyle %}

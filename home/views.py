@@ -4,11 +4,16 @@ from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
+from django.apps import apps
 from .models import MDBFile, TestSession, TestStage, TestResult
 from .models_harness import Conexiones
 from django_eventstream import send_event
 from datetime import datetime
 from collections import defaultdict
+
+from django.views.decorators.http import require_GET
+from .hardware.commander import Commander
+
 
 import pyodbc
 import sqlite3
@@ -388,6 +393,8 @@ def new_test(request):
                     instructions=f"Conectar {connector} y {dest} para ejecutar la prueba.",
                 )
                 
+                result_created = False
+                
                 for signal in signals:
                     # Crear TestResult para referencia SIN modificaciones
                     TestResult.objects.create(
@@ -439,27 +446,25 @@ def new_test(request):
                                 result="pending",
                             )
                             
+                            result_created = True  # al menos un resultado válido
+                    
+                if not result_created:
+                    test_stage.status = 'unmeasurable'
+                    test_stage.save()
+                    reference_stage.status = 'unmeasurable'
+                    reference_stage.save()
+                            
+            # Si no hay Results en ninguna de las etapas de tipo test, setear la session como No medible.
+            test_stages = session.stages.filter(stage_type='test')
+            has_results = any(stage.results.exists() for stage in test_stages)
+
+            if not has_results:
+                session.status = 'unmeasurable'
+                session.save()
+                            
         return redirect("test_preview", session_id=session.id)
     
     return render(request, 'pages/new-test.html', context)
-
-
-def test_preview(request, session_id):
-    session = get_object_or_404(TestSession, id=session_id)
-
-    reference_stages = session.stages.filter(stage_type='reference').order_by("stage_number")
-    test_stages = session.stages.filter(stage_type='test')
-
-    stage_pairs = []
-    for ref_stage in reference_stages:
-        test_stage = test_stages.filter(stage_number=ref_stage.stage_number).first()
-        stage_pairs.append((ref_stage, test_stage))  # Puede ser None si no existe test
-
-    return render(request, "pages/test-preview.html", {
-        "session": session,
-        "stage_pairs": stage_pairs,
-        "stages_count": test_stages.count(),
-    })
 
     
 def test_log(request):
@@ -494,6 +499,42 @@ def delete_test_session(request, session_id):
         session.delete()
         return JsonResponse({"success": True, "message": "Sesión eliminada correctamente."})
     return JsonResponse({"success": False, "message": "Método no permitido."}, status=405)
+
+
+def test_preview(request, session_id):
+    session = get_object_or_404(TestSession, id=session_id)
+
+    # Obtener todas las etapas test y reference, agrupadas por stage_number
+    all_stages = session.stages.all().select_related().order_by("stage_number", "stage_type")
+
+    # Separar por tipo
+    reference_stages = {s.stage_number: s for s in all_stages if s.stage_type == "reference"}
+    test_stages = {s.stage_number: s for s in all_stages if s.stage_type == "test"}
+
+    # Generar pares (reference_stage, test_stage)
+    stage_numbers = sorted(set(reference_stages) | set(test_stages))
+    stage_pairs = [(reference_stages.get(n), test_stages.get(n)) for n in stage_numbers]
+
+    # Para el breadcrumb
+    all_test_stages = list(test_stages.values())
+    stage_links = []
+    for stage in all_test_stages:
+        stage_links.append({
+            "id": stage.id,
+            "stage_number": stage.stage_number,
+            "result_count": stage.results.count()
+        })
+
+    context = {
+        "session": session,
+        "stage_pairs": stage_pairs,
+        "stages_count": len(all_test_stages),
+        "all_test_stages": all_test_stages,
+        "stage_links": stage_links,
+    }
+
+    return render(request, "pages/test-preview.html", context)
+
     
 def test_stage_view(request, session_id, stage_id):
     session = get_object_or_404(TestSession, id=session_id)
@@ -679,6 +720,104 @@ def test_result(request, session_id):
         "stage_links": stage_links,
     }
     return render(request, "pages/test-result.html", context)
+
+
+@require_GET
+def test_hardware(request):
+    # Parámetros fijos por ahora (luego los podés tomar del request)
+    card = 1
+    bus = 25
+    dev = 8
+
+    commander = Commander("tcp://10.245.1.103:9194", 5000) 
+    try:
+       
+        
+        
+        success, result =  commander.pik_op_bit("1","7","1","1")
+        if success:
+            return JsonResponse({
+                "status": "ok",
+                "message": "Conexión exitosa con la placa.",
+                "result": result,
+                "success": success
+            })
+        else:
+            return JsonResponse({
+                "status": "error",
+                "message": "Falló la comunicación con la placa.",
+                "result": result
+            }, status=500)
+        
+        
+        success, result = commander.pik_open(card, bus, dev)
+        if success:
+            return JsonResponse({
+                "status": "ok",
+                "message": "Conexión exitosa con la placa.",
+                "result": result
+            })
+        else:
+            return JsonResponse({
+                "status": "error",
+                "message": "Falló la comunicación con la placa.",
+                "result": result
+            }, status=500)
+    except Exception as e:
+        return JsonResponse({
+            "status": "error",
+            "message": f"Error inesperado: {str(e)}"
+        }, status=500)
+
+def hardware_admin(request):
+    context = {
+        'parent': '',
+        'segment': 'hardware_admin'
+    }
+    return render(request, 'pages/hardware-admin.html', context)
+
+from django.apps import apps
+
+def api_get_hardware_model(request, model_name):
+    try:
+        model = apps.get_model("home", model_name)  # "home" es el nombre de tu app
+        data = list(model.objects.all().values())
+        return JsonResponse({"data": data})
+    except LookupError:
+        return JsonResponse({"error": "Modelo no válido"}, status=400)
+
+@csrf_exempt
+def api_save_hardware_edit(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            model_name = data.get("model")
+            pk = data.get("id")
+            field = data.get("field")
+            value = data.get("value")
+
+            model = apps.get_model("home", model_name)
+            obj = model.objects.get(pk=pk)
+            setattr(obj, field, value)
+            obj.save()
+            return JsonResponse({"message": "Actualizado con éxito", "type": "success"})
+        except Exception as e:
+            return JsonResponse({"message": str(e), "type": "danger"}, status=500)
+        
+@csrf_exempt
+def api_create_hardware_record(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            model_name = data.get("model")
+            fields = data.get("fields", {})
+
+            model = apps.get_model("home", model_name)
+            obj = model.objects.create(**fields)
+            return JsonResponse({"message": "Registro creado", "type": "success"})
+        except Exception as e:
+            return JsonResponse({"message": str(e), "type": "danger"}, status=500)
+
 
 
 
