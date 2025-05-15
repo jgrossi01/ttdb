@@ -1,19 +1,16 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse, JsonResponse
+from django.views.decorators.http import require_GET
 from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse, JsonResponse
+from django.apps import apps
 from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
-from django.apps import apps
-from .models import MDBFile, TestSession, TestStage, TestResult
+from .models import *
 from .models_harness import Conexiones
 from django_eventstream import send_event
 from datetime import datetime
-from collections import defaultdict
-
-from django.views.decorators.http import require_GET
 from .hardware.commander import Commander
-
 
 import pyodbc
 import sqlite3
@@ -295,6 +292,15 @@ def get_unique_connectors():
     unique_connectors = sorted(set(filter(None, connectors)).union(set(filter(None, connectors_dest))))
 
     return unique_connectors
+
+def get_unique_connector_types():
+    connectors_orig_type = Conexiones.objects.using("harness").exclude(activo_si_no_field="no").values_list("tipo_de_con_orig", flat=True)
+    connectors_dest_type = Conexiones.objects.using("harness").exclude(activo_si_no_field="no").values_list("tipo_de_con_dest", flat=True)
+
+    # Unificar, eliminar None y duplicados
+    unique_connector_types = sorted(set(filter(None, connectors_orig_type)).union(set(filter(None, connectors_dest_type))))
+
+    return unique_connector_types
 
 def get_letter_to_number_mapping():
     letter_to_number = {}
@@ -749,42 +755,47 @@ def test_hardware(request):
                 "result": result
             }, status=500)
         
-        
-        success, result = commander.pik_open(card, bus, dev)
-        if success:
-            return JsonResponse({
-                "status": "ok",
-                "message": "Conexión exitosa con la placa.",
-                "result": result
-            })
-        else:
-            return JsonResponse({
-                "status": "error",
-                "message": "Falló la comunicación con la placa.",
-                "result": result
-            }, status=500)
     except Exception as e:
         return JsonResponse({
             "status": "error",
             "message": f"Error inesperado: {str(e)}"
         }, status=500)
 
-def hardware_admin(request):
+def hardware(request):
     context = {
         'parent': '',
-        'segment': 'hardware_admin'
+        'segment': 'hardware',
+        'connection_config': ConnectionConfig.objects.first()
     }
     return render(request, 'pages/hardware-admin.html', context)
 
-from django.apps import apps
+def api_connector_types(request):
+    unique_types = get_unique_connector_types()
+    return JsonResponse([{"value": t, "text": t} for t in unique_types], safe=False)
 
 def api_get_hardware_model(request, model_name):
     try:
-        model = apps.get_model("home", model_name)  # "home" es el nombre de tu app
+        if model_name.lower() == "adapter":
+            data = []
+            for adapter in Adapter.objects.all():
+                pxi = adapter.connections.values_list("pxi_connector__label", flat=True).distinct()
+                test = adapter.connections.values_list("test_connector__label", flat=True).distinct()
+                data.append({
+                    "id": adapter.id,
+                    "name": adapter.name,
+                    "pxi_connectors": list(pxi),
+                    "test_connectors": list(test),
+                })
+            return JsonResponse({"data": data})
+
+        # Fallback genérico para otros modelos
+        model = apps.get_model("home", model_name)
         data = list(model.objects.all().values())
         return JsonResponse({"data": data})
+
     except LookupError:
         return JsonResponse({"error": "Modelo no válido"}, status=400)
+
 
 @csrf_exempt
 def api_save_hardware_edit(request):
@@ -803,7 +814,8 @@ def api_save_hardware_edit(request):
             return JsonResponse({"message": "Actualizado con éxito", "type": "success"})
         except Exception as e:
             return JsonResponse({"message": str(e), "type": "danger"}, status=500)
-        
+
+   
 @csrf_exempt
 def api_create_hardware_record(request):
     if request.method == "POST":
@@ -811,12 +823,113 @@ def api_create_hardware_record(request):
             data = json.loads(request.body)
             model_name = data.get("model")
             fields = data.get("fields", {})
-
             model = apps.get_model("home", model_name)
+
+            # ✅ Asignar el objeto creado
             obj = model.objects.create(**fields)
-            return JsonResponse({"message": "Registro creado", "type": "success"})
+
+            return JsonResponse({
+                "message": "Registro creado",
+                "type": "success",
+                "id": obj.pk 
+            })
+
         except Exception as e:
             return JsonResponse({"message": str(e), "type": "danger"}, status=500)
+
+    return JsonResponse({"message": "Método no permitido"}, status=405)
+
+
+@csrf_exempt
+def api_delete_hardware_record(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            model_name = data.get("model")
+            pk = data.get("id")
+
+            model = apps.get_model("home", model_name)
+            obj = model.objects.get(pk=pk)
+            obj.delete()
+
+            return JsonResponse({"message": "Eliminado correctamente", "type": "success"})
+        except Exception as e:
+            return JsonResponse({"message": str(e), "type": "danger"}, status=500)
+    return JsonResponse({"message": "Método no permitido"}, status=405)
+
+def get_connection_config(request):
+    config = ConnectionConfig.objects.first()
+    return JsonResponse({
+        "ip_port": config.ip_port if config else ""
+    })
+    
+@csrf_exempt
+def new_adapter_view(request):
+    if request.method == "POST":
+        name = request.POST.get("name", "").strip()
+        if not name:
+            return render(request, "pages/new-adapter.html", {"error": "El nombre es obligatorio."})
+
+        if Adapter.objects.filter(name__iexact=name).exists():
+            return render(request, "pages/new-adapter.html", {"error": "Ya existe un adaptador con ese nombre."})
+
+        adapter = Adapter.objects.create(name=name)
+        return redirect('adapter_connectors_view', id=adapter.id)
+
+    return render(request, "pages/new-adapter.html")
+
+def adapter_connectors_view(request, id):
+    try:
+        adapter = Adapter.objects.get(pk=id)
+    except Adapter.DoesNotExist:
+        return redirect("new_adapter_view")
+
+    return render(request, "pages/adapter-connectors.html", {"adapter": adapter})
+
+
+
+@csrf_exempt
+def api_create_physical_connector(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            adapter_id = data.get("adapter_id")
+            connector_type = data.get("connector_type", "").strip().upper()
+            label = data.get("label", "").strip()
+
+            if not adapter_id or not connector_type or not label:
+                return JsonResponse({"message": "Datos incompletos."}, status=400)
+
+            from home.models import Adapter, PhysicalConnector
+
+            adapter = Adapter.objects.get(pk=adapter_id)
+
+            # Validar duplicado en el adapter
+            if PhysicalConnector.objects.filter(adapter=adapter, label__iexact=label).exists():
+                return JsonResponse({"message": "Ya existe un conector con ese nombre para este adaptador."}, status=400)
+
+            connector = PhysicalConnector.objects.create(
+                adapter=adapter,
+                connector_type=connector_type,
+                label=label
+            )
+            return JsonResponse({
+                "message": "Conector creado correctamente.",
+                "connector": {
+                    "id": connector.id,
+                    "label": connector.label,
+                    "connector_type": connector.connector_type
+                }
+            })
+
+        except Exception as e:
+            return JsonResponse({"message": str(e)}, status=500)
+
+
+
+
+
+
 
 
 

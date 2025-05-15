@@ -1,0 +1,75 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Nuevo adaptador - {% endblock title %}
+
+{% load static %}
+
+{% block content %}
+
+  <div class="page-wrapper">
+    <!-- Page header -->
+
+    <!-- Page body -->
+    <div class="page-body">
+      <div class="container-xl">
+        <div class="row row-cards">
+          <div class="col-lg-12">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Nuevo adaptador</h3>
+              </div>
+              <form method="POST" action="{% url 'new_adapter_view' %}" id="adapter-form">
+                {% csrf_token %}
+                <div class="card-body">
+                  <div class="mb-3">
+                    <label for="adapter-name" class="form-label">Nombre del adaptador</label>
+                    <input type="text" class="form-control" id="adapter-name" name="name" placeholder="Ej: Cable PXI-Chasis 1" required>
+                  </div>
+                  
+                  <div id="alert-container"></div>
+                  {% if error %}
+                  <div class="alert alert-important alert-warning alert-dismissible" role="alert">
+                    <div class="alert-icon">
+                      <!-- Download SVG icon from http://tabler.io/icons/icon/alert-circle -->
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon icon-2">
+                        <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path>
+                        <path d="M12 8v4"></path>
+                        <path d="M12 16h.01"></path>
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 class="alert-heading">{{ error }}</h4>
+                    </div>
+                    <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+                  </div>
+                  {% endif %}
+                </div>
+                <div class="card-footer text-end">
+                  <button type="submit" class="btn btn-primary">Crear adaptador</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    {% include 'includes/footer.html' %}
+  </div>
+
+  {% block modal %}
+     
+  {% endblock modal %}
+
+{% endblock content %}
+
+{% block extrajs %}
+
+<script src="{% static 'js/jquery-3.7.0.min.js' %}"></script>
+<script src="{% static 'js/dataTables.js' %}"></script>
+<script src="{% static 'js/dataTables.bootstrap5.js' %}"></script>
+
+
+{% endblock extrajs %}
+
+{% block extrastyle %}
+{% endblock extrastyle %}

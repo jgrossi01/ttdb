@@ -165,3 +165,5 @@ Acomodar estilo de breadscrumb (margin) e incluirlo tambien en Previsualización
 Ver si se puede generar pdf de la pagina Resultados.
 Agregar Fecha a los resultados (se muestra solo hora)
     
+
+ #Micro-d S (socket-hembra) P (pin contact - macho)

@@ -94,14 +94,7 @@ class TestResult(models.Model):
     
     def __str__(self):
         return f"{self.signal_name}: {self.result}"
-    
-class ConnectionConfig(models.Model):
-    """Placa PXI con canales de relé."""
-    ip_port = models.CharField(max_length=50, unique=True)  # ej. "tcp://10.245.1.103:9194"
-    
-    def __str__(self):
-        return self.ip_port
-    
+        
 class RelayCard(models.Model):
     """Placa PXI con canales de relé."""
     name = models.CharField(max_length=50, unique=True)  # ej. "PXI-1"
@@ -111,46 +104,74 @@ class RelayCard(models.Model):
     def __str__(self):
         return self.name
 
-
-class ConnectorType(models.Model):
-    """Tipo de conector: DB15-M, DB78-H, etc."""
-    name = models.CharField(max_length=20, unique=True)  # ej. "DB15M"
-    pin_count = models.PositiveIntegerField() # ej. "15"
-    connector_family = models.CharField(max_length=20)  # ej. "DB", "MIL"
-    gender = models.CharField(max_length=1, choices=[("M", "Macho"), ("H", "Hembra")])
-
-    def __str__(self):
-        return self.name
-
-
 class Adapter(models.Model):
     """
-    Adaptador físico entre conector de prueba y conector PXI.
-    Un adaptador define la relación entre pines del conector de test y canales de PXI.
+    Adaptador físico, p. ej. “Cable chasis → PXI-1”,
+    que conecta varios PhysicalConnector entre sí.
     """
     name = models.CharField(max_length=100, unique=True)
-    test_connector = models.ForeignKey(
-        ConnectorType, on_delete=models.CASCADE, related_name="adapters_as_test"
-    )
-    pxi_connector = models.ForeignKey(
-        ConnectorType, on_delete=models.CASCADE, related_name="adapters_as_pxi"
-    )
 
     def __str__(self):
         return self.name
+
+class PhysicalConnector(models.Model):
+    """
+    Una instancia física de conector (DB15-M, DB78-H, DB50F, etc.),
+    asociada a un adaptador específico.
+    """
+    adapter         = models.ForeignKey("Adapter", on_delete=models.CASCADE, related_name="physical_connectors")
+    connector_type  = models.CharField(max_length=50)  # ej. "DB50F", "DB25M"
+    label           = models.CharField(max_length=50)  # ej. "Conector A", "Conector B"
+
+    class Meta:
+        unique_together = ('adapter', 'label')
+
+    def __str__(self):
+        return f"{self.adapter.name} | {self.label}"
+
+class AdapterConnection(models.Model):
+    """
+    Una relación “unidireccional” dentro de un Adapter:
+      de un PhysicalConnector TEST al PhysicalConnector PXI.
+    """
+    adapter          = models.ForeignKey(Adapter, on_delete=models.CASCADE, related_name="connections")
+    test_connector   = models.ForeignKey(PhysicalConnector, on_delete=models.PROTECT, related_name="as_test_connections")
+    pxi_connector    = models.ForeignKey(PhysicalConnector, on_delete=models.PROTECT, related_name="as_pxi_connections")
+
+    class Meta:
+        unique_together = ("adapter", "test_connector", "pxi_connector")
+
+    def __str__(self):
+        return f"{self.adapter.name}: {self.test_connector.label} → {self.pxi_connector.label}"
 
 
 class AdapterPinMap(models.Model):
     """
-    Mapea los pines de un conector del adaptador a canales de una tarjeta PXI.
+    Para cada AdapterConnection, mapea un pin del conector de TEST
+    a un canal de RelayCard (PXI channel).
     """
-    adapter = models.ForeignKey(Adapter, on_delete=models.CASCADE, related_name="adapter_name")
-    relay_card = models.ForeignKey(RelayCard, on_delete=models.CASCADE, related_name="pxi_card")
-    adapter_pin = models.PositiveIntegerField()  # número de pin del adaptador
-    pxi_channel = models.PositiveIntegerField()  # índice de canal PXI (1..74)
+    adapter_connection = models.ForeignKey(
+        AdapterConnection,
+        on_delete=models.CASCADE,
+        related_name="pin_maps"
+    )
+    test_pin    = models.PositiveIntegerField()  # p. ej. 1..50
+    relay_card  = models.ForeignKey(RelayCard, on_delete=models.CASCADE, related_name="pin_maps")
+    pxi_channel = models.PositiveIntegerField()  # 1..74
 
     class Meta:
-        unique_together = ("adapter", "adapter_pin", "pxi_channel")
+        unique_together = ("adapter_connection", "test_pin", "relay_card", "pxi_channel")
 
     def __str__(self):
-        return f"{self.adapter.name}: {self.relay_card.name} - ch{self.pxi_channel} → {self.adapter_pin}"
+        ac = self.adapter_connection
+        return (
+            f"{ac.adapter.name} | {ac.test_connector.label}-pin{self.test_pin} → "
+            f"{ac.pxi_connector.label}-ch{self.pxi_channel}"
+        )
+        
+class ConnectionConfig(models.Model):
+    """Placa PXI con canales de relé."""
+    ip_port = models.CharField(max_length=50, unique=True)  # ej. "tcp://10.245.1.103:9194"
+    
+    def __str__(self):
+        return self.ip_port

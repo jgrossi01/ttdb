@@ -1,5 +1,5 @@
 {% extends 'layouts/base.html' %}
-{% block title %}Editar DB - {% endblock title %}
+{% block title %}Configuración - {% endblock title %}
 
 {% load static %}
 
@@ -38,51 +38,85 @@
                     <a href="#tabs-placas-pxi" class="nav-link active" data-bs-toggle="tab" aria-selected="true" role="tab">Placas PXI</a>
                   </li>
                   <li class="nav-item" role="presentation">
-                    <a href="#tabs-conectores" class="nav-link" data-bs-toggle="tab" aria-selected="false" tabindex="-1" role="tab">Tipos de conectores</a>
-                  </li>
-                  <li class="nav-item" role="presentation">
                     <a href="#tabs-adaptadores" class="nav-link" data-bs-toggle="tab" aria-selected="false" tabindex="-1" role="tab">Adaptadores</a>
                   </li>
-                  <li class="nav-item ms-auto" role="presentation">
-                    <a href="#tabs-settings" class="nav-link" title="Settings" data-bs-toggle="tab" aria-selected="false" tabindex="-1" role="tab">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1">
-                        <path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z"></path>
-                        <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"></path>
-                      </svg>
-                    </a>
+                  <li class="nav-item" role="presentation">
+                    <a href="#tabs-conexion" class="nav-link" data-bs-toggle="tab" aria-selected="false" tabindex="-1" role="tab">Conexión</a>
                   </li>
                 </ul>
               </div>
               <div class="card-body">
                 <div class="tab-content">
                   <div class="tab-pane active show" id="tabs-placas-pxi" role="tabpanel">
-                    <h4>Placas PXI</h4>
-                    <button class="btn btn-sm btn-primary mb-2" id="btn-add-placas-pxi">+ Agregar</button>
-                    <table id="table-placas-pxi" class="table table-bordered w-100"></table>
+                    <div class="card-header ps-0 pe-2 pt-0">
+                      <h3 class="card-title">Placas PXI</h3>
+                      <div class="card-actions">
+                        <a href="#" class="btn btn-primary" id="btn-add-placas-pxi">
+                          <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+                          <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M12 5l0 14"></path><path d="M5 12l14 0"></path></svg>
+                          Agregar
+                        </a>
+                      </div>
+                    </div>
+                  
+                    <table id="table-placas-pxi" class="table table-bordered w-100">
+                      <thead>
+                        <tr>
+                          <th>Nombre</th>
+                          <th>Bus</th>
+                          <th>Device</th>
+                          <th style="width: 1%">Acciones</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <!-- Las filas serán cargadas dinámicamente con DataTables -->
+                      </tbody>
+                    </table>
+                    
                   </div>
             
-                  <div class="tab-pane" id="tabs-conectores" role="tabpanel">
-                    <h4>Tipos de conectores</h4>
-                    <button class="btn btn-sm btn-primary mb-2" id="btn-add-conectores">+ Agregar</button>
-                    <table id="table-conectores" class="table table-bordered w-100"></table>
-                  </div>
+
             
                   <div class="tab-pane" id="tabs-adaptadores" role="tabpanel">
-                    <h4>Adaptadores</h4>
-                    <button class="btn btn-sm btn-primary mb-2" id="btn-add-adaptadores">+ Agregar</button>
-                    <table id="table-adaptadores" class="table table-bordered w-100"></table>
-                    <h5 class="mt-4">Mapeo de pines</h5>
-                    <button class="btn btn-sm btn-primary mb-2" id="btn-add-adaptadores-pinmap">+ Agregar PinMap</button>
-                    <table id="table-adaptadores-pinmap" class="table table-bordered w-100"></table>
+                    <div class="card-header ps-0 pe-2 pt-0">
+                      <h3 class="card-title">Adaptadores</h3>
+                      <div class="card-actions">
+                        <a href="#" class="btn btn-primary" id="btn-add-adaptadores">
+                          <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+                          <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M12 5l0 14"></path><path d="M5 12l14 0"></path></svg>
+                          Agregar
+                        </a>
+                      </div>
+                    </div>
+
+                    <table id="table-adaptadores" class="table table-bordered w-100">
+                      <thead>
+                        <tr>
+                          <th>Nombre</th>
+                          <th>Conectores a PXI</th>
+                          <th>Conectores a test</th>
+                          <th>Acciones</th>
+                        </tr>
+                      </thead>
+                    </table>
                   </div>
             
-                  <div class="tab-pane" id="tabs-settings" role="tabpanel">
-                    <h4>Configuración</h4>
-                    <div class="mb-3">
+                  <div class="tab-pane" id="tabs-conexion" role="tabpanel">
+                    <div class="card-header ps-0 pe-2 pt-0">
+                      <h3 class="card-title">Conexión</h3>
+                    </div>
+                    
+                    <div class="my-3">
                       <label class="form-label">Dirección del bus (IP y puerto)</label>
                       <input type="text" id="input-ip-port" class="form-control" value="tcp://localhost:6003">
                     </div>
-                    <button class="btn btn-success" id="btn-save-config">Guardar configuración</button>
+                    <div class="d-flex justify-content-end pt-2">
+                      <a href="#" class="btn btn-success" id="btn-save-config">
+                        <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+                        <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-device-floppy"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2" /><path d="M12 14m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M14 4l0 4l-6 0l0 -4" /></svg>
+                        Guardar
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -99,23 +133,73 @@
 
   {% block modal %}
   
-  <div class="modal modal-blur fade" id="backupModal" tabindex="-1" style="display: none;" aria-modal="true" role="dialog">
-    <div class="modal-dialog modal-dialog-centered" role="document">
+  <!-- Modal agregar placa PXI -->
+  <div class="modal modal-blur fade show" id="new-pxi" tabindex="-1" style="display: none;">
+    <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Copia de seguridad</h5>
+          <h5 class="modal-title">Agregar placa PXI</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          ¿Esta seguro que desea crear una copia de seguridad?
+          <div class="mb-3">
+            <label class="form-label">Nombre</label>
+            <input type="text" class="form-control" name="name" placeholder="Nombre de la placa PXI">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Bus</label>
+            <input type="text" class="form-control" name="bus" placeholder="Bus de conexion de red">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Device</label>
+            <input type="text" class="form-control" name="device" placeholder="Numero de slot donde esta la placa en el PXI">
+          </div>
+          <div id="alert-container" class="row col-12">
+          </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn me-auto" data-bs-dismiss="modal">Cerrar</button>
-          <button type="button" class="btn btn-primary" id="btnCrearBackup">Crear</button>
+          <a href="#" class="btn btn-link link-secondary btn-3" data-bs-dismiss="modal"> Cancelar </a>
+          <a href="#" class="btn btn-primary btn-5 ms-auto">
+            <!-- Download SVG icon from http://tabler.io/icons/icon/plus -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+              <path d="M12 5l0 14"></path>
+              <path d="M5 12l14 0"></path>
+            </svg>
+            Agregar
+          </a>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Modal de confirmación de eliminación -->
+  <div class="modal modal-blur fade" id="modal-confirm" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-status bg-danger"></div>
+        <div class="modal-body text-center py-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon mb-2 text-danger icon-lg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+            <path d="M10.24 3.957l-8.422 14.06a1.989 1.989 0 0 0 1.7 2.983h16.845a1.989 1.989 0 0 0 1.7 -2.983l-8.423 -14.06a1.989 1.989 0 0 0 -3.4 0z" />
+            <path d="M12 9v4" />
+            <path d="M12 17h.01" />
+          </svg>
+          <h3>Eliminar</h3>
+          <div class="text-muted">¿Está seguro que desea eliminar este registro?</div>
+        </div>
+        <div class="modal-footer">
+          <div class="w-100">
+            <div class="row">
+              <div class="col"><a href="#" class="btn w-100" data-bs-dismiss="modal">Cancelar</a></div>
+              <div class="col"><a href="#" id="confirmDeleteBtn" class="btn btn-danger w-100">Eliminar</a></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   {% endblock modal %}
 
 {% endblock content %}
@@ -126,121 +210,410 @@
 <script src="{% static 'js/dataTables.js' %}"></script>
 <script src="{% static 'js/dataTables.bootstrap5.js' %}"></script>
 
+<script src="{% static 'dist/libs/tom-select/dist/js/tom-select.base.min.js' %}?1684106062" defer></script>
+
 <script>
 
-document.addEventListener("DOMContentLoaded", function () {
-  const modelos = [
-    { id: 'placas-pxi', nombre: 'relaycard', columnas: ['name', 'bus', 'device'] },
-    { id: 'conectores', nombre: 'connectortype', columnas: ['name', 'pin_count', 'connector_family', 'gender'] },
-    { id: 'adaptadores', nombre: 'adapter', columnas: ['name', 'test_connector_id', 'pxi_connector_id'] },
-    { id: 'adaptadores-pinmap', nombre: 'adapterpinmap', columnas: ['adapter_id', 'relay_card_id', 'adapter_pin', 'pxi_channel'] }
-  ];
+  document.addEventListener("DOMContentLoaded", function () {
 
-  modelos.forEach(({ id, nombre, columnas }) => {
-    const tabla = $(`#table-${id}`).DataTable({
-      ajax: `/api/hardware/${nombre}/`,
-      dataSrc: "data",
-      columns: columnas.map(c => ({ data: c, className: 'editable' })),
-      language: { url: '{% static "datatables/datatables_es-ES.json" %}' },
-      pageLength: 25,
-      stateSave: true,
-      order: [[0, 'asc']],
-    });
+    /*
+    new TomSelect("#connector_type_select", {
+      create: true,  // permite nuevos valores
+      valueField: "value",
+      labelField: "text",
+      searchField: ["text"],
+      load: function (query, callback) {
+        fetch("/api/hardware/connector-types/")
+          .then(response => response.json())
+          .then(data => callback(data))
+          .catch(() => callback());
+      }
+    });*/
 
-    $(`#table-${id} tbody`).on("click", "td.editable", function () {
-      const cell = tabla.cell(this);
-      const rowData = tabla.row(this).data();
-      const column = tabla.column(this).dataSrc();
-      const input = $('<input type="text" class="form-control form-control-sm" />');
-      input.val(cell.data());
-      $(this).html(input);
-      input.focus();
-
-      input.on("blur", function () {
-        const newValue = input.val().trim();
-        if (newValue === rowData[column]) {
-          cell.data(rowData[column]).draw();
-          return;
+    // MODELS
+    const modelos = [
+      { 
+        id: 'placas-pxi', 
+        nombre: 'relaycard', 
+        columnas: ['name', 'bus', 'device'] 
+      },
+      {
+      id: 'adaptadores',
+      nombre: 'adapter',
+      columnas: [
+        { data: 'name', className: 'editable' },
+        {
+          data: 'pxi_connectors',
+          title: 'Conectores a PXI',
+          orderable: false,
+          searchable: false,
+          className: 'text-muted',  // Sin clase "editable"
+          render: function (data) {
+            return Array.isArray(data) ? data.join(", ") : '';
+          }
+        },
+        {
+          data: 'test_connectors',
+          title: 'Conectores a test',
+          orderable: false,
+          searchable: false,
+          className: 'text-muted',  // Sin clase "editable"
+          render: function (data) {
+            return Array.isArray(data) ? data.join(", ") : '';
+          }
         }
+      ]
+    },
+    ];
 
-        const payload = {
-          id: rowData.id,
-          model_name = d
-          column: column,
-          value: newValue,
+    // CREATE
+    const pxiModal = new bootstrap.Modal(document.getElementById('new-pxi'));
+    const confirmModal = new bootstrap.Modal(document.getElementById('modal-confirm'));
+    
+  
+    // Mostrar modal al hacer click en "Agregar placa PXI"
+    $('#btn-add-placas-pxi').on("click", function () {
+      $('#new-pxi input').val(""); // limpiar campos
+      pxiModal.show();
+    });
+  
+    // Botón del modal (confirmar creación)
+    $('#new-pxi .btn-primary').on('click', function () {
+      const modal = $('#new-pxi');
+      const name = modal.find('input[name="name"]').val().trim();
+      const bus = modal.find('input[name="bus"]').val().trim();
+      const device = modal.find('input[name="device"]').val().trim();
+      const alertContainer = modal.find("#alert-container");
+      
+
+      alertContainer.empty();
+  
+      if (!name || !bus || !device) {
+        showInlineAlert(alertContainer, "Todos los campos son obligatorios.", "warning");
+        return;
+      }
+
+      // Validación de enteros
+      if (!/^\d+$/.test(bus) || !/^\d+$/.test(device)) {
+        showInlineAlert(alertContainer, "Los campos 'Bus' y 'Device' deben ser números enteros.", "warning");
+        return;
+      }
+      
+  
+      $.ajax({
+        url: '/api/hardware/create/',
+        method: 'POST',
+        contentType: 'application/json',
+        headers: { "X-CSRFToken": getCSRFToken() },
+        data: JSON.stringify({
+          model: 'RelayCard',
+          fields: {
+            name,
+            bus: parseInt(bus),
+            device: parseInt(device)
+          }
+        }),
+        success: function (res) {
+          showToast(res.message || 'Placa agregada', 'success');
+          pxiModal.hide();
+          $('#table-placas-pxi').DataTable().ajax.reload();
+          alertContainer.empty();  
+        },
+        error: function (xhr) {
+          const error = xhr.responseJSON?.message || 'Error al crear la placa';
+          //showToast(error, 'danger');
+          showInlineAlert(alertContainer, error, 'warning');
+        }
+      });
+    });
+  
+    
+  // SHOW 
+    modelos.forEach(({ id, nombre, columnas }) => {
+      const tabla = $(`#table-${id}`).DataTable({
+        ajax: `/api/hardware/${nombre}/`,
+        dataSrc: "data",
+        columns: nombre === "adapter"
+          ? [
+              { data: 'name', className: 'editable' },
+              {
+                data: 'pxi_connectors',
+                title: 'Conectores PXI',
+                orderable: false,
+                searchable: false,
+                className: 'text-muted',
+                render: function (data) {
+                  return Array.isArray(data) ? data.join(", ") : '';
+                }
+              },
+              {
+                data: 'test_connectors',
+                title: 'Conectores TEST',
+                orderable: false,
+                searchable: false,
+                className: 'text-muted',
+                render: function (data) {
+                  return Array.isArray(data) ? data.join(", ") : '';
+                }
+              },
+              {
+                data: null,
+                orderable: false,
+                searchable: false,
+                title: "Acciones",
+                className: "text-center",
+                render: function (data, type, row) {
+                  return `
+                    <button class="btn btn-sm btn-danger btn-delete" title="Eliminar" data-id="${row.id}" data-model="${nombre}">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+                        <path d="M4 7h16"></path>
+                        <path d="M10 11v6"></path>
+                        <path d="M14 11v6"></path>
+                        <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"></path>
+                        <path d="M9 7V4h6v3"></path>
+                      </svg>
+                    </button>`;
+                }
+              }
+            ]
+          : [
+              ...columnas.map(c => ({ data: c, className: 'editable' })),
+              {
+                data: null,
+                orderable: false,
+                searchable: false,
+                title: "Acciones",
+                className: "text-center",
+                render: function (data, type, row) {
+                  return `
+                    <button class="btn btn-sm btn-danger btn-delete" title="Eliminar" data-id="${row.id}" data-model="${nombre}">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+                        <path d="M4 7h16"></path>
+                        <path d="M10 11v6"></path>
+                        <path d="M14 11v6"></path>
+                        <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"></path>
+                        <path d="M9 7V4h6v3"></path>
+                      </svg>
+                    </button>`;
+                }
+              }
+            ],
+        language: { url: '{% static "datatables/datatables_es-ES.json" %}' },
+        paging: false,
+        searching: false,
+        info: false,
+        ordering: false,
+        stateSave: false
+      });
+
+
+      // DELETE
+      $(`#table-${id} tbody`).on("click", ".btn-delete", function () {
+        const row = tabla.row($(this).closest("tr"));
+        const data = row.data();
+
+        deletePayload = {
+          model: nombre,
+          id: data.id,
+          row: row,
+          tabla: tabla
         };
 
-        $.ajax({
-          url: `/api/hardware/edit/${nombre}/`,
-          method: "POST",
-          contentType: "application/json",
-          headers: { "X-CSRFToken": getCSRFToken() },
-          data: JSON.stringify(payload),
-          success: function () {
-            cell.data(newValue).draw();
-            showToast("Actualizado con éxito", "success");
-          },
-          error: function () {
+        confirmModal.show();
+      });
+  
+      // EDIT
+      $(`#table-${id} tbody`).on("click", "td.editable", function () {
+        const cell = tabla.cell(this);
+        const rowData = tabla.row(this).data();
+        const column = tabla.column(this).dataSrc();
+        const input = $('<input type="text" class="form-control form-control-sm" />');
+        input.val(cell.data());
+        $(this).html(input);
+        input.focus();
+  
+        input.on("blur", function () {
+          const newValue = input.val().trim();
+
+          // Validación: no vacío
+          if (!newValue) {
+            showToast("El valor no puede estar vacío", "warning");
             cell.data(rowData[column]).draw();
-            showToast("Error al actualizar", "danger");
-          },
+            return;
+          }
+
+          // Validación: si el campo es "bus" o "device", debe ser entero
+          if ((column === "bus" || column === "device") && !/^\d+$/.test(newValue)) {
+            showToast(`El campo "${column}" debe ser un número entero`, "warning");
+            cell.data(rowData[column]).draw();
+            return;
+          }
+
+          // Validación: si el campo contiene lo mismo que ya tenia
+          if (String(newValue).trim() === String(rowData[column]).trim()) {
+            cell.data(rowData[column]).draw();
+            return;
+          }
+  
+          const payload = {
+            id: rowData.id,
+            model: nombre,
+            field: column,
+            value: (column === "bus" || column === "device") ? parseInt(newValue) : newValue,
+          };
+  
+          $.ajax({
+            url: `/api/hardware/save/`,
+            method: "POST",
+            contentType: "application/json",
+            headers: { "X-CSRFToken": getCSRFToken() },
+            data: JSON.stringify(payload),
+            success: function () {
+              cell.data(newValue).draw();
+              showToast("Actualizado con éxito", "success");
+            },
+            error: function () {
+              cell.data(rowData[column]).draw();
+              showToast("Error al actualizar", "danger");
+            },
+          });
         });
       });
     });
 
-    $(`#btn-add-${id}`).on("click", function () {
-      const row = {};
-      columnas.forEach(c => row[c] = "");
-      tabla.row.add(row).draw(false);
-    });
-  });
+    // Confirmar eliminación
+    $('#confirmDeleteBtn').on('click', function () {
+      if (!deletePayload) return;
 
-  // Config única: editar directamente campos de ConnectionConfig
-  $("#btn-save-config").on("click", function () {
-    const ip_port = $("#input-ip-port").val().trim();
-    $.ajax({
-      url: "/api/hardware/edit/connectionconfig/",
-      method: "POST",
-      contentType: "application/json",
-      headers: { "X-CSRFToken": getCSRFToken() },
-      data: JSON.stringify({ id: 1, column: "ip_port", value: ip_port }),
-      success: function () {
-        showToast("Configuración actualizada", "success");
-      },
-      error: function () {
-        showToast("Error al guardar", "danger");
-      }
-    });
-  });
-
-  function getCSRFToken() {
-    let value = null;
-    if (document.cookie) {
-      document.cookie.split(";").forEach(cookie => {
-        if (cookie.trim().startsWith("csrftoken=")) {
-          value = cookie.trim().substring("csrftoken=".length);
+      $.ajax({
+        url: "/api/hardware/delete/",
+        method: "POST",
+        contentType: "application/json",
+        headers: { "X-CSRFToken": getCSRFToken() },
+        data: JSON.stringify({ model: deletePayload.model, id: deletePayload.id }),
+        success: function () {
+          deletePayload.row.remove().draw();
+          confirmModal.hide();
+          showToast("Registro eliminado con éxito", "success");
+        },
+        error: function () {
+          showToast("Error al eliminar el registro", "danger");
+        },
+        complete: function () {
+          deletePayload = null;
         }
       });
-    }
-    return value;
-  }
+    });
+  
+    // VER Y GUARDAR CONNECTION CONFIG
 
-  function showToast(msg, type = "info") {
-    const toast = document.createElement("div");
-    toast.className = `toast align-items-center text-white bg-${type} border-0`;
-    toast.setAttribute("role", "alert");
-    toast.setAttribute("aria-live", "assertive");
-    toast.setAttribute("aria-atomic", "true");
-    toast.innerHTML = `
-      <div class="d-flex">
-        <div class="toast-body">${msg}</div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-      </div>`;
-    document.getElementById("toastContainer").appendChild(toast);
-    new bootstrap.Toast(toast).show();
-    toast.addEventListener("hidden.bs.toast", () => toast.remove());
-  }
-});
+    // Mostrar configuración actual de conexion
+    $.get('/api/hardware/connection_config/', function (res) {
+      if (res.ip_port) {
+        $('#input-ip-port').val(res.ip_port);
+      }
+    });
+
+    // Guardar configuración de conexion
+    $("#btn-save-config").on("click", function () {
+      const ip_port = $("#input-ip-port").val().trim();
+
+      if (!ip_port) {
+        showToast("El campo IP/puerto no puede estar vacío", "warning");
+        return;
+      }
+
+      $.ajax({
+        url: "/api/hardware/save/",
+        method: "POST",
+        contentType: "application/json",
+        headers: { "X-CSRFToken": getCSRFToken() },
+        data: JSON.stringify({ id: 1, model: "ConnectionConfig", field: "ip_port", value: ip_port }),
+        success: function () {
+          showToast("Configuración actualizada", "success");
+        },
+        error: function () {
+          showToast("Error al guardar la configuración", "danger");
+        }
+      });
+    });
+
+  
+    function getCSRFToken() {
+      let value = null;
+      if (document.cookie) {
+        document.cookie.split(";").forEach(cookie => {
+          if (cookie.trim().startsWith("csrftoken=")) {
+            value = cookie.trim().substring("csrftoken=".length);
+          }
+        });
+      }
+      return value;
+    }
+  
+    function showToast(msg, type = "info") {
+      const toast = document.createElement("div");
+      toast.className = `toast align-items-center text-white bg-${type} border-0 my-1`;
+      toast.setAttribute("role", "alert");
+      toast.setAttribute("aria-live", "assertive");
+      toast.setAttribute("aria-atomic", "true");
+      toast.innerHTML = `
+        <div class="d-flex">
+          <div class="toast-body">${msg}</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>`;
+      document.getElementById("toastContainer").appendChild(toast);
+      new bootstrap.Toast(toast).show();
+      toast.addEventListener("hidden.bs.toast", () => toast.remove());
+    }
+
+    function showInlineAlert(container, message, type = "info") {
+      const icons = {
+        info: `
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon icon-2">
+            <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path>
+            <path d="M12 9h.01"></path>
+            <path d="M11 12h1v4h1"></path>
+          </svg>`,
+        warning: `
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon icon-2">
+            <path d="M12 9v4"></path>
+            <path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z"></path>
+            <path d="M12 16h.01"></path>
+          </svg>`,
+        danger: `
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon icon-2">
+            <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path>
+            <path d="M12 8v4"></path>
+            <path d="M12 16h.01"></path>
+          </svg>`,
+        success: `
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon icon-2">
+            <path d="M5 12l5 5l10 -10"></path>
+          </svg>`
+      };
+
+      const icon = icons[type] || icons.info;
+
+      const html = `
+        <div class="alert alert-important alert-${type} alert-dismissible" role="alert">
+          <div class="alert-icon">${icon}</div>
+          <div>${message}</div>
+          <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+        </div>
+      `;
+
+      container.html(html);
+    }
+
+
+
+
+    
+
+
+
+  });
 
 </script>
 {% endblock extrajs %}

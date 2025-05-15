@@ -153,7 +153,7 @@
                       <span class="badge bg-default text-default-fg">{{ result.get_result_display }}</span>
                     {% endif %}
                   </td>
-                  <td>{{ result.timestamp|date:"H:i:s" }}</td>
+                  <td>{{ result.timestamp|date:"H:i d/m/y" }}</td>
                 </tr>
                 {% endfor %}
               </tbody>

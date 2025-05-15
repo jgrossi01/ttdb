@@ -1,0 +1,218 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Nuevo adaptador - {% endblock title %}
+
+{% load static %}
+
+{% block content %}
+
+  <div class="page-wrapper">
+    <!-- Page header -->
+
+    <!-- Page body -->
+    <div class="page-body">
+      <div class="container-xl">
+        <div class="row row-cards">
+          <div class="col-lg-12">
+            <div class="card mb-3">
+              <div class="card-header">
+                <h3 class="card-title">Conectores del adaptador {{ adapter.name }}</h3>
+              </div>                
+              <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                      <div class="mb-3">
+                        <label class="form-label">Tipo de conector</label>
+                        <select id="connector_type_select" class="form-select"></select>
+                      </div>
+                    </div>
+                    <div class="col">
+                        <div class="mb-3">
+                        <label class="form-label">Etiqueta (label)</label>
+                        <input type="text" id="connector_label" class="form-control" placeholder="Ej. H-E-OUTPUT-1">
+                      </div>
+                    </div>
+                  </div>
+                
+                <div id="alert-container"></div>
+
+              </div>
+              <div class="card-footer text-end">
+                <button class="btn btn-primary" id="btn-save-connector">Agregar conector</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Conectores existentes</h3>
+              </div>                
+              <div class="card-body">
+                <table class="table table-striped" id="connector-table">
+                  <thead>
+                    <tr>
+                      <th>Etiqueta</th>
+                      <th>Tipo</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+
+              </div>
+            </div>
+
+
+
+
+
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+    {% include 'includes/footer.html' %}
+  </div>
+
+  {% block modal %}
+     
+  {% endblock modal %}
+
+{% endblock content %}
+
+{% block extrajs %}
+
+<script src="{% static 'js/jquery-3.7.0.min.js' %}"></script>
+<script src="{% static 'js/dataTables.js' %}"></script>
+<script src="{% static 'js/dataTables.bootstrap5.js' %}"></script>
+
+<script src="{% static 'dist/libs/tom-select/dist/js/tom-select.base.min.js' %}?1684106062" defer></script>
+
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const adapterId = {{ adapter.id }};
+    const alertContainer = document.getElementById("alert-container");
+
+    new TomSelect("#connector_type_select", {
+      create: true,
+      valueField: "value",
+      labelField: "text",
+      searchField: ["text"],
+      load: function (query, callback) {
+        fetch("/api/hardware/connector-types/")
+          .then(res => res.json())
+          .then(data => callback(data))
+          .catch(() => callback());
+      }
+    });
+
+    function showInlineAlert(container, message, type = "info") {
+      const icons = {
+        info: `
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon icon-2">
+            <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path>
+            <path d="M12 9h.01"></path>
+            <path d="M11 12h1v4h1"></path>
+          </svg>`,
+        warning: `
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon icon-2">
+            <path d="M12 9v4"></path>
+            <path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z"></path>
+            <path d="M12 16h.01"></path>
+          </svg>`,
+        danger: `
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon icon-2">
+            <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path>
+            <path d="M12 8v4"></path>
+            <path d="M12 16h.01"></path>
+          </svg>`,
+        success: `
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon icon-2">
+            <path d="M5 12l5 5l10 -10"></path>
+          </svg>`
+      };
+
+      const icon = icons[type] || icons.info;
+
+      const html = `
+        <div class="alert alert-important alert-${type} alert-dismissible" role="alert">
+          <div class="alert-icon">${icon}</div>
+          <div>${message}</div>
+          <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+        </div>
+      `;
+
+      container.html(html);
+    }
+
+    function cargarConectores() {
+      fetch(`/api/hardware/physicalconnector/?adapter=${adapterId}`)
+        .then(res => res.json())
+        .then(data => {
+          const tbody = document.querySelector("#connector-table tbody");
+          tbody.innerHTML = "";
+          data.data.forEach(c => {
+            tbody.innerHTML += `
+              <tr>
+                <td>${c.label}</td>
+                <td>${c.connector_type}</td>
+                <td>
+                  <button class="btn btn-sm btn-danger btn-delete" data-id="${c.id}">Eliminar</button>
+                </td>
+              </tr>`;
+          });
+        });
+    }
+
+    document.getElementById("btn-save-connector").addEventListener("click", () => {
+      const type = document.getElementById("connector_type_select").value.trim();
+      const label = document.getElementById("connector_label").value.trim();
+
+      if (!type || !label) {
+        showAlert("Todos los campos son obligatorios.");
+        return;
+      }
+
+      fetch("/api/hardware/physicalconnector/create/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCSRFToken()
+        },
+        body: JSON.stringify({
+          adapter_id: adapterId,
+          connector_type: type,
+          label: label
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.message) showAlert(data.message, "success");
+        cargarConectores();
+        document.getElementById("connector_label").value = "";
+      })
+      .catch(err => {
+        showAlert("Error al guardar el conector", "danger");
+      });
+    });
+
+    function getCSRFToken() {
+      let value = null;
+      document.cookie.split(";").forEach(cookie => {
+        if (cookie.trim().startsWith("csrftoken=")) {
+          value = cookie.trim().substring("csrftoken=".length);
+        }
+      });
+      return value;
+    }
+
+    cargarConectores();
+  });
+</script>
+
+
+{% endblock extrajs %}
+
+{% block extrastyle %}
+{% endblock extrastyle %}

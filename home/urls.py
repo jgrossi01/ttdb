@@ -14,12 +14,12 @@ urlpatterns = [
     path("tests/<int:session_id>/result/", views.test_result, name="test_result"),
     path('test-log/', views.test_log, name='test_log'),
     path('tests/<int:session_id>/stage/<int:stage_id>/', views.test_stage_view, name='test_stage'),
-    path("hardware-admin/", views.hardware_admin, name="hardware_admin"),
-    path("api/hardware/<str:model_name>/", views.api_get_hardware_model, name="get_hardware_model"),
-    path("api/hardware/save/", views.api_save_hardware_edit, name="save_hardware_edit"),
-    path("api/hardware/create/", views.api_create_hardware_record, name="create_hardware_record"),
+    path("hardware/", views.hardware, name="hardware"),
+    path("hardware/new-adapter", views.new_adapter_view, name="new_adapter_view"),
+    path("hardware/adapter/<int:id>/connectors", views.adapter_connectors_view, name="adapter_connectors_view"),
+
     
-    #Hardware
+    #pruebas de conexion con pxi
     path('test-hardware/', views.test_hardware, name='test_hardware'),
 
     
@@ -34,6 +34,16 @@ urlpatterns = [
     path('api/latest-db-update', views.getLastDbUpdate, name='get_last_update'),
     path("api/delete-test-session/<int:session_id>/", views.delete_test_session, name="delete_test_session"),
     path('api/run-test-stage/', views.run_test_stage, name='run_test_stage'),
+    path("api/hardware/connector-types/", views.api_connector_types, name="connector_types"),
+    
+    # Genericas
+    path("api/hardware/save/", views.api_save_hardware_edit, name="save_hardware_edit"),
+    path("api/hardware/create/", views.api_create_hardware_record, name="create_hardware_record"),
+    path("api/hardware/delete/", views.api_delete_hardware_record, name="delete_hardware_record"),
+    path("api/hardware/connection_config/", views.get_connection_config, name="get_connection_config"),
+
+    path("api/hardware/<str:model_name>/", views.api_get_hardware_model, name="get_hardware_model"),
+    path("api/hardware/physicalconnector/create/", views.api_create_physical_connector),
     
     # Logs   
     path("events/", include(django_eventstream.urls), {"channels": ["dbupdate"]}),
