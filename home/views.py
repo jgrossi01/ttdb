@@ -10,7 +10,7 @@ from .models import *
 from .models_harness import Conexiones
 from django_eventstream import send_event
 from datetime import datetime
-from .hardware.commander import Commander
+#from .hardware.commander import Commander
 
 import pyodbc
 import sqlite3
@@ -727,7 +727,7 @@ def test_result(request, session_id):
     }
     return render(request, "pages/test-result.html", context)
 
-
+'''
 @require_GET
 def test_hardware(request):
     # Parámetros fijos por ahora (luego los podés tomar del request)
@@ -760,6 +760,7 @@ def test_hardware(request):
             "status": "error",
             "message": f"Error inesperado: {str(e)}"
         }, status=500)
+'''
 
 def hardware(request):
     context = {
@@ -795,6 +796,7 @@ def api_get_hardware_model(request, model_name):
 
     except LookupError:
         return JsonResponse({"error": "Modelo no válido"}, status=400)
+        
 
 
 @csrf_exempt
@@ -857,12 +859,14 @@ def api_delete_hardware_record(request):
             return JsonResponse({"message": str(e), "type": "danger"}, status=500)
     return JsonResponse({"message": "Método no permitido"}, status=405)
 
+
 def get_connection_config(request):
     config = ConnectionConfig.objects.first()
     return JsonResponse({
         "ip_port": config.ip_port if config else ""
     })
     
+
 @csrf_exempt
 def new_adapter_view(request):
     if request.method == "POST":
@@ -898,15 +902,13 @@ def api_create_physical_connector(request):
             label = data.get("label", "").strip()
 
             if not adapter_id or not connector_type or not label:
-                return JsonResponse({"message": "Datos incompletos."}, status=400)
-
-            from home.models import Adapter, PhysicalConnector
+                return JsonResponse({"type": "warning", "message": "Todos los campos son obligatorios."}, status=400)
 
             adapter = Adapter.objects.get(pk=adapter_id)
 
             # Validar duplicado en el adapter
             if PhysicalConnector.objects.filter(adapter=adapter, label__iexact=label).exists():
-                return JsonResponse({"message": "Ya existe un conector con ese nombre para este adaptador."}, status=400)
+                return JsonResponse({"type": "warning", "message": "Ya existe un conector con ese nombre para este adaptador."}, status=400)
 
             connector = PhysicalConnector.objects.create(
                 adapter=adapter,
@@ -914,7 +916,8 @@ def api_create_physical_connector(request):
                 label=label
             )
             return JsonResponse({
-                "message": "Conector creado correctamente.",
+                "type": "success",
+                "message": "Conector agregado correctamente.",
                 "connector": {
                     "id": connector.id,
                     "label": connector.label,
@@ -923,7 +926,33 @@ def api_create_physical_connector(request):
             })
 
         except Exception as e:
-            return JsonResponse({"message": str(e)}, status=500)
+            return JsonResponse({"type": "danger", "message": str(e)}, status=500)
+        
+@csrf_exempt
+# Revisar si ya existe un conector con el mismo nombre para el adaptador
+# (evitando que se valide contra sí mismo) 
+# Para edicion inline en adapter-connectors.html
+
+def api_check_connector_label(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        adapter_id = data.get("adapter_id")
+        label = data.get("label", "").strip()
+        connector_id = data.get("id")  # el id actual (evita validarse contra sí mismo)
+
+        if not adapter_id or not label:
+            return JsonResponse({"exists": False})
+
+        from home.models import PhysicalConnector
+
+        exists = PhysicalConnector.objects.filter(
+            adapter_id=adapter_id,
+            label__iexact=label
+        ).exclude(id=connector_id).exists()
+
+        return JsonResponse({"exists": exists})
+
+    return JsonResponse({"error": "Método no permitido"}, status=405)
 
 
 

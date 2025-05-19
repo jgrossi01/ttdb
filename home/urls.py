@@ -20,7 +20,7 @@ urlpatterns = [
 
     
     #pruebas de conexion con pxi
-    path('test-hardware/', views.test_hardware, name='test_hardware'),
+    #path('test-hardware/', views.test_hardware, name='test_hardware'),
 
     
     # Funciones
@@ -40,10 +40,13 @@ urlpatterns = [
     path("api/hardware/save/", views.api_save_hardware_edit, name="save_hardware_edit"),
     path("api/hardware/create/", views.api_create_hardware_record, name="create_hardware_record"),
     path("api/hardware/delete/", views.api_delete_hardware_record, name="delete_hardware_record"),
-    path("api/hardware/connection_config/", views.get_connection_config, name="get_connection_config"),
-
     path("api/hardware/<str:model_name>/", views.api_get_hardware_model, name="get_hardware_model"),
+
+    # Especificas
+    path("api/hardware/connection_config/", views.get_connection_config, name="get_connection_config"),
     path("api/hardware/physicalconnector/create/", views.api_create_physical_connector),
+    path("api/hardware/check-connector-label/", views.api_check_connector_label, name="check_connector_label"),
+
     
     # Logs   
     path("events/", include(django_eventstream.urls), {"channels": ["dbupdate"]}),
@@ -51,3 +54,4 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
