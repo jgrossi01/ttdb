@@ -1,5 +1,5 @@
 {% extends 'layouts/base.html' %}
-{% block title %}Nuevo adaptador - {% endblock title %}
+{% block title %}Nuevo conector - {% endblock title %}
 
 {% load static %}
 
@@ -15,7 +15,7 @@
           <div class="col-lg-12">
             <div class="card mb-3">
               <div class="card-header">
-                <h3 class="card-title">Conectores del adaptador {{ adapter.name }}</h3>
+                <h3 class="card-title">Agregar conector al adaptador "{{ adapter.name }}"</h3>
               </div>                
               <div class="card-body">
                 <div class="row">
@@ -43,7 +43,7 @@
 
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title">Conectores existentes</h3>
+                <h3 class="card-title">Conectores físcos del adaptador</h3>
               </div>                
               <div class="card-body">
                 <table class="table table-striped" id="connector-table">
@@ -51,21 +51,19 @@
                     <tr>
                       <th>Etiqueta</th>
                       <th>Tipo</th>
-                      <th>Acciones</th>
+                      <th style="width: 1%">Acciones</th>
                     </tr>
                   </thead>
-                  <tbody></tbody>
+                  <tbody id="connector-tbody"></tbody>
                 </table>
 
               </div>
             </div>
 
-
-
-
-
-
           </div>
+
+          <!-- Contenedor para toasts -->
+          <div id="toastContainer" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055"></div>
 
         </div>
       </div>
@@ -74,6 +72,34 @@
   </div>
 
   {% block modal %}
+
+  <!-- Modal de confirmación de eliminación -->
+  <div class="modal modal-blur fade" id="modal-confirm" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-status bg-danger"></div>
+        <div class="modal-body text-center py-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon mb-2 text-danger icon-lg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+            <path d="M10.24 3.957l-8.422 14.06a1.989 1.989 0 0 0 1.7 2.983h16.845a1.989 1.989 0 0 0 1.7 -2.983l-8.423 -14.06a1.989 1.989 0 0 0 -3.4 0z" />
+            <path d="M12 9v4" />
+            <path d="M12 17h.01" />
+          </svg>
+          <h3>Eliminar</h3>
+          <div class="text-muted">¿Está seguro que desea eliminar este registro?</div>
+        </div>
+        <div class="modal-footer">
+          <div class="w-100">
+            <div class="row">
+              <div class="col"><a href="#" class="btn w-100" data-bs-dismiss="modal">Cancelar</a></div>
+              <div class="col"><a href="#" id="confirmDeleteBtn" class="btn btn-danger w-100">Eliminar</a></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
      
   {% endblock modal %}
 
@@ -92,6 +118,7 @@
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     const adapterId = {{ adapter.id }};
+    const inputName = document.getElementById("adapter-name");
     const alertContainer = document.getElementById("alert-container");
 
     new TomSelect("#connector_type_select", {
@@ -99,6 +126,38 @@
       valueField: "value",
       labelField: "text",
       searchField: ["text"],
+      render:{
+        option: function(data, escape) {
+          return '<div>' + escape(data.text) + '</div>';
+        },
+        item: function(data, escape) {
+          return '<div>' + escape(data.text) + '</div>';
+        },
+        option_create: function(data, escape) {
+          return '<div class="create">Agregar <strong>' + escape(data.input) + '</strong>&hellip;</div>';
+        },
+        no_results:function(data,escape){
+          return '<div class="no-results text-center">Sin resultados para "'+escape(data.input)+'"</div>';
+        },
+        not_loading:function(data,escape){
+          // no default content
+        },
+        optgroup: function(data) {
+          let optgroup = document.createElement('div');
+          optgroup.className = 'optgroup';
+          optgroup.appendChild(data.options);
+          return optgroup;
+        },
+        optgroup_header: function(data, escape) {
+          return '<div class="optgroup-header">' + escape(data.label) + '</div>';
+        },
+        loading:function(data,escape){
+          return '<div class="spinner"></div>';
+        },
+        dropdown:function(){
+          return '<div></div>';
+        }
+      },
       load: function (query, callback) {
         fetch("/api/hardware/connector-types/")
           .then(res => res.json())
@@ -143,9 +202,26 @@
         </div>
       `;
 
-      container.html(html);
+      container.innerHTML = html;
     }
 
+    function showToast(msg, type = "info") {
+      const toast = document.createElement("div");
+      toast.className = `toast align-items-center text-white bg-${type} border-0 my-1`;
+      toast.setAttribute("role", "alert");
+      toast.setAttribute("aria-live", "assertive");
+      toast.setAttribute("aria-atomic", "true");
+      toast.innerHTML = `
+        <div class="d-flex">
+          <div class="toast-body">${msg}</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>`;
+      document.getElementById("toastContainer").appendChild(toast);
+      new bootstrap.Toast(toast).show();
+      toast.addEventListener("hidden.bs.toast", () => toast.remove());
+    }
+
+    // CREA TABLA DE CONECTORES
     function cargarConectores() {
       fetch(`/api/hardware/physicalconnector/?adapter=${adapterId}`)
         .then(res => res.json())
@@ -155,22 +231,33 @@
           data.data.forEach(c => {
             tbody.innerHTML += `
               <tr>
-                <td>${c.label}</td>
+                <td class="editable" data-field="label">${c.label}</td>
                 <td>${c.connector_type}</td>
-                <td>
-                  <button class="btn btn-sm btn-danger btn-delete" data-id="${c.id}">Eliminar</button>
+                <td class="text-center">
+                  <a href="#" class="btn-sm btn-delete text-red" data-id="${c.id}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-trash m-0">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                      <path d="M4 7l16 0" />
+                      <path d="M10 11l0 6" />
+                      <path d="M14 11l0 6" />
+                      <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                      <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                    </svg>
+                  </a>
                 </td>
               </tr>`;
           });
         });
     }
 
+
     document.getElementById("btn-save-connector").addEventListener("click", () => {
       const type = document.getElementById("connector_type_select").value.trim();
       const label = document.getElementById("connector_label").value.trim();
+      alertContainer.innerHTML = "";
 
       if (!type || !label) {
-        showAlert("Todos los campos son obligatorios.");
+        showInlineAlert(alertContainer, "Todos los campos son obligatorios.", "warning");
         return;
       }
 
@@ -182,18 +269,22 @@
         },
         body: JSON.stringify({
           adapter_id: adapterId,
-          connector_type: type,
+          connector_type: type.toUpperCase(),
           label: label
         })
       })
       .then(res => res.json())
       .then(data => {
-        if (data.message) showAlert(data.message, "success");
-        cargarConectores();
-        document.getElementById("connector_label").value = "";
+        if (data.type === "danger") {
+          showInlineAlert(alertContainer, data.message, data.type);
+        } else {
+          showInlineAlert(alertContainer, data.message || "Conector agregado correctamente.",  data.type);
+          cargarConectores();
+          document.getElementById("connector_label").value = "";
+        }
       })
-      .catch(err => {
-        showAlert("Error al guardar el conector", "danger");
+      .catch(() => {
+        showInlineAlert(alertContainer, "Error al agregar el conector", data.type);
       });
     });
 
@@ -208,6 +299,138 @@
     }
 
     cargarConectores();
+
+    // ELIMINAR CONECTOR
+    let deletePayload = null;
+    const confirmModal = new bootstrap.Modal(document.getElementById("modal-confirm"));
+    document.querySelector("#modal-confirm").addEventListener("hidden.bs.modal", function () {
+      deletePayload = null;
+    });
+    
+    document.querySelector("#connector-table").addEventListener("click", function (e) {
+      if (e.target.closest(".btn-delete")) {
+        const id = e.target.closest(".btn-delete").dataset.id;
+        deletePayload = {
+          model: "PhysicalConnector",
+          id: id
+        };
+        confirmModal.show();
+      }
+    });
+
+    document.getElementById("confirmDeleteBtn").addEventListener("click", () => {
+      if (!deletePayload) return;
+
+      fetch("/api/hardware/delete/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCSRFToken()
+        },
+        body: JSON.stringify(deletePayload)
+      })
+      .then(res => res.json())
+      .then(data => {
+        showToast("Conector eliminado correctamente.", "success");
+        cargarConectores();
+      })
+      .catch(() => {
+        showToast("Error al eliminar", "danger");
+      })
+      .finally(() => {
+        confirmModal.hide();
+        deletePayload = null;
+      });
+    });
+
+    // EDITAR LABEL INLINE
+  
+    document.querySelector("#connector-table tbody").addEventListener("click", function (e) {
+      const cell = e.target.closest("td");
+      const row = e.target.closest("tr");
+
+      // Solo permitir edición en la columna del label (primera columna)
+      if (!cell || row.cells[0] !== cell) return;
+
+      const originalText = cell.textContent.trim();
+      const connectorId = row.querySelector(".btn-delete").dataset.id;
+
+      const input = document.createElement("input");
+      input.type = "text";
+      input.className = "form-control form-control-sm";
+      input.value = originalText;
+
+      cell.innerHTML = "";
+      cell.appendChild(input);
+      input.focus();
+
+      const restoreCell = (text) => {
+        cell.textContent = text;
+      };
+
+      const guardarValor = () => {
+        const newValue = input.value.trim();
+
+        if (newValue === originalText || newValue === "") {
+          restoreCell(originalText);
+          return;
+        }
+
+        // Validar nombre único para el mismo adaptador
+        fetch(`/api/hardware/physicalconnector/?adapter=${adapterId}`)
+          .then(res => res.json())
+          .then(data => {
+            const existe = data.data.some(c =>
+              c.label.trim().toLowerCase() === newValue.toLowerCase() &&
+              c.id !== parseInt(connectorId)
+            );
+
+            if (existe) {
+              showToast("Ya existe un conector con ese nombre en este adaptador.", "warning");
+              restoreCell(originalText);
+            } else {
+              fetch("/api/hardware/save/", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "X-CSRFToken": getCSRFToken()
+                },
+                body: JSON.stringify({
+                  model: "PhysicalConnector",
+                  id: connectorId,
+                  field: "label",
+                  value: newValue
+                })
+              })
+              .then(res => res.json())
+              .then(() => {
+                showToast("Conector actualizado", "success");
+                restoreCell(newValue);
+              })
+              .catch(() => {
+                showToast("Error al guardar el nuevo nombre", "danger");
+                restoreCell(originalText);
+              });
+            }
+          });
+      };
+
+      // Guardar al hacer blur
+      input.addEventListener("blur", guardarValor);
+
+      // Guardar con Enter / Cancelar con Escape
+      input.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+          input.blur(); // Trigger blur to save
+        } else if (event.key === "Escape") {
+          restoreCell(originalText);
+        }
+      });
+    });
+
+
+
+
   });
 </script>
 
@@ -215,4 +438,5 @@
 {% endblock extrajs %}
 
 {% block extrastyle %}
+
 {% endblock extrastyle %}

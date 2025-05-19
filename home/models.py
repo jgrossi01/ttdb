@@ -122,6 +122,7 @@ class PhysicalConnector(models.Model):
     adapter         = models.ForeignKey("Adapter", on_delete=models.CASCADE, related_name="physical_connectors")
     connector_type  = models.CharField(max_length=50)  # ej. "DB50F", "DB25M"
     label           = models.CharField(max_length=50)  # ej. "Conector A", "Conector B"
+    #pin_qty        = models.PositiveIntegerField()  # Cantidad de pines del conector
 
     class Meta:
         unique_together = ('adapter', 'label')
@@ -157,7 +158,7 @@ class AdapterPinMap(models.Model):
     )
     test_pin    = models.PositiveIntegerField()  # p. ej. 1..50
     relay_card  = models.ForeignKey(RelayCard, on_delete=models.CASCADE, related_name="pin_maps")
-    pxi_channel = models.PositiveIntegerField()  # 1..74
+    pxi_channel = models.PositiveIntegerField()  # 1..74 Cambiar a charfield para guardar xej U45
 
     class Meta:
         unique_together = ("adapter_connection", "test_pin", "relay_card", "pxi_channel")
