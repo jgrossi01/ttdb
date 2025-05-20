@@ -26,9 +26,24 @@
                       </div>
                     </div>
                     <div class="col">
-                        <div class="mb-3">
-                        <label class="form-label">Etiqueta (label)</label>
+                      <div class="mb-3">
+                        <label class="form-label">Etiqueta</label>
                         <input type="text" id="connector_label" class="form-control" placeholder="Ej. H-E-OUTPUT-1">
+                      </div>
+                    </div>
+                    <div class="col">
+                      <div class="mb-3">
+                        <label class="form-label">Cantidad de pines</label>
+                        <input type="text" id="connector_pin_qty" class="form-control" placeholder="Ej. 50">
+                      </div>
+                    </div>
+                    <div class="col">
+                      <div class="mb-3">
+                        <label class="form-label">Ubicación en adaptador</label>
+                        <select id="connector_side_select" class="form-select">
+                          <option value="pxi-side">Lado PXI</option>
+                          <option value="test-side">Lado test</option>
+                        </select>
                       </div>
                     </div>
                   </div>
@@ -51,6 +66,8 @@
                     <tr>
                       <th>Etiqueta</th>
                       <th>Tipo</th>
+                      <th>Cantidad de pines</th>
+                      <th>Ubicación en adaptador</th>
                       <th style="width: 1%">Acciones</th>
                     </tr>
                   </thead>
@@ -221,6 +238,18 @@
       toast.addEventListener("hidden.bs.toast", () => toast.remove());
     }
 
+    function getCSRFToken() {
+      let value = null;
+      if (document.cookie) {
+        document.cookie.split(";").forEach(cookie => {
+          if (cookie.trim().startsWith("csrftoken=")) {
+            value = cookie.trim().substring("csrftoken=".length);
+          }
+        });
+      }
+      return value;
+    }
+
     // CREA TABLA DE CONECTORES
     function cargarConectores() {
       fetch(`/api/hardware/physicalconnector/?adapter=${adapterId}`)
@@ -233,6 +262,8 @@
               <tr>
                 <td class="editable" data-field="label">${c.label}</td>
                 <td>${c.connector_type}</td>
+                <td class="editable" data-field="pin_qty">${c.pin_qty}</td>
+                <td>${c.connector_side_display}</td>
                 <td class="text-center">
                   <a href="#" class="btn-sm btn-delete text-red" data-id="${c.id}">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-trash m-0">
@@ -251,13 +282,22 @@
     }
 
 
+
     document.getElementById("btn-save-connector").addEventListener("click", () => {
       const type = document.getElementById("connector_type_select").value.trim();
       const label = document.getElementById("connector_label").value.trim();
+      const pinQty = document.getElementById("connector_pin_qty").value.trim();
+      const connectorSide = document.getElementById("connector_side_select").value;  // nuevo campo
+
       alertContainer.innerHTML = "";
 
-      if (!type || !label) {
+      if (!type || !label || !connectorSide) {
         showInlineAlert(alertContainer, "Todos los campos son obligatorios.", "warning");
+        return;
+      }
+
+      if (!/^\d+$/.test(pinQty) || pinQty <= 0) {
+        showInlineAlert(alertContainer, "La cantidad de pines debe ser un número entero.", "warning");
         return;
       }
 
@@ -270,7 +310,9 @@
         body: JSON.stringify({
           adapter_id: adapterId,
           connector_type: type.toUpperCase(),
-          label: label
+          label: label,
+          pin_qty: parseInt(pinQty),
+          connector_side: connectorSide  // incluir en payload
         })
       })
       .then(res => res.json())
@@ -284,19 +326,10 @@
         }
       })
       .catch(() => {
-        showInlineAlert(alertContainer, "Error al agregar el conector", data.type);
+        showInlineAlert(alertContainer, "Error al agregar el conector", "danger");
       });
     });
 
-    function getCSRFToken() {
-      let value = null;
-      document.cookie.split(";").forEach(cookie => {
-        if (cookie.trim().startsWith("csrftoken=")) {
-          value = cookie.trim().substring("csrftoken=".length);
-        }
-      });
-      return value;
-    }
 
     cargarConectores();
 
@@ -345,13 +378,14 @@
 
     // EDITAR LABEL INLINE
   
+    // EDITAR LABEL o PIN_QTY INLINE
     document.querySelector("#connector-table tbody").addEventListener("click", function (e) {
       const cell = e.target.closest("td");
       const row = e.target.closest("tr");
 
-      // Solo permitir edición en la columna del label (primera columna)
-      if (!cell || row.cells[0] !== cell) return;
+      if (!cell || !cell.classList.contains("editable")) return;
 
+      const field = cell.dataset.field;
       const originalText = cell.textContent.trim();
       const connectorId = row.querySelector(".btn-delete").dataset.id;
 
@@ -376,63 +410,66 @@
           return;
         }
 
-        // Validar nombre único para el mismo adaptador
-        fetch(`/api/hardware/physicalconnector/?adapter=${adapterId}`)
-          .then(res => res.json())
-          .then(data => {
-            const existe = data.data.some(c =>
-              c.label.trim().toLowerCase() === newValue.toLowerCase() &&
-              c.id !== parseInt(connectorId)
-            );
+        // validaciones:
+        if (field === "pin_qty" && !/^\d+$/.test(newValue)) {
+          showToast("La cantidad de pines debe ser un número entero", "warning");
+          restoreCell(originalText);
+          return;
+        }
 
-            if (existe) {
-              showToast("Ya existe un conector con ese nombre en este adaptador.", "warning");
-              restoreCell(originalText);
-            } else {
-              fetch("/api/hardware/save/", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  "X-CSRFToken": getCSRFToken()
-                },
-                body: JSON.stringify({
-                  model: "PhysicalConnector",
-                  id: connectorId,
-                  field: "label",
-                  value: newValue
-                })
-              })
-              .then(res => res.json())
-              .then(() => {
-                showToast("Conector actualizado", "success");
-                restoreCell(newValue);
-              })
-              .catch(() => {
-                showToast("Error al guardar el nuevo nombre", "danger");
+        if (field === "label") {
+          fetch(`/api/hardware/physicalconnector/?adapter=${adapterId}`)
+            .then(res => res.json())
+            .then(data => {
+              const existe = data.data.some(c =>
+                c.label.trim().toLowerCase() === newValue.toLowerCase() &&
+                c.id !== parseInt(connectorId)
+              );
+              if (existe) {
+                showToast("Esa etiqueta ya existe para un conector de este adaptador.", "warning");
                 restoreCell(originalText);
-              });
-            }
+                return;
+              }
+              return actualizarConector(field, newValue);
+            });
+        } else {
+          actualizarConector(field, newValue);
+        }
+
+        function actualizarConector(field, value) {
+          fetch("/api/hardware/save/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": getCSRFToken()
+            },
+            body: JSON.stringify({
+              model: "PhysicalConnector",
+              id: connectorId,
+              field: field,
+              value: field === "pin_qty" ? parseInt(value) : value
+            })
+          })
+          .then(res => res.json())
+          .then(() => {
+            showToast("Conector actualizado", "success");
+            restoreCell(value);
+          })
+          .catch(() => {
+            showToast("Error al guardar", "danger");
+            restoreCell(originalText);
           });
+        }
       };
 
-      // Guardar al hacer blur
       input.addEventListener("blur", guardarValor);
-
-      // Guardar con Enter / Cancelar con Escape
       input.addEventListener("keydown", function (event) {
-        if (event.key === "Enter") {
-          input.blur(); // Trigger blur to save
-        } else if (event.key === "Escape") {
-          restoreCell(originalText);
-        }
+        if (event.key === "Enter") input.blur();
+        if (event.key === "Escape") restoreCell(originalText);
       });
     });
 
-<<<<<<< HEAD
-//test
-=======
 
->>>>>>> ebcd340fd1d3cb4e5137fbcfc59439d7baef5fcd
 
 
   });
