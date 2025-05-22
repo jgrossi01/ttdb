@@ -216,327 +216,10 @@
 
   document.addEventListener("DOMContentLoaded", function () {
 
-    // MODELS
-    const modelos = [
-      { 
-        id: 'placas-pxi', 
-        nombre: 'relaycard', 
-        columnas: ['name', 'bus', 'device'] 
-      },
-      {
-      id: 'adaptadores',
-      nombre: 'adapter',
-      columnas: [
-        { data: 'name', className: 'editable' },
-        {
-          data: 'pxi_connectors',
-          title: 'Conectores a PXI',
-          orderable: false,
-          searchable: false,
-          className: 'text-muted',  // Sin clase "editable"
-          render: function (data) {
-            return Array.isArray(data) ? data.join(", ") : '';
-          }
-        },
-        {
-          data: 'test_connectors',
-          title: 'Conectores a test',
-          orderable: false,
-          searchable: false,
-          className: 'text-muted',  // Sin clase "editable"
-          render: function (data) {
-            return Array.isArray(data) ? data.join(", ") : '';
-          }
-        }
-      ]
-    },
-    ];
+    // =======================
+    // UTILS
+    // =======================
 
-    // CREATE
-    const pxiModal = new bootstrap.Modal(document.getElementById('new-pxi'));
-    const confirmModal = new bootstrap.Modal(document.getElementById('modal-confirm'));
-    
-  
-    // Mostrar modal al hacer click en "Agregar placa PXI"
-    $('#btn-add-placas-pxi').on("click", function () {
-      $('#new-pxi input').val(""); // limpiar campos
-      pxiModal.show();
-    });
-  
-    // Botón del modal (confirmar creación)
-    $('#new-pxi .btn-primary').on('click', function () {
-      const modal = $('#new-pxi');
-      const name = modal.find('input[name="name"]').val().trim();
-      const bus = modal.find('input[name="bus"]').val().trim();
-      const device = modal.find('input[name="device"]').val().trim();
-      const alertContainer = modal.find("#alert-container");
-      
-
-      alertContainer.empty();
-  
-      if (!name || !bus || !device) {
-        showInlineAlert(alertContainer, "Todos los campos son obligatorios.", "warning");
-        return;
-      }
-
-      // Validación de enteros
-      if (!/^\d+$/.test(bus) || !/^\d+$/.test(device)) {
-        showInlineAlert(alertContainer, "Los campos 'Bus' y 'Device' deben ser números enteros.", "warning");
-        return;
-      }
-      
-  
-      $.ajax({
-        url: '/api/hardware/create/',
-        method: 'POST',
-        contentType: 'application/json',
-        headers: { "X-CSRFToken": getCSRFToken() },
-        data: JSON.stringify({
-          model: 'RelayCard',
-          fields: {
-            name,
-            bus: parseInt(bus),
-            device: parseInt(device)
-          }
-        }),
-        success: function (res) {
-          showToast(res.message || 'Placa agregada', 'success');
-          pxiModal.hide();
-          $('#table-placas-pxi').DataTable().ajax.reload();
-          alertContainer.empty();  
-        },
-        error: function (xhr) {
-          const error = xhr.responseJSON?.message || 'Error al crear la placa';
-          //showToast(error, 'danger');
-          showInlineAlert(alertContainer, error, 'warning');
-        }
-      });
-    });
-  
-    
-  // SHOW 
-    modelos.forEach(({ id, nombre, columnas }) => {
-      const tabla = $(`#table-${id}`).DataTable({
-        ajax: `/api/hardware/${nombre}/`,
-        dataSrc: "data",
-        columns: nombre === "adapter"
-          ? [
-              { data: 'name', className: 'editable' },
-              {
-                data: 'pxi_connectors',
-                title: 'Conectores PXI',
-                orderable: false,
-                searchable: false,
-                className: 'text-muted',
-                render: function (data) {
-                  return Array.isArray(data) ? data.join(", ") : '';
-                }
-              },
-              {
-                data: 'test_connectors',
-                title: 'Conectores TEST',
-                orderable: false,
-                searchable: false,
-                className: 'text-muted',
-                render: function (data) {
-                  return Array.isArray(data) ? data.join(", ") : '';
-                }
-              },
-              {
-                data: null,
-                orderable: false,
-                searchable: false,
-                title: "Acciones",
-                className: "text-center",
-                render: function (data, type, row) {
-                  return `
-                    <button class="btn btn-sm btn-danger btn-delete" title="Eliminar" data-id="${row.id}" data-model="${nombre}">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-                        <path d="M4 7h16"></path>
-                        <path d="M10 11v6"></path>
-                        <path d="M14 11v6"></path>
-                        <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"></path>
-                        <path d="M9 7V4h6v3"></path>
-                      </svg>
-                    </button>`;
-                }
-              }
-            ]
-          : [
-              ...columnas.map(c => ({ data: c, className: 'editable' })),
-              {
-                data: null,
-                orderable: false,
-                searchable: false,
-                title: "Acciones",
-                className: "text-center",
-                render: function (data, type, row) {
-                  return `
-                    <button class="btn btn-sm btn-danger btn-delete" title="Eliminar" data-id="${row.id}" data-model="${nombre}">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-                        <path d="M4 7h16"></path>
-                        <path d="M10 11v6"></path>
-                        <path d="M14 11v6"></path>
-                        <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"></path>
-                        <path d="M9 7V4h6v3"></path>
-                      </svg>
-                    </button>`;
-                }
-              }
-            ],
-        language: { url: '{% static "datatables/datatables_es-ES.json" %}' },
-        paging: false,
-        searching: false,
-        info: false,
-        ordering: false,
-        stateSave: false
-      });
-
-
-      // DELETE
-      $(`#table-${id} tbody`).on("click", ".btn-delete", function () {
-        const row = tabla.row($(this).closest("tr"));
-        const data = row.data();
-
-        deletePayload = {
-          model: nombre,
-          id: data.id,
-          row: row,
-          tabla: tabla
-        };
-
-        confirmModal.show();
-      });
-  
-      // EDIT
-      $(`#table-${id} tbody`).on("click", "td.editable", function () {
-        const cell = tabla.cell(this);
-        const rowData = tabla.row(this).data();
-        const column = tabla.column(this).dataSrc();
-        const input = $('<input type="text" class="form-control form-control-sm" />');
-        input.val(cell.data());
-        $(this).html(input);
-        input.focus();
-  
-        input.on("blur", function () {
-          const newValue = input.val().trim();
-
-          // Validación: no vacío
-          if (!newValue) {
-            showToast("El valor no puede estar vacío", "warning");
-            cell.data(rowData[column]).draw();
-            return;
-          }
-
-          // Validación: si el campo es "bus" o "device", debe ser entero
-          if ((column === "bus" || column === "device") && !/^\d+$/.test(newValue)) {
-            showToast(`El campo "${column}" debe ser un número entero`, "warning");
-            cell.data(rowData[column]).draw();
-            return;
-          }
-
-          // Validación: si el campo contiene lo mismo que ya tenia
-          if (String(newValue).trim() === String(rowData[column]).trim()) {
-            cell.data(rowData[column]).draw();
-            return;
-          }
-  
-          const payload = {
-            id: rowData.id,
-            model: nombre,
-            field: column,
-            value: (column === "bus" || column === "device") ? parseInt(newValue) : newValue,
-          };
-  
-          $.ajax({
-            url: `/api/hardware/save/`,
-            method: "POST",
-            contentType: "application/json",
-            headers: { "X-CSRFToken": getCSRFToken() },
-            data: JSON.stringify(payload),
-            success: function () {
-              cell.data(newValue).draw();
-              showToast("Actualizado con éxito", "success");
-            },
-            error: function () {
-              cell.data(rowData[column]).draw();
-              showToast("Error al actualizar", "danger");
-            },
-          });
-        });
-      });
-    });
-
-    // Confirmar eliminación
-    $('#confirmDeleteBtn').on('click', function () {
-      if (!deletePayload) return;
-
-      $.ajax({
-        url: "/api/hardware/delete/",
-        method: "POST",
-        contentType: "application/json",
-        headers: { "X-CSRFToken": getCSRFToken() },
-        data: JSON.stringify({ model: deletePayload.model, id: deletePayload.id }),
-        success: function () {
-          deletePayload.row.remove().draw();
-          confirmModal.hide();
-          showToast("Registro eliminado con éxito", "success");
-        },
-        error: function () {
-          showToast("Error al eliminar el registro", "danger");
-        },
-        complete: function () {
-          deletePayload = null;
-        }
-      });
-    });
-  
-    // VER Y GUARDAR CONNECTION CONFIG
-
-    // Mostrar configuración actual de conexion
-    $.get('/api/hardware/connection_config/', function (res) {
-      if (res.ip_port) {
-        $('#input-ip-port').val(res.ip_port);
-      }
-    });
-
-    // Guardar configuración de conexion
-    $("#btn-save-config").on("click", function () {
-      const ip_port = $("#input-ip-port").val().trim();
-
-      if (!ip_port) {
-        showToast("El campo IP/puerto no puede estar vacío", "warning");
-        return;
-      }
-
-      $.ajax({
-        url: "/api/hardware/save/",
-        method: "POST",
-        contentType: "application/json",
-        headers: { "X-CSRFToken": getCSRFToken() },
-        data: JSON.stringify({ id: 1, model: "ConnectionConfig", field: "ip_port", value: ip_port }),
-        success: function () {
-          showToast("Configuración actualizada", "success");
-        },
-        error: function () {
-          showToast("Error al guardar la configuración", "danger");
-        }
-      });
-    });
-
-  
-    function getCSRFToken() {
-      let value = null;
-      if (document.cookie) {
-        document.cookie.split(";").forEach(cookie => {
-          if (cookie.trim().startsWith("csrftoken=")) {
-            value = cookie.trim().substring("csrftoken=".length);
-          }
-        });
-      }
-      return value;
-    }
-  
     function showToast(msg, type = "info") {
       const toast = document.createElement("div");
       toast.className = `toast align-items-center text-white bg-${type} border-0 my-1`;
@@ -589,13 +272,485 @@
         </div>
       `;
 
-      container.html(html);
+      container.innerHTML = html;
     }
 
+    function getCSRFToken() {
+      let value = null;
+      if (document.cookie) {
+        document.cookie.split(";").forEach(cookie => {
+          if (cookie.trim().startsWith("csrftoken=")) {
+            value = cookie.trim().substring("csrftoken=".length);
+          }
+        });
+      }
+      return value;
+    }
+
+    // =======================
+    // RELAY CARD TABLE (placas-pxi)
+    // =======================
+    const tablaPlacasPxi = $('#table-placas-pxi').DataTable({
+      ajax: '/api/hardware/get-relaycards/',
+      dataSrc: 'data',
+      columns: [
+        { data: 'name', className: 'editable' },
+        { data: 'bus', className: 'editable' },
+        { data: 'device', className: 'editable' },
+        {
+          data: null,
+          orderable: false,
+          searchable: false,
+          title: "Acciones",
+          className: "text-center",
+          render: (data, type, row) => `
+            <button class="btn btn-sm btn-danger btn-delete" title="Eliminar" data-id="${row.id}" data-model="relaycard">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+                <path d="M4 7h16"></path>
+                <path d="M10 11v6"></path>
+                <path d="M14 11v6"></path>
+                <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"></path>
+                <path d="M9 7V4h6v3"></path>
+              </svg>
+            </button>`
+        }
+      ],
+      language: { url: '{% static "datatables/datatables_es-ES.json" %}' },
+      paging: false,
+      searching: false,
+      info: false,
+      ordering: false,
+      stateSave: false
+    });
+
+    // =======================
+    // ADAPTER TABLE (adapters)
+    // =======================
+    const tablaAdapters = $('#table-adaptadores').DataTable({
+      ajax: '/api/hardware/get-adapters/',
+      dataSrc: 'data',
+      columns: [
+        { data: 'name', className: 'editable', title: 'Nombre', className: "text-center align-middle", },
+        {
+          data: 'pxi_connectors',
+          title: 'Conectores lado PXI',
+          orderable: false,
+          searchable: false,
+          className: "text-center align-middle",
+          render: function (data, type, row) {
+              return type === 'display' ? data : data.replace(/<br>/g, ', ');
+          }
+        },
+        {
+          data: 'test_connectors',
+          title: 'Conectores lado TEST',
+          orderable: false,
+          searchable: false,
+          className: "text-center align-middle",
+          render: function (data, type, row) {
+              return type === 'display' ? data : data.replace(/<br>/g, ', ');
+          }
+        },
+        {
+          data: null,
+          orderable: false,
+          searchable: false,
+          title: "Acciones",
+          className: "text-center align-middle",
+          render: (data, type, row) => `
+            <button class="btn btn-sm btn-primary btn-cntEditConectors" title="Editar conectores" data-id="${row.id}" data-model="adapter">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9.785 6l8.215 8.215l-2.054 2.054a5.81 5.81 0 1 1 -8.215 -8.215l2.054 -2.054z" /><path d="M4 20l3.5 -3.5" /><path d="M15 4l-3.5 3.5" /><path d="M20 9l-3.5 3.5" /></svg>
+            </button>
+            <button class="btn btn-sm btn-primary btn-cntEditConections" title="Editar conexiones" data-id="${row.id}" data-model="adapter">
+              <svg  xmlns="http://www.w3.org/2000/svg"  width="18"  height="18"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 12l5 5l-1.5 1.5a3.536 3.536 0 1 1 -5 -5l1.5 -1.5z" /><path d="M17 12l-5 -5l1.5 -1.5a3.536 3.536 0 1 1 5 5l-1.5 1.5z" /><path d="M3 21l2.5 -2.5" /><path d="M18.5 5.5l2.5 -2.5" /><path d="M10 11l-2 2" /><path d="M13 14l-2 2" /></svg>
+            </button>
+            <button class="btn btn-sm btn-danger btn-delete" title="Eliminar" data-id="${row.id}" data-model="adapter">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+                <path d="M4 7h16"></path>
+                <path d="M10 11v6"></path>
+                <path d="M14 11v6"></path>
+                <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"></path>
+                <path d="M9 7V4h6v3"></path>
+              </svg>
+            </button>`
+        }
+      ],
+      language: { url: '{% static "datatables/datatables_es-ES.json" %}' },
+      paging: false,
+      searching: false,
+      info: false,
+      ordering: false,
+      stateSave: false
+    });
 
 
+    // =======================
+    // MODALS
+    // =======================
+    const pxiModal = new bootstrap.Modal(document.getElementById('new-pxi'));
+    const confirmModal = new bootstrap.Modal(document.getElementById('modal-confirm'));
 
+    document.getElementById('btn-add-placas-pxi').addEventListener('click', () => {
+      document.querySelectorAll('#new-pxi input').forEach(input => input.value = '');
+      pxiModal.show();
+    });
+
+    let deletePayload = null;
+    document.querySelector("#modal-confirm").addEventListener("hidden.bs.modal", function () {
+      deletePayload = null;
+    });
     
+    // =======================
+    // Agregar PXI
+    // =======================
+
+    document.querySelector('#new-pxi .btn-primary').addEventListener('click', () => {
+      const modal = document.getElementById('new-pxi');
+      const name = modal.querySelector('input[name="name"]').value.trim();
+      const bus = modal.querySelector('input[name="bus"]').value.trim();
+      const device = modal.querySelector('input[name="device"]').value.trim();
+      const alertContainer = modal.querySelector("#alert-container");
+      alertContainer.innerHTML = '';
+
+      if (!name || !bus || !device) {
+        showInlineAlert(alertContainer, "Todos los campos son obligatorios.", "warning");
+        return;
+      }
+
+      if (!/^\d+$/.test(bus) || !/^\d+$/.test(device)) {
+        showInlineAlert(alertContainer, "Los campos 'Bus' y 'Device' deben ser números enteros.", "warning");
+        return;
+      }
+
+      fetch('/api/hardware/create/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCSRFToken()
+        },
+        body: JSON.stringify({
+          model: 'RelayCard',
+          fields: { name, bus: parseInt(bus), device: parseInt(device) }
+        })
+      })
+      .then(response => {
+        if (!response.ok) return response.json().then(data => Promise.reject(data));
+        return response.json();
+      })
+      .then(res => {
+        showToast(res.message || 'Placa agregada correctamente.', 'success');
+        pxiModal.hide();
+        $('#table-placas-pxi').DataTable().ajax.reload();
+      })
+      .catch(err => {
+        if (err && err.message) {
+          showInlineAlert(alertContainer, err.message, "danger");
+        } else {
+          showInlineAlert(alertContainer, "Error al crear la placa", "danger");
+        }
+      });
+
+    });
+
+    // =======================
+    // Editar adaptadores inline
+    // =======================
+ 
+    document.querySelector('#table-adaptadores tbody').addEventListener('click', function (e) {
+      const cellElement = e.target.closest('td.editable');
+      if (!cellElement) return;
+
+      const rowElement = cellElement.closest('tr');
+      const row = tablaAdapters.row(rowElement);
+      const rowData = row.data();
+      const cellIndex = Array.from(cellElement.parentNode.children).indexOf(cellElement);
+      const column = tablaAdapters.column(cellIndex).dataSrc();
+      const oldValue = rowData[column];
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'form-control form-control-sm';
+      input.value = oldValue;
+      cellElement.innerHTML = '';
+      cellElement.appendChild(input);
+      input.focus();
+
+      const restoreCell = () => {
+        row.data(rowData).draw();
+      };
+
+      input.addEventListener('blur', function () {
+        const newValue = input.value.trim();
+
+        if (!newValue) {
+          showToast("El valor no puede estar vacío", "warning");
+          restoreCell();
+          return;
+        }
+
+        if (newValue === oldValue) {
+          restoreCell();
+          return;
+        }
+
+        // Validación de duplicado
+        const allData = tablaAdapters.rows().data().toArray();
+        const nameExists = allData.some(d => d.id !== rowData.id && String(d.name).trim().toLowerCase() === newValue.toLowerCase());
+        if (nameExists) {
+          showToast("Este adaptador ya tiene un conector con esa etiqueta.", "warning");
+          restoreCell();
+          return;
+        }
+
+        const payload = {
+          id: rowData.id,
+          model: "adapter",
+          field: column,
+          value: newValue
+        };
+
+        fetch('/api/hardware/save/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+          },
+          body: JSON.stringify(payload)
+        })
+        .then(res => {
+          if (!res.ok) throw new Error();
+          rowData[column] = newValue;
+          row.data(rowData).draw();
+          showToast("Actualizado con éxito", "success");
+        })
+        .catch(() => {
+          restoreCell();
+          showToast("Error al actualizar", "danger");
+        });
+      });
+
+      input.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') input.blur();
+        if (event.key === 'Escape') restoreCell();
+      });
+    });
+
+
+    // =======================
+    // Editar placas PXI inline
+    // =======================
+
+    document.querySelector('#table-placas-pxi tbody').addEventListener('click', function (e) {
+      const cellElement = e.target.closest('td.editable');
+      if (!cellElement) return;
+
+      const rowElement = cellElement.closest('tr');
+      const row = tablaPlacasPxi.row(rowElement);
+      const rowData = row.data();
+      const cellIndex = Array.from(cellElement.parentNode.children).indexOf(cellElement);
+      const column = tablaPlacasPxi.column(cellIndex).dataSrc();
+      const oldValue = rowData[column];
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'form-control form-control-sm';
+      input.value = oldValue;
+      cellElement.innerHTML = '';
+      cellElement.appendChild(input);
+      input.focus();
+
+      const restoreCell = () => {
+        row.data(rowData).draw();
+      };
+
+      input.addEventListener('blur', function () {
+        const newValue = input.value.trim();
+
+        if (!newValue) {
+          showToast("El valor no puede estar vacío", "warning");
+          restoreCell();
+          return;
+        }
+
+        if ((column === 'bus' || column === 'device') && !/^\d+$/.test(newValue)) {
+          showToast(`El campo "${column}" debe ser un número entero`, "warning");
+          restoreCell();
+          return;
+        }
+
+        if (newValue === String(oldValue)) {
+          restoreCell();
+          return;
+        }
+
+        // Validación de duplicado solo para 'name'
+        if (column === 'name') {
+          const allData = tablaPlacasPxi.rows().data().toArray();
+          const nameExists = allData.some(d => d.id !== rowData.id && String(d.name).trim().toLowerCase() === newValue.toLowerCase());
+          if (nameExists) {
+            showToast("Ya existe un registro con ese nombre", "warning");
+            restoreCell();
+            return;
+          }
+        }
+
+        const payload = {
+          id: rowData.id,
+          model: "relaycard",
+          field: column,
+          value: (column === 'bus' || column === 'device') ? parseInt(newValue) : newValue
+        };
+
+        fetch('/api/hardware/save/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+          },
+          body: JSON.stringify(payload)
+        })
+        .then(res => {
+          if (!res.ok) throw new Error();
+          rowData[column] = payload.value;
+          row.data(rowData).draw();
+          showToast("Actualizado con éxito", "success");
+        })
+        .catch(() => {
+          restoreCell();
+          showToast("Error al actualizar", "danger");
+        });
+      });
+
+      input.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') input.blur();
+        if (event.key === 'Escape') restoreCell();
+      });
+    });
+
+
+
+    // =======================
+    // Eliminar registros
+    // =======================
+
+    document.querySelectorAll('#table-adaptadores, #table-placas-pxi').forEach(table => {
+      table.addEventListener('click', function (e) {
+        if (e.target.closest('.btn-delete')) {
+          const button = e.target.closest('.btn-delete');
+          const rowElement = button.closest('tr');
+          const tabla = $(table).DataTable();
+          const row = tabla.row(rowElement);
+          const data = row.data();
+
+          deletePayload = {
+            model: button.getAttribute("data-model"),
+            id: data.id,
+            row: row,
+            tabla: tabla
+          };
+
+          confirmModal.show();
+        }
+      });
+    });
+
+    document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
+      if (!deletePayload) return;
+
+      fetch("/api/hardware/delete/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCSRFToken()
+        },
+        body: JSON.stringify({
+          model: deletePayload.model,
+          id: deletePayload.id
+        })
+      })
+        .then(response => {
+          if (!response.ok) throw new Error("Error al eliminar");
+          deletePayload.row.remove().draw();
+          confirmModal.hide();
+          showToast("Registro eliminado con éxito", "success");
+        })
+        .catch(() => {
+          showToast("Error al eliminar el registro", "danger");
+        })
+        .finally(() => {
+          deletePayload = null;
+        });
+    });
+
+
+    // =======================
+    // CONNECTION CONFIG
+    // =======================
+
+    fetch('/api/hardware/connection_config/')
+      .then(response => response.json())
+      .then(res => {
+        if (res.ip_port) {
+          document.getElementById('input-ip-port').value = res.ip_port;
+        }
+      });
+
+    document.getElementById('btn-save-config').addEventListener('click', () => {
+      const ip_port = document.getElementById('input-ip-port').value.trim();
+
+      if (!ip_port) {
+        showToast("El campo IP/puerto no puede estar vacío", "warning");
+        return;
+      }
+
+      fetch('/api/hardware/save/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCSRFToken()
+        },
+        body: JSON.stringify({
+          id: 1,
+          model: 'ConnectionConfig',
+          field: 'ip_port',
+          value: ip_port
+        })
+      })
+        .then(res => {
+          if (!res.ok) throw new Error();
+          showToast("Configuración actualizada", "success");
+        })
+        .catch(() => {
+          showToast("Error al guardar la configuración", "danger");
+        });
+    });
+
+    // =======================
+    // REDIRECCIÓN CONECTORES
+    // =======================
+
+    document.addEventListener('click', (e) => {
+      const button = e.target.closest('.btn-cntEditConectors');
+      if (button) {
+        const adapterId = button.getAttribute('data-id');
+        if (adapterId) {
+          window.location.href = `/hardware/adapter/${adapterId}/connectors`;
+        }
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      const button = e.target.closest('.btn-cntEditConections');
+      if (button) {
+        const adapterId = button.getAttribute('data-id');
+        if (adapterId) {
+          window.location.href = `/hardware/adapter/${adapterId}/connections`;
+        }
+      }
+    });
+
+
+  
 
 
 

@@ -1,10 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_GET
 from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, Http404
 from django.apps import apps
 from django.conf import settings
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from django.utils import timezone
 from .models import *
 from .models_harness import Conexiones
@@ -773,31 +773,37 @@ def hardware(request):
 def api_connector_types(request):
     unique_types = get_unique_connector_types()
     return JsonResponse([{"value": t, "text": t} for t in unique_types], safe=False)
+       
+       
+def api_get_adapters(request):
+    data = []
 
-def api_get_hardware_model(request, model_name):
-    try:
-        if model_name.lower() == "adapter":
-            data = []
-            for adapter in Adapter.objects.all():
-                pxi = adapter.connections.values_list("pxi_connector__label", flat=True).distinct()
-                test = adapter.connections.values_list("test_connector__label", flat=True).distinct()
-                data.append({
-                    "id": adapter.id,
-                    "name": adapter.name,
-                    "pxi_connectors": list(pxi),
-                    "test_connectors": list(test),
-                })
-            return JsonResponse({"data": data})
+    for adapter in Adapter.objects.all():
+        connectors = adapter.physical_connectors.all()
 
-        # Fallback genérico para otros modelos
-        model = apps.get_model("home", model_name)
-        data = list(model.objects.all().values())
-        return JsonResponse({"data": data})
+        pxi_connectors = connectors.filter(connector_side='pxi-side')
+        test_connectors = connectors.filter(connector_side='test-side')
 
-    except LookupError:
-        return JsonResponse({"error": "Modelo no válido"}, status=400)
-        
+        def format_connectors(queryset):
+            return "<br>".join(
+                f"{pc.label} ({pc.connector_type})"
+                for pc in queryset
+            )
 
+        data.append({
+            "id": adapter.id,
+            "name": adapter.name,
+            "pxi_connectors": format_connectors(pxi_connectors),
+            "test_connectors": format_connectors(test_connectors),
+        })
+
+    return JsonResponse({"data": data})
+
+
+
+def api_get_relaycards(request):
+    data = list(RelayCard.objects.all().values())
+    return JsonResponse({"data": data})
 
 @csrf_exempt
 def api_save_hardware_edit(request):
@@ -811,11 +817,17 @@ def api_save_hardware_edit(request):
 
             model = apps.get_model("home", model_name)
             obj = model.objects.get(pk=pk)
+            
+            if not field or not isinstance(field, str) or field is None:
+                return JsonResponse({"message": "Campo 'field' inválido o faltante", "type": "danger"}, status=400)
+
             setattr(obj, field, value)
             obj.save()
+
             return JsonResponse({"message": "Actualizado con éxito", "type": "success"})
         except Exception as e:
             return JsonResponse({"message": str(e), "type": "danger"}, status=500)
+
 
    
 @csrf_exempt
@@ -827,19 +839,33 @@ def api_create_hardware_record(request):
             fields = data.get("fields", {})
             model = apps.get_model("home", model_name)
 
-            # ✅ Asignar el objeto creado
             obj = model.objects.create(**fields)
 
             return JsonResponse({
                 "message": "Registro creado",
                 "type": "success",
-                "id": obj.pk 
+                "id": obj.pk
             })
 
+        except IntegrityError as e:
+            if "UNIQUE constraint" in str(e):
+                return JsonResponse({
+                    "message": f"Ya existe un registro con ese nombre.",
+                    "type": "danger"
+                }, status=400)
+            return JsonResponse({
+                "message": "Error de integridad en la base de datos.",
+                "type": "danger"
+            }, status=400)
+
         except Exception as e:
-            return JsonResponse({"message": str(e), "type": "danger"}, status=500)
+            return JsonResponse({
+                "message": str(e),
+                "type": "danger"
+            }, status=500)
 
     return JsonResponse({"message": "Método no permitido"}, status=405)
+
 
 
 @csrf_exempt
@@ -859,8 +885,8 @@ def api_delete_hardware_record(request):
             return JsonResponse({"message": str(e), "type": "danger"}, status=500)
     return JsonResponse({"message": "Método no permitido"}, status=405)
 
-
-def get_connection_config(request):
+@csrf_exempt
+def api_get_connection_config(request):
     config = ConnectionConfig.objects.first()
     return JsonResponse({
         "ip_port": config.ip_port if config else ""
@@ -882,6 +908,9 @@ def new_adapter_view(request):
 
     return render(request, "pages/new-adapter.html")
 
+
+
+
 def adapter_connectors_view(request, id):
     try:
         adapter = Adapter.objects.get(pk=id)
@@ -890,43 +919,94 @@ def adapter_connectors_view(request, id):
 
     return render(request, "pages/adapter-connectors.html", {"adapter": adapter})
 
-
-
 @csrf_exempt
 def api_create_physical_connector(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
             adapter_id = data.get("adapter_id")
-            connector_type = data.get("connector_type", "").strip().upper()
             label = data.get("label", "").strip()
-
-            if not adapter_id or not connector_type or not label:
+            connector_type = data.get("connector_type", "").strip()
+            pin_qty = data.get("pin_qty")
+            connector_side = data.get("connector_side", "pxi-side")
+            
+            if not adapter_id or not connector_type or not label or not pin_qty:
                 return JsonResponse({"type": "warning", "message": "Todos los campos son obligatorios."}, status=400)
+            
+            if connector_side not in [choice[0] for choice in PhysicalConnector.CONNECTOR_SIDE_CHOICES]:
+                return JsonResponse({
+                    "type": "warning",
+                    "message": f"Ubicación de conector inválida: {connector_side}"
+                })
+                
+            try:
+                pin_qty = int(pin_qty)
+                if pin_qty <= 0:
+                    raise ValueError()
+            except ValueError:
+                return JsonResponse({
+                    "type": "warning",
+                    "message": "La cantidad de pines debe ser un número entero positivo."
+                })
+                
+            try:
+                adapter = Adapter.objects.get(pk=adapter_id)
+            except Adapter.DoesNotExist:
+                return JsonResponse({
+                    "type": "warning",
+                    "message": "Adaptador no encontrado."
+                })
 
-            adapter = Adapter.objects.get(pk=adapter_id)
 
-            # Validar duplicado en el adapter
             if PhysicalConnector.objects.filter(adapter=adapter, label__iexact=label).exists():
-                return JsonResponse({"type": "warning", "message": "Ya existe un conector con ese nombre para este adaptador."}, status=400)
+                return JsonResponse({"message": "Este adaptador ya tiene un conector con esa etiqueta.", "type": "warning"}, status=400)
 
             connector = PhysicalConnector.objects.create(
                 adapter=adapter,
                 connector_type=connector_type,
-                label=label
+                label=label,
+                pin_qty=pin_qty,
+                connector_side=connector_side
             )
+            
+            if connector.connector_side == 'pxi-side':
+                pin_maps = []
+                for i in range(1, pin_qty + 1):
+                    pin_maps.append(AdapterPinMap(
+                        adapter=adapter,
+                        pxi_connector=connector,
+                        to_pxi_pin=i,
+                        # Resto de campos queda como null
+                    ))
+                AdapterPinMap.objects.bulk_create(pin_maps)
+                
             return JsonResponse({
                 "type": "success",
-                "message": "Conector agregado correctamente.",
-                "connector": {
-                    "id": connector.id,
-                    "label": connector.label,
-                    "connector_type": connector.connector_type
-                }
+                "message": "Conector creado correctamente.",
+                "id": connector.id
             })
 
         except Exception as e:
-            return JsonResponse({"type": "danger", "message": str(e)}, status=500)
+            return JsonResponse({"message": str(e), "type": "danger"}, status=500)
+        
+
+def api_list_physical_connectors(request):
+    adapter_id = request.GET.get("adapter")
+    connectors = PhysicalConnector.objects.filter(adapter_id=adapter_id)
+
+    data = []
+    for c in connectors:
+        data.append({
+            "id": c.id,
+            "label": c.label,
+            "connector_type": c.connector_type,
+            "pin_qty": c.pin_qty,
+            "connector_side": c.connector_side,
+            "connector_side_display": c.get_connector_side_display(),
+        })
+
+    return JsonResponse({"data": data})
+
         
 @csrf_exempt
 # Revisar si ya existe un conector con el mismo nombre para el adaptador
@@ -953,6 +1033,83 @@ def api_check_connector_label(request):
         return JsonResponse({"exists": exists})
 
     return JsonResponse({"error": "Método no permitido"}, status=405)
+
+
+
+
+def adapter_connections_view(request, id):
+    try:
+        adapter = apps.get_model("home", "Adapter").objects.get(pk=id)
+    except apps.get_model("home", "Adapter").DoesNotExist:
+        return redirect("new_adapter_view")
+    return render(request, "pages/adapter-connections.html", {"adapter": adapter})
+
+def api_list_adapterpinmap(request):
+    """GET /api/hardware/adapterpinmap/?adapter=<id> → lista de registros para DataTables"""
+    adapter_id = request.GET.get("adapter")
+    qs = apps.get_model("home", "AdapterPinMap").objects.filter(adapter_id=adapter_id)
+    data = []
+    for m in qs:
+        data.append({
+            "id": m.id,
+            "pxi_connector": f"{m.pxi_connector.label} ({m.pxi_connector.connector_type})",
+            "to_pxi_pin": m.to_pxi_pin,
+            "pxi_channel_type": m.get_pxi_channel_type_display(),
+            "pxi_channel": m.pxi_channel,
+            "relay_card": m.relay_card.id if m.relay_card else None,
+            "relay_card_name": m.relay_card.name if m.relay_card else "",
+            "test_connector": m.test_connector.id if m.test_connector else None,
+            "test_connector_display": (
+                f"{m.test_connector.label} ({m.test_connector.connector_type})"
+                if m.test_connector else ""
+            ),
+            "to_test_pin": m.to_test_pin,
+        })
+    return JsonResponse({"data": data})
+
+@csrf_exempt
+def api_save_adapterpinmap(request):
+    """POST /api/hardware/adapterpinmap/save/  body {id, field, value}"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Método no permitido"}, status=405)
+    try:
+        payload = json.loads(request.body)
+        field = payload["field"]
+        value = payload["value"]
+
+        m = apps.get_model("home", "AdapterPinMap").objects.get(pk=payload["id"])
+
+        # Convert FK IDs to instances
+        if field in ("relay_card", "test_connector"):
+            fk_model = "RelayCard" if field == "relay_card" else "PhysicalConnector"
+            if value is not None:
+                value = apps.get_model("home", fk_model).objects.get(pk=value)
+            else:
+                value = None
+                
+        if payload["field"] == "to_test_pin":
+            connector = m.test_connector
+            if not connector:
+                return JsonResponse({"error": "Seleccione un conector de test válido antes de ingresar el pin."}, status=400)
+            try:
+                val = int(payload["value"])
+            except (TypeError, ValueError):
+                return JsonResponse({"error": "Pin inválido"}, status=400)
+            if val < 1 or val > connector.pin_qty:
+                return JsonResponse({"error": f"Pin permitido: 1-{connector.pin_qty}"}, status=400)
+
+        setattr(m, field, value)
+        m.full_clean()
+        m.save()
+        return JsonResponse({"success": True})
+    except ValidationError as e:
+        return JsonResponse({"error": e.message_dict.get(field, e.messages)[0]}, status=400)
+    except IntegrityError as e:
+        return JsonResponse({"error": "Valor duplicado o inválido"}, status=400)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
 
 
 

@@ -1,0 +1,391 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Conexiones del adaptador {{ adapter.name }} - {% endblock title %}
+
+{% load static %}
+
+{% block content %}
+
+  <div class="page-wrapper">
+    <!-- Page header -->
+
+    <!-- Page body -->
+    <div class="page-body">
+      <div class="container-xl">
+        <div class="row row-cards">
+          <div class="col-lg-12">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Conexiones del adaptador "{{ adapter.name }} "</h3>
+              </div>                
+              <div class="card-body">
+                <table class="table table-striped" id="connections-table">
+                  <thead>
+                    <tr>
+                      <th>Conector lado PXI</th>
+                      <th>Pin lado PXI</th>
+                      <th>Tipo de canal</th>
+                      <th>Canal PXI</th>
+                      <th>Placa PXI</th>
+                      <th>Conector lado test</th>
+                      <th>Pin lado test</th>
+                    </tr>
+                  </thead>
+                  <tbody id="connections-tbody"></tbody>
+                </table>
+
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Contenedor para toasts -->
+          <div id="toastContainer" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055"></div>
+
+        </div>
+      </div>
+    </div>
+    {% include 'includes/footer.html' %}
+  </div>
+
+  {% block modal %}
+
+  <!-- Modal de confirmación de eliminación -->
+  <div class="modal modal-blur fade" id="modal-confirm" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-status bg-danger"></div>
+        <div class="modal-body text-center py-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon mb-2 text-danger icon-lg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+            <path d="M10.24 3.957l-8.422 14.06a1.989 1.989 0 0 0 1.7 2.983h16.845a1.989 1.989 0 0 0 1.7 -2.983l-8.423 -14.06a1.989 1.989 0 0 0 -3.4 0z" />
+            <path d="M12 9v4" />
+            <path d="M12 17h.01" />
+          </svg>
+          <h3>Eliminar</h3>
+          <div class="text-muted">¿Está seguro que desea eliminar este registro?</div>
+        </div>
+        <div class="modal-footer">
+          <div class="w-100">
+            <div class="row">
+              <div class="col"><a href="#" class="btn w-100" data-bs-dismiss="modal">Cancelar</a></div>
+              <div class="col"><a href="#" id="confirmDeleteBtn" class="btn btn-danger w-100">Eliminar</a></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+     
+  {% endblock modal %}
+
+{% endblock content %}
+
+{% block extrajs %}
+
+<script src="{% static 'js/jquery-3.7.0.min.js' %}"></script>
+<script src="{% static 'js/dataTables.js' %}"></script>
+<script src="{% static 'js/dataTables.bootstrap5.js' %}"></script>
+
+<script src="{% static 'dist/libs/tom-select/dist/js/tom-select.base.min.js' %}?1684106062" defer></script>
+
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+
+    function showInlineAlert(container, message, type = "info") {
+      const icons = {
+        info: `
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon icon-2">
+            <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path>
+            <path d="M12 9h.01"></path>
+            <path d="M11 12h1v4h1"></path>
+          </svg>`,
+        warning: `
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon icon-2">
+            <path d="M12 9v4"></path>
+            <path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z"></path>
+            <path d="M12 16h.01"></path>
+          </svg>`,
+        danger: `
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon icon-2">
+            <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path>
+            <path d="M12 8v4"></path>
+            <path d="M12 16h.01"></path>
+          </svg>`,
+        success: `
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon icon-2">
+            <path d="M5 12l5 5l10 -10"></path>
+          </svg>`
+      };
+
+      const icon = icons[type] || icons.info;
+
+      const html = `
+        <div class="alert alert-important alert-${type} alert-dismissible" role="alert">
+          <div class="alert-icon">${icon}</div>
+          <div>${message}</div>
+          <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+        </div>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    function showToast(msg, type = "info") {
+      const toast = document.createElement("div");
+      toast.className = `toast align-items-center text-white bg-${type} border-0 my-1`;
+      toast.setAttribute("role", "alert");
+      toast.setAttribute("aria-live", "assertive");
+      toast.setAttribute("aria-atomic", "true");
+      toast.innerHTML = `
+        <div class="d-flex">
+          <div class="toast-body">${msg}</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>`;
+      document.getElementById("toastContainer").appendChild(toast);
+      new bootstrap.Toast(toast).show();
+      toast.addEventListener("hidden.bs.toast", () => toast.remove());
+    }
+
+    function getCSRFToken() {
+      let value = null;
+      if (document.cookie) {
+        document.cookie.split(";").forEach(cookie => {
+          if (cookie.trim().startsWith("csrftoken=")) {
+            value = cookie.trim().substring("csrftoken=".length);
+          }
+        });
+      }
+      return value;
+    }
+
+    const adapterId = {{ adapter.id }};
+
+    // =======================
+    // Carga opciones dinámicas
+    // =======================
+
+    let relayOptions = [];
+    fetch('/api/hardware/get-relaycards/')
+      .then(r=>r.json())
+      .then(r=> relayOptions = r.data.map(x=> ({id:x.id, text:x.name})) );
+
+    let testConnectorOptions = [];
+    fetch(`/api/hardware/physicalconnector/?adapter=${adapterId}`)
+      .then(r=>r.json())
+      .then(r=> {
+        testConnectorOptions = r.data
+          .filter(x=> x.connector_side==='test-side')
+          .map(x=>({id:x.id, text:`${x.label} (${x.connector_type})`, maxPin:x.pin_qty}));
+      });
+
+    const channelTypes = [
+      {value:'U', text:'Input'},
+      {value:'M', text:'Output'},
+      {value:'undefined', text:'No definido'}
+    ];
+
+    function getMaxPinForConnector(connectorId) {
+      const conn = testConnectorOptions.find(x => x.id == connectorId);
+      return conn ? conn.maxPin : null;
+    }
+
+    function renderPinInput(field, value, connectorId) {
+      const maxPin = getMaxPinForConnector(connectorId);
+      return `
+        <input type="number" class="form-control form-control-sm auto-save-input"
+              data-field="${field}" value="${value}" ${maxPin ? `max="${maxPin}"` : ''}>
+      `;
+    }
+
+    function renderSelect(field, selectedText) {
+      let opts = [];
+      if (field === 'pxi_channel_type') {
+        opts = channelTypes;
+      } else if (field === 'relay_card_name') {
+        opts = [{ id: '', text: 'No definido' }, ...relayOptions];
+      } else if (field === 'test_connector_display') {
+        opts = [{ id: '', text: 'No definido' }, ...testConnectorOptions];
+      }
+
+      const selectedValue = (opts.find(o => o.text === selectedText) || {}).id || (opts.find(o => o.text === selectedText) || {}).value || '';
+      
+      return `
+        <select class="form-select form-select-sm auto-save-select" data-field="${field}">
+          ${opts.map(o => `
+            <option value="${o.id || o.value}" ${String(o.id || o.value) === String(selectedValue) ? 'selected' : ''}>
+              ${o.text}
+            </option>
+          `).join('')}
+        </select>
+      `;
+    }
+
+
+    // =======================
+    // Inicializa DataTable
+    // =======================
+
+    const connTable = $('#connections-table').DataTable({
+      ajax: {
+        url: `/api/hardware/adapterpinmap/?adapter=${adapterId}`,
+        dataSrc: 'data'
+      },
+      columns: [
+        { data: 'pxi_connector', title: 'Conector lado PXI' },
+        { data: 'to_pxi_pin', title: 'Pin lado PXI' },
+        { data: 'relay_card_name', title: 'Placa PXI', render: (data, type, row) => renderSelect('relay_card_name', data) },
+        { data: 'pxi_channel_type', title: 'Tipo de canal', render: (data, type, row) => renderSelect('pxi_channel_type', data) },
+        { data: 'pxi_channel', title: 'Canal PXI', className: 'editable-number' },
+        { data: 'test_connector_display', render: (data, type, row) => renderSelect('test_connector_display', data) },
+        {
+          data: 'to_test_pin',
+          title: 'Pin lado test',
+          className: 'editable-number',
+          render: function (data, type, row) {
+            return data ?? '';
+          }
+        }
+      ],
+      language: { url: '{% static "datatables/datatables_es-ES.json" %}' },
+      paging: false, searching: false, info: false, ordering: true, stateSave: false,
+      order: [[0, 'asc'], [1, 'asc']],
+    });
+
+    
+
+    // =======================
+    // Helper para guardar
+    // =======================
+
+    
+
+    function saveField(id, field, value, cell) {
+      fetch('/api/hardware/adapterpinmap/save/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCSRFToken()
+        },
+        body: JSON.stringify({ id, field, value })
+      })
+        .then(r => r.ok ? r.json() : r.json().then(e => Promise.reject(e)))
+        .then(() => {
+          showToast('Actualizado', 'success');
+          connTable.ajax.reload(null, false);
+        })
+        .catch(err => {
+          showToast(err.error || 'Error', 'danger');
+          connTable.ajax.reload(null, false);
+        });
+    }
+
+    // =======================
+    // Edición inline: selects
+    // =======================
+    $('#connections-table tbody').on('change', 'select.auto-save-select', function () {
+      const row = connTable.row($(this).closest('tr')).data();
+      const field = this.dataset.field;
+      const rawValue = this.value;
+      
+      const value = rawValue === 'undefined' || rawValue === '' ? null
+             : /^\d+$/.test(rawValue) ? parseInt(rawValue)
+             : rawValue;
+
+      saveField(row.id, field.replace('_display', '').replace('_name', ''), value);
+    });
+
+    // =======================
+    // Edición inline: números
+    // =======================
+    $('#connections-table tbody').on('click','td.editable-number',function(){
+      const cell=this, col=connTable.column(cell).dataSrc(), row=connTable.row(cell.closest('tr'));
+      const data=row.data(), oldVal=data[col];
+      const inp=document.createElement('input');
+      inp.type='number'; inp.className='form-control form-control-sm';
+      inp.value=oldVal;
+      if(col==='pxi_channel') { inp.min=0; inp.max=74; }
+      if(col==='to_test_pin') inp.min=1;
+      cell.innerHTML=''; cell.appendChild(inp); inp.focus();
+
+      inp.addEventListener('keydown',e=>{
+        if(e.key==='Enter') inp.blur();
+        if(e.key==='Escape'){ connTable.ajax.reload(null,false); }
+      });
+      inp.addEventListener('blur', () => {
+        let nv = inp.value.trim();
+
+        // Si el campo está vacío → guardar null
+        if (!nv) {
+          saveField(data.id, col, null, cell);
+
+          // Reset dependiente si se borra
+          if (col === 'relay_card') {
+            saveField(data.id, 'pxi_channel', null);
+          }
+          if (col === 'test_connector') {
+            saveField(data.id, 'to_test_pin', null);
+          }
+
+          return;
+        }
+
+        // Validar que sea número
+        if (isNaN(nv)) {
+          showToast('Número inválido', 'warning');
+          connTable.ajax.reload(null, false);
+          return;
+        }
+
+        nv = parseInt(nv);
+
+        // Validación para pxi_channel
+        if (col === 'pxi_channel') {
+          if (!data.relay_card) {
+            showToast('Primero seleccione una placa PXI', 'warning');
+            connTable.ajax.reload(null, false);
+            return;
+          }
+          if (nv < 1 || nv > 74) {
+            showToast('Canal PXI fuera de rango: 1–74', 'warning');
+            connTable.ajax.reload(null, false);
+            return;
+          }
+        }
+
+        // Validación para to_test_pin
+        if (col === 'to_test_pin') {
+          if (!data.test_connector) {
+            showToast('Primero seleccione un conector lado test', 'warning');
+            connTable.ajax.reload(null, false);
+            return;
+          }
+
+          const opt = testConnectorOptions.find(o => o.id == data.test_connector);
+          if (opt) {
+            const max = opt.maxPin || 1;
+            if (nv < 1 || nv > max) {
+              showToast(`Pin fuera de rango: 1–${max}`, 'warning');
+              connTable.ajax.reload(null, false);
+              return;
+            }
+          }
+        }
+
+        // Guardar valor válido
+        saveField(data.id, col, nv, cell);
+      });
+
+
+    });
+  });
+</script>
+
+
+{% endblock extrajs %}
+
+{% block extrastyle %}
+
+{% endblock extrastyle %}

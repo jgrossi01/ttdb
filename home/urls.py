@@ -17,6 +17,7 @@ urlpatterns = [
     path("hardware/", views.hardware, name="hardware"),
     path("hardware/new-adapter", views.new_adapter_view, name="new_adapter_view"),
     path("hardware/adapter/<int:id>/connectors", views.adapter_connectors_view, name="adapter_connectors_view"),
+    path("hardware/adapter/<int:id>/connections", views.adapter_connections_view, name="adapter_connections_view"),
 
     
     #pruebas de conexion con pxi
@@ -36,16 +37,23 @@ urlpatterns = [
     path('api/run-test-stage/', views.run_test_stage, name='run_test_stage'),
     path("api/hardware/connector-types/", views.api_connector_types, name="connector_types"),
     
+    # Especificas
+    path("api/hardware/connection_config/", views.api_get_connection_config, name="get_connection_config"),
+    path("api/hardware/physicalconnector/create/", views.api_create_physical_connector),
+    path("api/hardware/physicalconnector/", views.api_list_physical_connectors),
+    path("api/hardware/check-connector-label/", views.api_check_connector_label, name="check_connector_label"),
+    path("api/hardware/get-adapters/", views.api_get_adapters, name="get_adapters"),
+    path("api/hardware/get-relaycards/", views.api_get_relaycards, name="get_relaycards"),
+    
+    # Pinmap
+    path("api/hardware/adapterpinmap/", views.api_list_adapterpinmap),
+    path("api/hardware/adapterpinmap/save/", views.api_save_adapterpinmap),
+    
     # Genericas
     path("api/hardware/save/", views.api_save_hardware_edit, name="save_hardware_edit"),
     path("api/hardware/create/", views.api_create_hardware_record, name="create_hardware_record"),
     path("api/hardware/delete/", views.api_delete_hardware_record, name="delete_hardware_record"),
-    path("api/hardware/<str:model_name>/", views.api_get_hardware_model, name="get_hardware_model"),
-
-    # Especificas
-    path("api/hardware/connection_config/", views.get_connection_config, name="get_connection_config"),
-    path("api/hardware/physicalconnector/create/", views.api_create_physical_connector),
-    path("api/hardware/check-connector-label/", views.api_check_connector_label, name="check_connector_label"),
+    #path("api/hardware/<str:model_name>/", views.api_get_hardware_model, name="get_hardware_model"), #Mantener abajo para evitar errores
 
     
     # Logs   

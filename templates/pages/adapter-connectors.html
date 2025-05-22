@@ -1,5 +1,5 @@
 {% extends 'layouts/base.html' %}
-{% block title %}Nuevo conector - {% endblock title %}
+{% block title %}Conectores del adaptador {{ adapter.name }} - {% endblock title %}
 
 {% load static %}
 
@@ -250,45 +250,64 @@
       return value;
     }
 
-    // CREA TABLA DE CONECTORES
-    function cargarConectores() {
-      fetch(`/api/hardware/physicalconnector/?adapter=${adapterId}`)
-        .then(res => res.json())
-        .then(data => {
-          const tbody = document.querySelector("#connector-table tbody");
-          tbody.innerHTML = "";
-          data.data.forEach(c => {
-            tbody.innerHTML += `
-              <tr>
-                <td class="editable" data-field="label">${c.label}</td>
-                <td>${c.connector_type}</td>
-                <td class="editable" data-field="pin_qty">${c.pin_qty}</td>
-                <td>${c.connector_side_display}</td>
-                <td class="text-center">
-                  <a href="#" class="btn-sm btn-delete text-red" data-id="${c.id}">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-trash m-0">
-                      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                      <path d="M4 7l16 0" />
-                      <path d="M10 11l0 6" />
-                      <path d="M14 11l0 6" />
-                      <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
-                      <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
-                    </svg>
-                  </a>
-                </td>
-              </tr>`;
-          });
-        });
-    }
+
+    // =======================
+    // Inicializa la tabla de conectores con DataTables
+    // =======================
+    const connectorTable = $('#connector-table').DataTable({
+      ajax: {
+        url: `/api/hardware/physicalconnector/?adapter=${adapterId}`,
+        dataSrc: 'data'
+      },
+      columns: [
+        {
+          data: 'label',
+          className: 'editable',
+          title: 'Etiqueta',
+          createdCell: function (td) {
+            $(td).attr('data-field', 'label');
+          }
+        },
+        { data: 'connector_type', title: 'Tipo' },
+        { data: 'pin_qty', title: 'Pines' },
+        { data: 'connector_side_display', title: 'Lado' },
+        {
+          data: 'id',
+          className: 'text-center',
+          orderable: false,
+          title: '',
+          render: function (data) {
+            return `
+              <a href="#" class="btn-sm btn-delete text-red" data-id="${data}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-trash m-0">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <path d="M4 7l16 0" />
+                  <path d="M10 11l0 6" />
+                  <path d="M14 11l0 6" />
+                  <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                  <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                </svg>
+              </a>`;
+          }
+        }
+      ],
+      language: { url: '{% static "datatables/datatables_es-ES.json" %}' },
+      paging: false,
+      searching: false,
+      info: false,
+      ordering: false,
+      stateSave: false
+    });
 
 
-
+    // =======================
+    // Guardar nuevo conector
+    // =======================
     document.getElementById("btn-save-connector").addEventListener("click", () => {
       const type = document.getElementById("connector_type_select").value.trim();
       const label = document.getElementById("connector_label").value.trim();
       const pinQty = document.getElementById("connector_pin_qty").value.trim();
-      const connectorSide = document.getElementById("connector_side_select").value;  // nuevo campo
-
+      const connectorSide = document.getElementById("connector_side_select").value;
       alertContainer.innerHTML = "";
 
       if (!type || !label || !connectorSide) {
@@ -312,7 +331,7 @@
           connector_type: type.toUpperCase(),
           label: label,
           pin_qty: parseInt(pinQty),
-          connector_side: connectorSide  // incluir en payload
+          connector_side: connectorSide
         })
       })
       .then(res => res.json())
@@ -320,8 +339,8 @@
         if (data.type === "danger") {
           showInlineAlert(alertContainer, data.message, data.type);
         } else {
-          showInlineAlert(alertContainer, data.message || "Conector agregado correctamente.",  data.type);
-          cargarConectores();
+          showInlineAlert(alertContainer, data.message || "Conector agregado correctamente.", data.type);
+          connectorTable.ajax.reload();
           document.getElementById("connector_label").value = "";
         }
       })
@@ -330,16 +349,15 @@
       });
     });
 
-
-    cargarConectores();
-
-    // ELIMINAR CONECTOR
+    // =======================
+    // Eliminar conector
+    // =======================
     let deletePayload = null;
     const confirmModal = new bootstrap.Modal(document.getElementById("modal-confirm"));
     document.querySelector("#modal-confirm").addEventListener("hidden.bs.modal", function () {
       deletePayload = null;
     });
-    
+
     document.querySelector("#connector-table").addEventListener("click", function (e) {
       if (e.target.closest(".btn-delete")) {
         const id = e.target.closest(".btn-delete").dataset.id;
@@ -363,9 +381,9 @@
         body: JSON.stringify(deletePayload)
       })
       .then(res => res.json())
-      .then(data => {
+      .then(() => {
         showToast("Conector eliminado correctamente.", "success");
-        cargarConectores();
+        connectorTable.ajax.reload();
       })
       .catch(() => {
         showToast("Error al eliminar", "danger");
@@ -376,18 +394,15 @@
       });
     });
 
-    // EDITAR LABEL INLINE
-  
-    // EDITAR LABEL o PIN_QTY INLINE
-    document.querySelector("#connector-table tbody").addEventListener("click", function (e) {
-      const cell = e.target.closest("td");
-      const row = e.target.closest("tr");
-
-      if (!cell || !cell.classList.contains("editable")) return;
-
+    // =======================
+    // Edición inline de celdas (label y pin_qty)
+    // =======================
+    $('#connector-table tbody').on('click', 'td.editable', function () {
+      const cell = this;
       const field = cell.dataset.field;
       const originalText = cell.textContent.trim();
-      const connectorId = row.querySelector(".btn-delete").dataset.id;
+      const row = connectorTable.row(cell.closest('tr')).data();
+      const connectorId = row.id;
 
       const input = document.createElement("input");
       input.type = "text";
@@ -399,18 +414,22 @@
       input.focus();
 
       const restoreCell = (text) => {
-        cell.textContent = text;
+        cell.innerHTML = text;
       };
 
       const guardarValor = () => {
         const newValue = input.value.trim();
-
-        if (newValue === originalText || newValue === "") {
+        if (newValue === originalText) {
           restoreCell(originalText);
           return;
         }
 
-        // validaciones:
+        if (newValue === "") {
+          showToast("El campo no puede estar vacío.", "warning");
+          restoreCell(originalText);
+          return;
+        }
+
         if (field === "pin_qty" && !/^\d+$/.test(newValue)) {
           showToast("La cantidad de pines debe ser un número entero", "warning");
           restoreCell(originalText);
@@ -423,7 +442,7 @@
             .then(data => {
               const existe = data.data.some(c =>
                 c.label.trim().toLowerCase() === newValue.toLowerCase() &&
-                c.id !== parseInt(connectorId)
+                c.id !== connectorId
               );
               if (existe) {
                 showToast("Esa etiqueta ya existe para un conector de este adaptador.", "warning");
@@ -437,6 +456,8 @@
         }
 
         function actualizarConector(field, value) {
+          console.log("Enviando:", { field, value, connectorId });
+
           fetch("/api/hardware/save/", {
             method: "POST",
             headers: {
@@ -450,17 +471,26 @@
               value: field === "pin_qty" ? parseInt(value) : value
             })
           })
-          .then(res => res.json())
-          .then(() => {
-            showToast("Conector actualizado", "success");
-            restoreCell(value);
+          .then(async res => {
+            const data = await res.json();
+
+            if (res.ok) {
+              showToast(data.message || "Actualización exitosa", "success");
+              restoreCell(value);
+              connectorTable.ajax.reload(null, false);
+            } else {
+              showToast(data.message || "Error al guardar", "danger");
+              restoreCell(originalText);
+            }
           })
-          .catch(() => {
-            showToast("Error al guardar", "danger");
+          .catch(err => {
+            console.error("Error inesperado:", err);
+            showToast("Error al guardar (conexión fallida)", "danger");
             restoreCell(originalText);
           });
         }
-      };
+
+      }
 
       input.addEventListener("blur", guardarValor);
       input.addEventListener("keydown", function (event) {
@@ -468,9 +498,6 @@
         if (event.key === "Escape") restoreCell(originalText);
       });
     });
-
-
-
 
   });
 </script>
