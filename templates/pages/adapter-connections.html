@@ -21,6 +21,7 @@
                 <table class="table table-striped" id="connections-table">
                   <thead>
                     <tr>
+                      <th style="max-width: 5px">#</th>
                       <th>Conector lado PXI</th>
                       <th>Pin lado PXI</th>
                       <th>Tipo de canal</th>
@@ -202,6 +203,11 @@
 
     function renderSelect(field, selectedText) {
       let opts = [];
+      if (selectedText === null || selectedText === undefined) {
+        if (field === 'pxi_channel_type') selectedText = 'No definido';
+        else if (field === 'relay_card_name' || field === 'test_connector_display') selectedText = 'No definido';
+      }
+
       if (field === 'pxi_channel_type') {
         opts = channelTypes;
       } else if (field === 'relay_card_name') {
@@ -224,6 +230,7 @@
     }
 
 
+
     // =======================
     // Inicializa DataTable
     // =======================
@@ -234,6 +241,12 @@
         dataSrc: 'data'
       },
       columns: [
+        {
+          data: null,
+          defaultContent: '',
+          className: 'select-checkbox',
+          orderable: false
+        },
         { data: 'pxi_connector', title: 'Conector lado PXI' },
         { data: 'to_pxi_pin', title: 'Pin lado PXI' },
         { data: 'relay_card_name', title: 'Placa PXI', render: (data, type, row) => renderSelect('relay_card_name', data) },

@@ -330,7 +330,7 @@
       ajax: '/api/hardware/get-adapters/',
       dataSrc: 'data',
       columns: [
-        { data: 'name', className: 'editable', title: 'Nombre', className: "text-center align-middle", },
+        { data: 'name', className: 'editable text-center align-middle', title: 'Nombre' },
         {
           data: 'pxi_connectors',
           title: 'Conectores lado PXI',
@@ -458,6 +458,7 @@
  
     document.querySelector('#table-adaptadores tbody').addEventListener('click', function (e) {
       const cellElement = e.target.closest('td.editable');
+      
       if (!cellElement) return;
 
       const rowElement = cellElement.closest('tr');
@@ -497,7 +498,7 @@
         const allData = tablaAdapters.rows().data().toArray();
         const nameExists = allData.some(d => d.id !== rowData.id && String(d.name).trim().toLowerCase() === newValue.toLowerCase());
         if (nameExists) {
-          showToast("Este adaptador ya tiene un conector con esa etiqueta.", "warning");
+          showToast("Ya existe un adaptador con ese nombre.", "warning");
           restoreCell();
           return;
         }

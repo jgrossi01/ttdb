@@ -234,7 +234,7 @@ class AdapterPinMap(models.Model):
                         qs = qs.exclude(pk=self.pk)
                     if qs.exists():
                         errors['pxi_channel'] = (
-                            f"El canal {self.pxi_channel} ya esta en uso para esta placa."
+                            f"El canal {self.pxi_channel} ya esta en uso para esta placa PXI."
                         )
 
         # ——— test_connector / to_test_pin ———
