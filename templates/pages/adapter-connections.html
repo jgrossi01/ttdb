@@ -256,130 +256,101 @@
 
     
 
-    // =======================
-    // Helper para guardar
-    // =======================
+    // helper: unifica success/error
+    async function editField(id, field, value) {
 
-    
-
-    function saveField(id, field, value, cell) {
-      fetch('/api/hardware/adapterpinmap/save/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': getCSRFToken()
-        },
-        body: JSON.stringify({ id, field, value })
-      })
-        .then(r => r.ok ? r.json() : r.json().then(e => Promise.reject(e)))
-        .then(() => {
-          showToast('Actualizado', 'success');
-          connTable.ajax.reload(null, false);
-        })
-        .catch(err => {
-          showToast(err.error || 'Error', 'danger');
-          connTable.ajax.reload(null, false);
+      try {
+        const res = await fetch('/api/hardware/adapterpinmap/save/', {
+          method:'POST',
+          headers:{
+            'Content-Type':'application/json',
+            'X-CSRFToken': getCSRFToken()
+          },
+          body: JSON.stringify({ id, field, value })
         });
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error || 'Error');
+        showToast('Guardado exitoso', 'success');
+      } catch (err) {
+        showToast(err.message, 'warning');
+      } finally {
+        connTable.ajax.reload(null, false);
+      }
     }
 
-    // =======================
-    // Edición inline: selects
-    // =======================
-    $('#connections-table tbody').on('change', 'select.auto-save-select', function () {
-      const row = connTable.row($(this).closest('tr')).data();
-      const field = this.dataset.field;
-      const rawValue = this.value;
-      
-      const value = rawValue === 'undefined' || rawValue === '' ? null
-             : /^\d+$/.test(rawValue) ? parseInt(rawValue)
-             : rawValue;
+    // cuando un select cambia:
+    $('#connections-table tbody')
+      .on('change', 'select.auto-save-select', function(){
+        const row = connTable.row($(this).closest('tr')).data();
+        const field = this.dataset.field.replace('_display','').replace('_name','');
+        const raw = this.value;
+        const val = raw && raw!=='undefined' ? (/^\d+$/.test(raw)?+raw:raw) : null;
 
-      saveField(row.id, field.replace('_display', '').replace('_name', ''), value);
+        // si limpieas relay_card o test_connector, solo un request
+        editField(row.id, field, val);
     });
 
-    // =======================
-    // Edición inline: números
-    // =======================
+    // inline-numbers
     $('#connections-table tbody').on('click','td.editable-number',function(){
-      const cell=this, col=connTable.column(cell).dataSrc(), row=connTable.row(cell.closest('tr'));
-      const data=row.data(), oldVal=data[col];
-      const inp=document.createElement('input');
-      inp.type='number'; inp.className='form-control form-control-sm';
-      inp.value=oldVal;
-      if(col==='pxi_channel') { inp.min=0; inp.max=74; }
-      if(col==='to_test_pin') inp.min=1;
-      cell.innerHTML=''; cell.appendChild(inp); inp.focus();
+      const cell = this;
+      const col = connTable.column(cell).dataSrc();
+      const rowData = connTable.row(cell.closest('tr')).data();
+      const inp = $('<input type="number" class="form-control form-control-sm">')
+          .val(rowData[col]);
 
-      inp.addEventListener('keydown',e=>{
-        if(e.key==='Enter') inp.blur();
-        if(e.key==='Escape'){ connTable.ajax.reload(null,false); }
-      });
-      inp.addEventListener('blur', () => {
-        let nv = inp.value.trim();
+      // rango mínimo/máximo
+      if(col==='pxi_channel') inp.attr({ min:1, max:74 });
+      if(col==='to_test_pin') {
+        inp.attr('min',1);
+        if (rowData.test_connector){
+          const max = getMaxPinForConnector(rowData.test_connector);
+          inp.attr('max', max);
+        }
+      }
 
-        // Si el campo está vacío → guardar null
-        if (!nv) {
-          saveField(data.id, col, null, cell);
+      $(cell).empty().append(inp);
+      inp.focus();
 
-          // Reset dependiente si se borra
-          if (col === 'relay_card') {
-            saveField(data.id, 'pxi_channel', null);
-          }
-          if (col === 'test_connector') {
-            saveField(data.id, 'to_test_pin', null);
-          }
-
+      inp.on('blur keydown', e => {
+        if(e.type==='keydown' && !['Enter','Escape'].includes(e.key)) return;
+        if(e.key==='Escape') {
+          connTable.ajax.reload(null,false);
           return;
         }
 
-        // Validar que sea número
-        if (isNaN(nv)) {
-          showToast('Número inválido', 'warning');
-          connTable.ajax.reload(null, false);
-          return;
+        // blur o Enter:
+        let nv = inp.val().trim();
+        const clear = nv==='';
+        // validaciones previas:
+        if(col==='pxi_channel' && !rowData.relay_card){
+          showToast('Selecciona primero una placa PXI', 'warning');
+          return connTable.ajax.reload(null,false);
+        }
+        if(col==='to_test_pin' && !rowData.test_connector){
+          showToast('Selecciona primero un conector de test', 'warning');
+          return connTable.ajax.reload(null,false);
+        }
+        if(!clear){
+          const num = +nv;
+          // rango
+          const min=+inp.attr('min'), max=+inp.attr('max');
+          if(isNaN(num) || num<min || num>max){
+            showToast(`Valor fuera de rango ${min}–${max}`, 'warning');
+            return connTable.ajax.reload(null,false);
+          }
+          nv = num;
+        } else {
+          nv = null;
         }
 
-        nv = parseInt(nv);
-
-        // Validación para pxi_channel
-        if (col === 'pxi_channel') {
-          if (!data.relay_card) {
-            showToast('Primero seleccione una placa PXI', 'warning');
-            connTable.ajax.reload(null, false);
-            return;
-          }
-          if (nv < 1 || nv > 74) {
-            showToast('Canal PXI fuera de rango: 1–74', 'warning');
-            connTable.ajax.reload(null, false);
-            return;
-          }
-        }
-
-        // Validación para to_test_pin
-        if (col === 'to_test_pin') {
-          if (!data.test_connector) {
-            showToast('Primero seleccione un conector lado test', 'warning');
-            connTable.ajax.reload(null, false);
-            return;
-          }
-
-          const opt = testConnectorOptions.find(o => o.id == data.test_connector);
-          if (opt) {
-            const max = opt.maxPin || 1;
-            if (nv < 1 || nv > max) {
-              showToast(`Pin fuera de rango: 1–${max}`, 'warning');
-              connTable.ajax.reload(null, false);
-              return;
-            }
-          }
-        }
-
-        // Guardar valor válido
-        saveField(data.id, col, nv, cell);
+        // todo validado → guardamos
+        editField(rowData.id, col, nv);
       });
-
-
     });
+
+
+
+    
   });
 </script>
 

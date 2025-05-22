@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 from .models_harness import *
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
+
 # Create your models here.
 
 class UserProfile(models.Model):
@@ -177,7 +178,6 @@ class AdapterPinMap(models.Model):
     pxi_channel_type = models.CharField(
         max_length=50,
         choices=[('U', 'Input'), ('M', 'Output'), ('undefined', 'No definido')],
-        default='undefined',
         null=True, blank=True
     )
     relay_card = models.ForeignKey(
@@ -197,55 +197,70 @@ class AdapterPinMap(models.Model):
     )
 
     class Meta:
+        
         constraints = [
             models.UniqueConstraint(
-                fields=["adapter", "pxi_connector", "pxi_channel"],
-                name="unique_pxi_mapping_per_adapter"
-            )
+                fields=["adapter", "relay_card", "pxi_channel"],
+                name="unique_pxi_mapping_per_adapter_and_relay",
+            ),
+            models.UniqueConstraint(
+                fields=["adapter", "test_connector", "to_test_pin"],
+                name="unique_test_mapping_per_adapter"
+            ),
         ]
-        ordering = ['adapter', 'pxi_connector', 'pxi_channel']
-
-    def __str__(self):
-        base = f"{self.adapter.name} | {self.pxi_connector.label}"
-        if self.test_connector and self.to_test_pin:
-            return f"{base} → {self.test_connector.label}-pin{self.to_test_pin}"
-        return f"{base} → (sin asignar)"
+        ordering = ['pxi_connector', 'to_pxi_pin', 'pxi_channel']
 
     def clean(self):
-        # Validar que to_test_pin no supere la cantidad de pines del test_connector
-        if self.test_connector and self.to_test_pin:
-            if self.to_test_pin > self.test_connector.pin_qty:
-                raise ValidationError({
-                    'to_test_pin': f"El pin {self.to_test_pin} excede la cantidad de pines del conector {self.test_connector.label} (máximo: {self.test_connector.pin_qty})."
-                })
+        errors = {}
 
-            # Validar que no se repita el to_test_pin en el mismo test_connector y adapter
-            query = AdapterPinMap.objects.filter(
-                adapter=self.adapter,
-                test_connector=self.test_connector,
-                to_test_pin=self.to_test_pin,
-            )
-            if self.pk:
-                query = query.exclude(pk=self.pk)
-            if query.exists():
-                raise ValidationError({
-                    'to_test_pin': f"El pin {self.to_test_pin} ya está asignado en el conector {self.test_connector.label}."
-                })
+        # ——— relay_card / pxi_channel ———
+        if not self.relay_card:
+            # Si quito placa, limpio canal
+            self.pxi_channel = None
+        else:
+            # Solo validamos si el canal ya fue asignado
+            if self.pxi_channel is not None:
+                # Rango 1–74
+                if not (1 <= self.pxi_channel <= 74):
+                    errors['pxi_channel'] = "El canal PXI debe estar en 1–74."
+                else:
+                    # Unicidad adapter + relay_card + pxi_channel
+                    qs = AdapterPinMap.objects.filter(
+                        adapter=self.adapter,
+                        relay_card=self.relay_card,
+                        pxi_channel=self.pxi_channel
+                    )
+                    if self.pk:
+                        qs = qs.exclude(pk=self.pk)
+                    if qs.exists():
+                        errors['pxi_channel'] = (
+                            f"El canal {self.pxi_channel} ya esta en uso para esta placa."
+                        )
 
-        # Validar que pxi_channel no se repita con el mismo pxi_connector y relay_card
-        if self.pxi_connector and self.pxi_channel and self.relay_card:
-            query = AdapterPinMap.objects.filter(
-                adapter=self.adapter,
-                pxi_connector=self.pxi_connector,
-                pxi_channel=self.pxi_channel,
-                relay_card=self.relay_card
-            )
-            if self.pk:
-                query = query.exclude(pk=self.pk)
-            if query.exists():
-                raise ValidationError({
-                    'pxi_channel': f"El canal PXI {self.pxi_channel} ya está asignado para este conector y relay card."
-                })
+        # ——— test_connector / to_test_pin ———
+         # Validación test_connector / to_test_pin
+        if not self.test_connector:
+            self.to_test_pin = None
+        elif self.to_test_pin is not None:
+            if not (1 <= self.to_test_pin <= self.test_connector.pin_qty):
+                errors['to_test_pin'] = (
+                    f"Pin fuera de rango (1–{self.test_connector.pin_qty})."
+                )
+            else:
+                qs2 = AdapterPinMap.objects.filter(
+                    adapter=self.adapter,
+                    test_connector=self.test_connector,
+                    to_test_pin=self.to_test_pin
+                )
+                if self.pk:
+                    qs2 = qs2.exclude(pk=self.pk)
+                if qs2.exists():
+                    errors['to_test_pin'] = (
+                        f"El pin {self.to_test_pin} ya está asignado en este conector."
+                    )
+
+        if errors:
+            raise ValidationError(errors)
 
                 
 

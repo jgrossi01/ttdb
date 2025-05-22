@@ -1034,9 +1034,6 @@ def api_check_connector_label(request):
 
     return JsonResponse({"error": "Método no permitido"}, status=405)
 
-
-
-
 def adapter_connections_view(request, id):
     try:
         adapter = apps.get_model("home", "Adapter").objects.get(pk=id)
@@ -1069,45 +1066,34 @@ def api_list_adapterpinmap(request):
 
 @csrf_exempt
 def api_save_adapterpinmap(request):
-    """POST /api/hardware/adapterpinmap/save/  body {id, field, value}"""
     if request.method != "POST":
         return JsonResponse({"error": "Método no permitido"}, status=405)
+
+    data = json.loads(request.body)
+    field, val, obj_id = data['field'], data['value'], data['id']
+    Model = apps.get_model("home", "AdapterPinMap")
+    instance = get_object_or_404(Model, pk=obj_id)
+
+    # Conversión de FKs
+    if field in ('relay_card', 'test_connector'):
+        fk_model = 'RelayCard' if field == 'relay_card' else 'PhysicalConnector'
+        val = apps.get_model('home', fk_model).objects.get(pk=val) if val is not None else None
+        
+    if field == 'pxi_channel_type' and not val:
+        val = None
+
+    setattr(instance, field, val)
     try:
-        payload = json.loads(request.body)
-        field = payload["field"]
-        value = payload["value"]
-
-        m = apps.get_model("home", "AdapterPinMap").objects.get(pk=payload["id"])
-
-        # Convert FK IDs to instances
-        if field in ("relay_card", "test_connector"):
-            fk_model = "RelayCard" if field == "relay_card" else "PhysicalConnector"
-            if value is not None:
-                value = apps.get_model("home", fk_model).objects.get(pk=value)
-            else:
-                value = None
-                
-        if payload["field"] == "to_test_pin":
-            connector = m.test_connector
-            if not connector:
-                return JsonResponse({"error": "Seleccione un conector de test válido antes de ingresar el pin."}, status=400)
-            try:
-                val = int(payload["value"])
-            except (TypeError, ValueError):
-                return JsonResponse({"error": "Pin inválido"}, status=400)
-            if val < 1 or val > connector.pin_qty:
-                return JsonResponse({"error": f"Pin permitido: 1-{connector.pin_qty}"}, status=400)
-
-        setattr(m, field, value)
-        m.full_clean()
-        m.save()
+        instance.full_clean()
+        instance.save()
         return JsonResponse({"success": True})
     except ValidationError as e:
-        return JsonResponse({"error": e.message_dict.get(field, e.messages)[0]}, status=400)
-    except IntegrityError as e:
-        return JsonResponse({"error": "Valor duplicado o inválido"}, status=400)
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+        # devolvemos único mensaje de error
+        msg = e.message_dict.get(field, e.messages)[0]
+        return JsonResponse({"error": msg}, status=400)
+    except IntegrityError:
+        return JsonResponse({"error": "Combinación duplicada"}, status=400)
+
 
 
 
