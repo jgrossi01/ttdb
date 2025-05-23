@@ -48,6 +48,7 @@ urlpatterns = [
     # Pinmap
     path("api/hardware/adapterpinmap/", views.api_list_adapterpinmap),
     path("api/hardware/adapterpinmap/save/", views.api_save_adapterpinmap),
+    path('api/hardware/adapterpinmap/bulk-update/', views.adapterpinmap_bulk_update, name='adapterpinmap_bulk_update'),
     
     # Genericas
     path("api/hardware/save/", views.api_save_hardware_edit, name="save_hardware_edit"),

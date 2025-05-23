@@ -1093,6 +1093,62 @@ def api_save_adapterpinmap(request):
         return JsonResponse({"error": msg}, status=400)
     except IntegrityError:
         return JsonResponse({"error": "Combinación duplicada"}, status=400)
+    
+@csrf_exempt
+def adapterpinmap_bulk_update(request):
+    import json
+    from django.core.exceptions import ValidationError
+    data = json.loads(request.body)
+    ids = data.get('ids', [])
+    fields = data.get('fields', {})
+
+    if not ids or not isinstance(ids, list):
+        return JsonResponse({'error': 'IDs inválidos'}, status=400)
+
+    qs = AdapterPinMap.objects.filter(id__in=ids)
+
+    allowed_fields = ['relay_card', 'test_connector', 'pxi_channel_type']
+    update_fields = {f: v for f, v in fields.items() if f in allowed_fields}
+
+    errors = []
+
+    for obj in qs:
+        # Cambios dependientes
+        relay_card_changed = 'relay_card' in update_fields
+        test_connector_changed = 'test_connector' in update_fields
+
+        for field, val in update_fields.items():
+            if field in ['relay_card', 'test_connector']:
+                if val is None or val == 'undefined':
+                    setattr(obj, field, None)
+                else:
+                    Model = RelayCard if field == 'relay_card' else PhysicalConnector
+                    try:
+                        related_obj = Model.objects.get(id=val)
+                        setattr(obj, field, related_obj)
+                    except Model.DoesNotExist:
+                        continue
+            else:
+                setattr(obj, field, val if val else None)
+
+        # Limpiar campos dependientes manualmente si cambió el FK
+        if relay_card_changed:
+            obj.pxi_channel = None
+        if test_connector_changed:
+            obj.to_test_pin = None
+
+        try:
+            obj.full_clean()
+            obj.save()
+        except ValidationError as ve:
+            error_text = '; '.join([f"{k}: {', '.join(v)}" for k, v in ve.message_dict.items()])
+            errors.append({'id': obj.id, 'error': error_text})
+
+    if errors:
+        return JsonResponse({'status': 'partial', 'errors': errors}, status=400)
+
+    return JsonResponse({'status': 'ok'})
+
 
 
 

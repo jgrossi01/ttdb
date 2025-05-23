@@ -18,6 +18,7 @@
                 <h3 class="card-title">Conexiones del adaptador "{{ adapter.name }} "</h3>
               </div>                
               <div class="card-body">
+                <button id="bulk-edit-btn" class="btn btn-secondary btn-sm" disabled>Editar seleccionados</button>
                 <table class="table table-striped" id="connections-table">
                   <thead>
                     <tr>
@@ -49,6 +50,47 @@
   </div>
 
   {% block modal %}
+  <!-- Modal de bulk edit -->
+  <div class="modal modal-blur fade" id="bulk-edit-modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Edición en lote</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Placa PXI</label>
+            <select id="bulk-relay-select" class="form-select">
+              <option value="">(Sin cambios)</option>
+            </select>
+            <p class="text-warning mt-1 ms-1"><small>Cambiar esto quitara el "canal PXI" actual</small></p>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Tipo de canal</label>
+            <select id="bulk-type-select" class="form-select">
+              <option value="">(Sin cambios)</option>
+              <option value="U">Input</option>
+              <option value="M">Output</option>
+              <option value="undefined">No definido</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Conector de test</label>
+            <select id="bulk-connector-select" class="form-select">
+              <option value="">(Sin cambios)</option>
+            </select>
+            <p class="text-warning mt-1 ms-1"><small>Cambiar esto quitara el "pin lado test" actual</small></p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-link" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" id="confirm-bulk-edit" class="btn btn-primary">Aplicar cambios</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 
   <!-- Modal de confirmación de eliminación -->
   <div class="modal modal-blur fade" id="modal-confirm" tabindex="-1" role="dialog" aria-hidden="true">
@@ -234,7 +276,6 @@
     // =======================
     // Inicializa DataTable
     // =======================
-
     const connTable = $('#connections-table').DataTable({
       ajax: {
         url: `/api/hardware/adapterpinmap/?adapter=${adapterId}`,
@@ -243,10 +284,14 @@
       columns: [
         {
           data: null,
-          defaultContent: '',
-          className: 'select-checkbox',
-          orderable: false
+          title: '',
+          orderable: false,
+          className: 'text-center',
+          render: function (data, type, row) {
+            return `<input type="checkbox" class="form-check-input m-0 align-middle table-selectable-check" data-id="${row.id}">`;
+          }
         },
+
         { data: 'pxi_connector', title: 'Conector lado PXI' },
         { data: 'to_pxi_pin', title: 'Pin lado PXI' },
         { data: 'relay_card_name', title: 'Placa PXI', render: (data, type, row) => renderSelect('relay_card_name', data) },
@@ -262,12 +307,29 @@
           }
         }
       ],
+      select: {
+        style: 'multi',
+        selector: 'td.select-checkbox'
+      },
       language: { url: '{% static "datatables/datatables_es-ES.json" %}' },
-      paging: false, searching: false, info: false, ordering: true, stateSave: false,
+      paging: false,
+      searching: true,
+      info: false,
+      ordering: true,
+      stateSave: false,
       order: [[0, 'asc'], [1, 'asc']],
+      initComplete: function () {
+        // Inserta el checkbox en el primer <th> después de renderizar
+        $('#connections-table thead th').eq(0).html(
+          '<input type="checkbox" class="form-check-input m-0 align-middle table-selectable-check" id="select-all-visible" />'
+        );
+      }
     });
 
+
     
+    
+
 
     // helper: unifica success/error
     async function editField(id, field, value) {
@@ -360,6 +422,127 @@
         editField(rowData.id, col, nv);
       });
     });
+
+    // Bulk edit
+    // Activa/desactiva botón según selección
+    $('#connections-table').on('change', '.form-check-input', function() {
+      const selectedCount = $('.form-check-input:checked').length;
+      $('#bulk-edit-btn').prop('disabled', selectedCount === 0);
+    });
+
+    // Abre el modal y rellena los selects
+    $('#bulk-edit-btn').on('click', function() {
+      // Rellenar opciones para Relay Card
+      $('#bulk-relay-select').html(
+        `<option value="">(Sin cambios)</option>` +
+        relayOptions.map(opt => `<option value="${opt.id}">${opt.text}</option>`).join('')
+      );
+
+      // Rellenar opciones para Test Connector
+      $('#bulk-connector-select').html(
+        `<option value="">(Sin cambios)</option>` +
+        testConnectorOptions.map(opt => `<option value="${opt.id}">${opt.text}</option>`).join('')
+      );
+
+      // NOTA: El select de tipo canal ya está en el HTML con opciones hardcodeadas
+
+      // Mostrar el modal
+      const modal = new bootstrap.Modal(document.getElementById('bulk-edit-modal'));
+      modal.show();
+    });
+
+    // Confirmar y enviar cambios
+    $('#confirm-bulk-edit').on('click', function() {
+      const selectedIds = $('.form-check-input:checked').map(function() {
+        return $(this).data('id');
+      }).get();
+
+      // Armar objeto fields solo con campos definidos
+      const rawFields = {
+        relay_card: $('#bulk-relay-select').val(),
+        test_connector: $('#bulk-connector-select').val(),
+        pxi_channel_type: $('#bulk-type-select').val()
+      };
+
+      // Filtrar los campos que no fueron modificados (vacíos)
+      const fields = {};
+      Object.entries(rawFields).forEach(([key, val]) => {
+        if (val) {
+          fields[key] = /^\d+$/.test(val) ? +val : val;
+        }
+      });
+
+      // Enviar el request al backend
+      fetch('/api/hardware/adapterpinmap/bulk-update/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCSRFToken()
+        },
+        body: JSON.stringify({ ids: selectedIds, fields })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'ok') {
+          $('#bulk-edit-modal').modal('hide');
+          connTable.ajax.reload(null, false);
+          showToast('Actualización en lote realizada', 'success');
+        } else if (data.errors) {
+          const msg = data.errors.map(e => `ID ${e.id}: ${e.error}`).join('<br>');
+          showToast(`Algunos registros no se actualizaron:<br>${msg}`, 'danger', 8000);
+        } else {
+          showToast('Ocurrió un error desconocido al actualizar.', 'danger');
+        }
+      })
+      .catch(err => {
+        showToast('Error de red o servidor al actualizar.', 'danger');
+      });
+    });
+
+
+    // Checkbox de encabezado: seleccionar todos los visibles
+    $('#connections-table thead').on('click', '#select-all-visible', function () {
+      const isChecked = this.checked;
+
+      // Solo afecta las filas visibles
+      $('#connections-table tbody tr:visible').each(function () {
+        const checkbox = $(this).find('input.form-check-input');
+        checkbox.prop('checked', isChecked);
+      });
+    });
+
+    // Si un checkbox se desmarca manualmente, desmarcar el de encabezado
+    $('#connections-table tbody').on('change', 'input.form-check-input', function () {
+      const allVisible = $('#connections-table tbody tr:visible input.form-check-input');
+      const allChecked = allVisible.length && allVisible.filter(':checked').length === allVisible.length;
+      $('#select-all-visible').prop('checked', allChecked);
+    });
+
+    let selectedIds = new Set();
+
+    // Al abrir el modal: guardar checkboxes seleccionados
+    $('#bulk-edit-modal').on('show.bs.modal', function () {
+      selectedIds.clear();
+      $('#connections-table tbody input.table-selectable-check:checked').each(function () {
+        selectedIds.add($(this).data('id'));
+      });
+    });
+
+    // Al cerrar el modal: restaurar checkboxes seleccionados
+    $('#bulk-edit-modal').on('hidden.bs.modal', function () {
+      $('#connections-table tbody input.table-selectable-check').each(function () {
+        const id = $(this).data('id');
+        $(this).prop('checked', selectedIds.has(id));
+      });
+    });
+
+    $('#bulk-edit-modal').on('hidden.bs.modal', function () {
+      // Resetear todos los selects a ''
+      $(this).find('select').not('#bulk-type-select').val('');
+      // Resetear el select de tipo de canal a 'undefined'
+      $('#bulk-type-select').val('');
+    });
+
 
 
 
