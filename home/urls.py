@@ -39,11 +39,13 @@ urlpatterns = [
     
     # Especificas
     path("api/hardware/connection_config/", views.api_get_connection_config, name="get_connection_config"),
-    path("api/hardware/physicalconnector/create/", views.api_create_physical_connector),
-    path("api/hardware/physicalconnector/", views.api_list_physical_connectors),
-    path("api/hardware/check-connector-label/", views.api_check_connector_label, name="check_connector_label"),
+    path("api/hardware/adapterconnector/create/", views.api_create_adapterconnector),
+    path("api/hardware/adapterconnectors/", views.api_list_adapterconnectors),
+    #path("api/hardware/check-connector-label/", views.api_check_connector_label, name="check_connector_label"),
     path("api/hardware/get-adapters/", views.api_get_adapters, name="get_adapters"),
     path("api/hardware/get-relaycards/", views.api_get_relaycards, name="get_relaycards"),
+    path('api/hardware/create-adapter/', views.api_create_adapter, name='create_adapter'),
+    #path('api/hardware/get-subunit-choices/', views.api_get_sub_unit_choices, name='get_subunit_choices'),
     
     # Pinmap
     path("api/hardware/adapterpinmap/", views.api_list_adapterpinmap),

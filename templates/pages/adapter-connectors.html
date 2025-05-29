@@ -256,7 +256,7 @@
     // =======================
     const connectorTable = $('#connector-table').DataTable({
       ajax: {
-        url: `/api/hardware/physicalconnector/?adapter=${adapterId}`,
+        url: `/api/hardware/adapterconnectors/?adapter=${adapterId}`,
         dataSrc: 'data'
       },
       columns: [
@@ -320,7 +320,7 @@
         return;
       }
 
-      fetch("/api/hardware/physicalconnector/create/", {
+      fetch("/api/hardware/adapterconnector/create/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -362,7 +362,7 @@
       if (e.target.closest(".btn-delete")) {
         const id = e.target.closest(".btn-delete").dataset.id;
         deletePayload = {
-          model: "PhysicalConnector",
+          model: "AdapterConnector",
           id: id
         };
         confirmModal.show();

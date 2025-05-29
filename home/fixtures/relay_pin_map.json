@@ -1,0 +1,3522 @@
+[
+  {
+    "model": "home.RelayPinMap",
+    "pk": 1,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 1,
+      "test_connector": 1,
+      "to_test_pin": 1
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 2,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 2,
+      "test_connector": 1,
+      "to_test_pin": 2
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 3,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 3,
+      "test_connector": 1,
+      "to_test_pin": 3
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 4,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 4,
+      "test_connector": 1,
+      "to_test_pin": 4
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 5,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 5,
+      "test_connector": 1,
+      "to_test_pin": 5
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 6,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 6,
+      "test_connector": 1,
+      "to_test_pin": 6
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 7,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 7,
+      "test_connector": 1,
+      "to_test_pin": 7
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 8,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 8,
+      "test_connector": 1,
+      "to_test_pin": 8
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 9,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 9,
+      "test_connector": 1,
+      "to_test_pin": 9
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 10,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 10,
+      "test_connector": 1,
+      "to_test_pin": 10
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 11,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 11,
+      "test_connector": 1,
+      "to_test_pin": 11
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 12,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 12,
+      "test_connector": 1,
+      "to_test_pin": 12
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 13,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 13,
+      "test_connector": 1,
+      "to_test_pin": 13
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 14,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 14,
+      "test_connector": 1,
+      "to_test_pin": 14
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 15,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 15,
+      "test_connector": 1,
+      "to_test_pin": 15
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 16,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 16,
+      "test_connector": 1,
+      "to_test_pin": 16
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 17,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 17,
+      "test_connector": 1,
+      "to_test_pin": 17
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 18,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 18,
+      "test_connector": 1,
+      "to_test_pin": 18
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 19,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 19,
+      "test_connector": 1,
+      "to_test_pin": 19
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 20,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 20,
+      "test_connector": 1,
+      "to_test_pin": 20
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 21,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 21,
+      "test_connector": 1,
+      "to_test_pin": 21
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 22,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 22,
+      "test_connector": 1,
+      "to_test_pin": 22
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 23,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 23,
+      "test_connector": 1,
+      "to_test_pin": 23
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 24,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 24,
+      "test_connector": 1,
+      "to_test_pin": 24
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 25,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 25,
+      "test_connector": 1,
+      "to_test_pin": 25
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 26,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 26,
+      "test_connector": 1,
+      "to_test_pin": 26
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 27,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 27,
+      "test_connector": 1,
+      "to_test_pin": 27
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 28,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 28,
+      "test_connector": 1,
+      "to_test_pin": 28
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 29,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 29,
+      "test_connector": 1,
+      "to_test_pin": 29
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 30,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 30,
+      "test_connector": 1,
+      "to_test_pin": 30
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 31,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 31,
+      "test_connector": 1,
+      "to_test_pin": 31
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 32,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 32,
+      "test_connector": 1,
+      "to_test_pin": 32
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 33,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 33,
+      "test_connector": 1,
+      "to_test_pin": 33
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 34,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 34,
+      "test_connector": 1,
+      "to_test_pin": 34
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 35,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 35,
+      "test_connector": 1,
+      "to_test_pin": 35
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 36,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 36,
+      "test_connector": 1,
+      "to_test_pin": 36
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 37,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 37,
+      "test_connector": 1,
+      "to_test_pin": 37
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 38,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 38,
+      "test_connector": 1,
+      "to_test_pin": 38
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 39,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 39,
+      "test_connector": 1,
+      "to_test_pin": 39
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 40,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 40,
+      "test_connector": 1,
+      "to_test_pin": 40
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 41,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 41,
+      "test_connector": 1,
+      "to_test_pin": 41
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 42,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 42,
+      "test_connector": 1,
+      "to_test_pin": 42
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 43,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 43,
+      "test_connector": 1,
+      "to_test_pin": 43
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 44,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 44,
+      "test_connector": 1,
+      "to_test_pin": 44
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 45,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 45,
+      "test_connector": 1,
+      "to_test_pin": 45
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 46,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 46,
+      "test_connector": 1,
+      "to_test_pin": 46
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 47,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 47,
+      "test_connector": 1,
+      "to_test_pin": 47
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 48,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 48,
+      "test_connector": 1,
+      "to_test_pin": 48
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 49,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 49,
+      "test_connector": 1,
+      "to_test_pin": 49
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 50,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 50,
+      "test_connector": 1,
+      "to_test_pin": 50
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 51,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 51,
+      "test_connector": 2,
+      "to_test_pin": 1
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 52,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 52,
+      "test_connector": 2,
+      "to_test_pin": 2
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 53,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 53,
+      "test_connector": 2,
+      "to_test_pin": 3
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 54,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 54,
+      "test_connector": 2,
+      "to_test_pin": 4
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 55,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 55,
+      "test_connector": 2,
+      "to_test_pin": 5
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 56,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 56,
+      "test_connector": 2,
+      "to_test_pin": 6
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 57,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 57,
+      "test_connector": 2,
+      "to_test_pin": 7
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 58,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 58,
+      "test_connector": 2,
+      "to_test_pin": 8
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 59,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 59,
+      "test_connector": 2,
+      "to_test_pin": 9
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 60,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 60,
+      "test_connector": 2,
+      "to_test_pin": 10
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 61,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 61,
+      "test_connector": 2,
+      "to_test_pin": 11
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 62,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 62,
+      "test_connector": 2,
+      "to_test_pin": 12
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 63,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 63,
+      "test_connector": 2,
+      "to_test_pin": 13
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 64,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 64,
+      "test_connector": 2,
+      "to_test_pin": 14
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 65,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 65,
+      "test_connector": 2,
+      "to_test_pin": 15
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 66,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 66,
+      "test_connector": 2,
+      "to_test_pin": 16
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 67,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 67,
+      "test_connector": 2,
+      "to_test_pin": 17
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 68,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 68,
+      "test_connector": 2,
+      "to_test_pin": 18
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 69,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 69,
+      "test_connector": 2,
+      "to_test_pin": 19
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 70,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 70,
+      "test_connector": 2,
+      "to_test_pin": 20
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 71,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 71,
+      "test_connector": 2,
+      "to_test_pin": 21
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 72,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 72,
+      "test_connector": 2,
+      "to_test_pin": 22
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 73,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 73,
+      "test_connector": 2,
+      "to_test_pin": 23
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 74,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "U",
+      "pxi_channel": 74,
+      "test_connector": 2,
+      "to_test_pin": 24
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 75,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 1,
+      "test_connector": 2,
+      "to_test_pin": 25
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 76,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 2,
+      "test_connector": 2,
+      "to_test_pin": 26
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 77,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 3,
+      "test_connector": 2,
+      "to_test_pin": 27
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 78,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 4,
+      "test_connector": 2,
+      "to_test_pin": 28
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 79,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 5,
+      "test_connector": 2,
+      "to_test_pin": 29
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 80,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 6,
+      "test_connector": 2,
+      "to_test_pin": 30
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 81,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 7,
+      "test_connector": 2,
+      "to_test_pin": 31
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 82,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 8,
+      "test_connector": 2,
+      "to_test_pin": 32
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 83,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 9,
+      "test_connector": 2,
+      "to_test_pin": 33
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 84,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 10,
+      "test_connector": 2,
+      "to_test_pin": 34
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 85,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 11,
+      "test_connector": 2,
+      "to_test_pin": 35
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 86,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 12,
+      "test_connector": 2,
+      "to_test_pin": 36
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 87,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 13,
+      "test_connector": 2,
+      "to_test_pin": 37
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 88,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 14,
+      "test_connector": 2,
+      "to_test_pin": 38
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 89,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 15,
+      "test_connector": 2,
+      "to_test_pin": 39
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 90,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 16,
+      "test_connector": 2,
+      "to_test_pin": 40
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 91,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 17,
+      "test_connector": 2,
+      "to_test_pin": 41
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 92,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 18,
+      "test_connector": 2,
+      "to_test_pin": 42
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 93,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 19,
+      "test_connector": 2,
+      "to_test_pin": 43
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 94,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 20,
+      "test_connector": 2,
+      "to_test_pin": 44
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 95,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 21,
+      "test_connector": 2,
+      "to_test_pin": 45
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 96,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 22,
+      "test_connector": 2,
+      "to_test_pin": 46
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 97,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 23,
+      "test_connector": 2,
+      "to_test_pin": 47
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 98,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 24,
+      "test_connector": 2,
+      "to_test_pin": 48
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 99,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 25,
+      "test_connector": 2,
+      "to_test_pin": 49
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 100,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 26,
+      "test_connector": 2,
+      "to_test_pin": 50
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 101,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 27,
+      "test_connector": 3,
+      "to_test_pin": 1
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 102,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 28,
+      "test_connector": 3,
+      "to_test_pin": 2
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 103,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 29,
+      "test_connector": 3,
+      "to_test_pin": 3
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 104,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 30,
+      "test_connector": 3,
+      "to_test_pin": 4
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 105,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 31,
+      "test_connector": 3,
+      "to_test_pin": 5
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 106,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 32,
+      "test_connector": 3,
+      "to_test_pin": 6
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 107,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 33,
+      "test_connector": 3,
+      "to_test_pin": 7
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 108,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 34,
+      "test_connector": 3,
+      "to_test_pin": 8
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 109,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 35,
+      "test_connector": 3,
+      "to_test_pin": 9
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 110,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 36,
+      "test_connector": 3,
+      "to_test_pin": 10
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 111,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 37,
+      "test_connector": 3,
+      "to_test_pin": 11
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 112,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 38,
+      "test_connector": 3,
+      "to_test_pin": 12
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 113,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 39,
+      "test_connector": 3,
+      "to_test_pin": 13
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 114,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 40,
+      "test_connector": 3,
+      "to_test_pin": 14
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 115,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 41,
+      "test_connector": 3,
+      "to_test_pin": 15
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 116,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 42,
+      "test_connector": 3,
+      "to_test_pin": 16
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 117,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 43,
+      "test_connector": 3,
+      "to_test_pin": 17
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 118,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 44,
+      "test_connector": 3,
+      "to_test_pin": 18
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 119,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 45,
+      "test_connector": 3,
+      "to_test_pin": 19
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 120,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 46,
+      "test_connector": 3,
+      "to_test_pin": 20
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 121,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 47,
+      "test_connector": 3,
+      "to_test_pin": 21
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 122,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 48,
+      "test_connector": 3,
+      "to_test_pin": 22
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 123,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 49,
+      "test_connector": 3,
+      "to_test_pin": 23
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 124,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 50,
+      "test_connector": 3,
+      "to_test_pin": 24
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 125,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 51,
+      "test_connector": 3,
+      "to_test_pin": 25
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 126,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 52,
+      "test_connector": 3,
+      "to_test_pin": 26
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 127,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 53,
+      "test_connector": 3,
+      "to_test_pin": 27
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 128,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 54,
+      "test_connector": 3,
+      "to_test_pin": 28
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 129,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 55,
+      "test_connector": 3,
+      "to_test_pin": 29
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 130,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 56,
+      "test_connector": 3,
+      "to_test_pin": 30
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 131,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 57,
+      "test_connector": 3,
+      "to_test_pin": 31
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 132,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 58,
+      "test_connector": 3,
+      "to_test_pin": 32
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 133,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 59,
+      "test_connector": 3,
+      "to_test_pin": 33
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 134,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 60,
+      "test_connector": 3,
+      "to_test_pin": 34
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 135,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 61,
+      "test_connector": 3,
+      "to_test_pin": 35
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 136,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 62,
+      "test_connector": 3,
+      "to_test_pin": 36
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 137,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 63,
+      "test_connector": 3,
+      "to_test_pin": 37
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 138,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 64,
+      "test_connector": 3,
+      "to_test_pin": 38
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 139,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 65,
+      "test_connector": 3,
+      "to_test_pin": 39
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 140,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 66,
+      "test_connector": 3,
+      "to_test_pin": 40
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 141,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 67,
+      "test_connector": 3,
+      "to_test_pin": 41
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 142,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 68,
+      "test_connector": 3,
+      "to_test_pin": 42
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 143,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 69,
+      "test_connector": 3,
+      "to_test_pin": 43
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 144,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 70,
+      "test_connector": 3,
+      "to_test_pin": 44
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 145,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 71,
+      "test_connector": 3,
+      "to_test_pin": 45
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 146,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 72,
+      "test_connector": 3,
+      "to_test_pin": 46
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 147,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 73,
+      "test_connector": 3,
+      "to_test_pin": 47
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 148,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "U",
+      "pxi_channel": 74,
+      "test_connector": 3,
+      "to_test_pin": 48
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 149,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 1,
+      "test_connector": 4,
+      "to_test_pin": 1
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 150,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 2,
+      "test_connector": 4,
+      "to_test_pin": 2
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 151,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 3,
+      "test_connector": 4,
+      "to_test_pin": 3
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 152,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 4,
+      "test_connector": 4,
+      "to_test_pin": 4
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 153,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 5,
+      "test_connector": 4,
+      "to_test_pin": 5
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 154,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 6,
+      "test_connector": 4,
+      "to_test_pin": 6
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 155,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 7,
+      "test_connector": 4,
+      "to_test_pin": 7
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 156,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 8,
+      "test_connector": 4,
+      "to_test_pin": 8
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 157,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 9,
+      "test_connector": 4,
+      "to_test_pin": 9
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 158,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 10,
+      "test_connector": 4,
+      "to_test_pin": 10
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 159,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 11,
+      "test_connector": 4,
+      "to_test_pin": 11
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 160,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 12,
+      "test_connector": 4,
+      "to_test_pin": 12
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 161,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 13,
+      "test_connector": 4,
+      "to_test_pin": 13
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 162,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 14,
+      "test_connector": 4,
+      "to_test_pin": 14
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 163,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 15,
+      "test_connector": 4,
+      "to_test_pin": 15
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 164,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 16,
+      "test_connector": 4,
+      "to_test_pin": 16
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 165,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 17,
+      "test_connector": 4,
+      "to_test_pin": 17
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 166,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 18,
+      "test_connector": 4,
+      "to_test_pin": 18
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 167,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 19,
+      "test_connector": 4,
+      "to_test_pin": 19
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 168,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 20,
+      "test_connector": 4,
+      "to_test_pin": 20
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 169,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 21,
+      "test_connector": 4,
+      "to_test_pin": 21
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 170,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 22,
+      "test_connector": 4,
+      "to_test_pin": 22
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 171,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 23,
+      "test_connector": 4,
+      "to_test_pin": 23
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 172,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 24,
+      "test_connector": 4,
+      "to_test_pin": 24
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 173,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 25,
+      "test_connector": 4,
+      "to_test_pin": 25
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 174,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 26,
+      "test_connector": 4,
+      "to_test_pin": 26
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 175,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 27,
+      "test_connector": 4,
+      "to_test_pin": 27
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 176,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 28,
+      "test_connector": 4,
+      "to_test_pin": 28
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 177,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 29,
+      "test_connector": 4,
+      "to_test_pin": 29
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 178,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 30,
+      "test_connector": 4,
+      "to_test_pin": 30
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 179,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 31,
+      "test_connector": 4,
+      "to_test_pin": 31
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 180,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 32,
+      "test_connector": 4,
+      "to_test_pin": 32
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 181,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 33,
+      "test_connector": 4,
+      "to_test_pin": 33
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 182,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 34,
+      "test_connector": 4,
+      "to_test_pin": 34
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 183,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 35,
+      "test_connector": 4,
+      "to_test_pin": 35
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 184,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 36,
+      "test_connector": 4,
+      "to_test_pin": 36
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 185,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 37,
+      "test_connector": 4,
+      "to_test_pin": 37
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 186,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 38,
+      "test_connector": 4,
+      "to_test_pin": 38
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 187,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 39,
+      "test_connector": 4,
+      "to_test_pin": 39
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 188,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 40,
+      "test_connector": 4,
+      "to_test_pin": 40
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 189,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 41,
+      "test_connector": 4,
+      "to_test_pin": 41
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 190,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 42,
+      "test_connector": 4,
+      "to_test_pin": 42
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 191,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 43,
+      "test_connector": 4,
+      "to_test_pin": 43
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 192,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 44,
+      "test_connector": 4,
+      "to_test_pin": 44
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 193,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 45,
+      "test_connector": 4,
+      "to_test_pin": 45
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 194,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 46,
+      "test_connector": 4,
+      "to_test_pin": 46
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 195,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 47,
+      "test_connector": 4,
+      "to_test_pin": 47
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 196,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 48,
+      "test_connector": 4,
+      "to_test_pin": 48
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 197,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 49,
+      "test_connector": 4,
+      "to_test_pin": 49
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 198,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 50,
+      "test_connector": 4,
+      "to_test_pin": 50
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 199,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 51,
+      "test_connector": 5,
+      "to_test_pin": 1
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 200,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 52,
+      "test_connector": 5,
+      "to_test_pin": 2
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 201,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 53,
+      "test_connector": 5,
+      "to_test_pin": 3
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 202,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 54,
+      "test_connector": 5,
+      "to_test_pin": 4
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 203,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 55,
+      "test_connector": 5,
+      "to_test_pin": 5
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 204,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 56,
+      "test_connector": 5,
+      "to_test_pin": 6
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 205,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 57,
+      "test_connector": 5,
+      "to_test_pin": 7
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 206,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 58,
+      "test_connector": 5,
+      "to_test_pin": 8
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 207,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 59,
+      "test_connector": 5,
+      "to_test_pin": 9
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 208,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 60,
+      "test_connector": 5,
+      "to_test_pin": 10
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 209,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 61,
+      "test_connector": 5,
+      "to_test_pin": 11
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 210,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 62,
+      "test_connector": 5,
+      "to_test_pin": 12
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 211,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 63,
+      "test_connector": 5,
+      "to_test_pin": 13
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 212,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 64,
+      "test_connector": 5,
+      "to_test_pin": 14
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 213,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 65,
+      "test_connector": 5,
+      "to_test_pin": 15
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 214,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 66,
+      "test_connector": 5,
+      "to_test_pin": 16
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 215,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 67,
+      "test_connector": 5,
+      "to_test_pin": 17
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 216,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 68,
+      "test_connector": 5,
+      "to_test_pin": 18
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 217,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 69,
+      "test_connector": 5,
+      "to_test_pin": 19
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 218,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 70,
+      "test_connector": 5,
+      "to_test_pin": 20
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 219,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 71,
+      "test_connector": 5,
+      "to_test_pin": 21
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 220,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 72,
+      "test_connector": 5,
+      "to_test_pin": 22
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 221,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 73,
+      "test_connector": 5,
+      "to_test_pin": 23
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 222,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "M",
+      "pxi_channel": 74,
+      "test_connector": 5,
+      "to_test_pin": 24
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 223,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 1,
+      "test_connector": 5,
+      "to_test_pin": 25
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 224,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 2,
+      "test_connector": 5,
+      "to_test_pin": 26
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 225,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 3,
+      "test_connector": 5,
+      "to_test_pin": 27
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 226,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 4,
+      "test_connector": 5,
+      "to_test_pin": 28
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 227,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 5,
+      "test_connector": 5,
+      "to_test_pin": 29
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 228,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 6,
+      "test_connector": 5,
+      "to_test_pin": 30
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 229,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 7,
+      "test_connector": 5,
+      "to_test_pin": 31
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 230,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 8,
+      "test_connector": 5,
+      "to_test_pin": 32
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 231,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 9,
+      "test_connector": 5,
+      "to_test_pin": 33
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 232,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 10,
+      "test_connector": 5,
+      "to_test_pin": 34
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 233,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 11,
+      "test_connector": 5,
+      "to_test_pin": 35
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 234,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 12,
+      "test_connector": 5,
+      "to_test_pin": 36
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 235,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 13,
+      "test_connector": 5,
+      "to_test_pin": 37
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 236,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 14,
+      "test_connector": 5,
+      "to_test_pin": 38
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 237,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 15,
+      "test_connector": 5,
+      "to_test_pin": 39
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 238,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 16,
+      "test_connector": 5,
+      "to_test_pin": 40
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 239,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 17,
+      "test_connector": 5,
+      "to_test_pin": 41
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 240,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 18,
+      "test_connector": 5,
+      "to_test_pin": 42
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 241,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 19,
+      "test_connector": 5,
+      "to_test_pin": 43
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 242,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 20,
+      "test_connector": 5,
+      "to_test_pin": 44
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 243,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 21,
+      "test_connector": 5,
+      "to_test_pin": 45
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 244,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 22,
+      "test_connector": 5,
+      "to_test_pin": 46
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 245,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 23,
+      "test_connector": 5,
+      "to_test_pin": 47
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 246,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 24,
+      "test_connector": 5,
+      "to_test_pin": 48
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 247,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 25,
+      "test_connector": 5,
+      "to_test_pin": 49
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 248,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 26,
+      "test_connector": 5,
+      "to_test_pin": 50
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 249,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 27,
+      "test_connector": 6,
+      "to_test_pin": 1
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 250,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 28,
+      "test_connector": 6,
+      "to_test_pin": 2
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 251,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 29,
+      "test_connector": 6,
+      "to_test_pin": 3
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 252,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 30,
+      "test_connector": 6,
+      "to_test_pin": 4
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 253,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 31,
+      "test_connector": 6,
+      "to_test_pin": 5
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 254,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 32,
+      "test_connector": 6,
+      "to_test_pin": 6
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 255,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 33,
+      "test_connector": 6,
+      "to_test_pin": 7
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 256,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 34,
+      "test_connector": 6,
+      "to_test_pin": 8
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 257,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 35,
+      "test_connector": 6,
+      "to_test_pin": 9
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 258,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 36,
+      "test_connector": 6,
+      "to_test_pin": 10
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 259,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 37,
+      "test_connector": 6,
+      "to_test_pin": 11
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 260,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 38,
+      "test_connector": 6,
+      "to_test_pin": 12
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 261,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 39,
+      "test_connector": 6,
+      "to_test_pin": 13
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 262,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 40,
+      "test_connector": 6,
+      "to_test_pin": 14
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 263,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 41,
+      "test_connector": 6,
+      "to_test_pin": 15
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 264,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 42,
+      "test_connector": 6,
+      "to_test_pin": 16
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 265,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 43,
+      "test_connector": 6,
+      "to_test_pin": 17
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 266,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 44,
+      "test_connector": 6,
+      "to_test_pin": 18
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 267,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 45,
+      "test_connector": 6,
+      "to_test_pin": 19
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 268,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 46,
+      "test_connector": 6,
+      "to_test_pin": 20
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 269,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 47,
+      "test_connector": 6,
+      "to_test_pin": 21
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 270,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 48,
+      "test_connector": 6,
+      "to_test_pin": 22
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 271,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 49,
+      "test_connector": 6,
+      "to_test_pin": 23
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 272,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 50,
+      "test_connector": 6,
+      "to_test_pin": 24
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 273,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 51,
+      "test_connector": 6,
+      "to_test_pin": 25
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 274,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 52,
+      "test_connector": 6,
+      "to_test_pin": 26
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 275,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 53,
+      "test_connector": 6,
+      "to_test_pin": 27
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 276,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 54,
+      "test_connector": 6,
+      "to_test_pin": 28
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 277,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 55,
+      "test_connector": 6,
+      "to_test_pin": 29
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 278,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 56,
+      "test_connector": 6,
+      "to_test_pin": 30
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 279,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 57,
+      "test_connector": 6,
+      "to_test_pin": 31
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 280,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 58,
+      "test_connector": 6,
+      "to_test_pin": 32
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 281,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 59,
+      "test_connector": 6,
+      "to_test_pin": 33
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 282,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 60,
+      "test_connector": 6,
+      "to_test_pin": 34
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 283,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 61,
+      "test_connector": 6,
+      "to_test_pin": 35
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 284,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 62,
+      "test_connector": 6,
+      "to_test_pin": 36
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 285,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 63,
+      "test_connector": 6,
+      "to_test_pin": 37
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 286,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 64,
+      "test_connector": 6,
+      "to_test_pin": 38
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 287,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 65,
+      "test_connector": 6,
+      "to_test_pin": 39
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 288,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 66,
+      "test_connector": 6,
+      "to_test_pin": 40
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 289,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 67,
+      "test_connector": 6,
+      "to_test_pin": 41
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 290,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 68,
+      "test_connector": 6,
+      "to_test_pin": 42
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 291,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 69,
+      "test_connector": 6,
+      "to_test_pin": 43
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 292,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 70,
+      "test_connector": 6,
+      "to_test_pin": 44
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 293,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 71,
+      "test_connector": 6,
+      "to_test_pin": 45
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 294,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 72,
+      "test_connector": 6,
+      "to_test_pin": 46
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 295,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 73,
+      "test_connector": 6,
+      "to_test_pin": 47
+    }
+  },
+  {
+    "model": "home.RelayPinMap",
+    "pk": 296,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "M",
+      "pxi_channel": 74,
+      "test_connector": 6,
+      "to_test_pin": 48
+    }
+  },
+    {
+    "model": "home.RelayPinMap",
+    "pk": 297,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "F",
+      "pxi_channel": 1,
+      "test_connector": 7,
+      "to_test_pin": 2
+    }
+  },
+    {
+    "model": "home.RelayPinMap",
+    "pk": 298,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "F",
+      "pxi_channel": 2,
+      "test_connector": 7,
+      "to_test_pin": 15
+    }
+  },
+    {
+    "model": "home.RelayPinMap",
+    "pk": 299,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "F",
+      "pxi_channel": 3,
+      "test_connector": 7,
+      "to_test_pin": 3
+    }
+  },
+    {
+    "model": "home.RelayPinMap",
+    "pk": 300,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "F",
+      "pxi_channel": 4,
+      "test_connector": 7,
+      "to_test_pin": 16
+    }
+  },
+    {
+    "model": "home.RelayPinMap",
+    "pk": 301,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "F",
+      "pxi_channel": 5,
+      "test_connector": 7,
+      "to_test_pin": 4
+    }
+  },
+    {
+    "model": "home.RelayPinMap",
+    "pk": 302,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "F",
+      "pxi_channel": 6,
+      "test_connector": 7,
+      "to_test_pin": 17
+    }
+  },
+    {
+    "model": "home.RelayPinMap",
+    "pk": 303,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "F",
+      "pxi_channel": 7,
+      "test_connector": 7,
+      "to_test_pin": 5
+    }
+  },
+    {
+    "model": "home.RelayPinMap",
+    "pk": 304,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "F",
+      "pxi_channel": 8,
+      "test_connector": 7,
+      "to_test_pin": 18
+    }
+  },
+    {
+    "model": "home.RelayPinMap",
+    "pk": 305,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "MON",
+      "pxi_channel": 1,
+      "test_connector": 7,
+      "to_test_pin": 1
+    }
+  },
+    {
+    "model": "home.RelayPinMap",
+    "pk": 306,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "MON",
+      "pxi_channel": 2,
+      "test_connector": 7,
+      "to_test_pin": 14
+    }
+  },
+    {
+    "model": "home.RelayPinMap",
+    "pk": 307,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "GND",
+      "pxi_channel": 1,
+      "test_connector": 7,
+      "to_test_pin": 6
+    }
+  },
+    {
+    "model": "home.RelayPinMap",
+    "pk": 308,
+    "fields": {
+      "relay_card": 1,
+      "pxi_channel_type": "GND",
+      "pxi_channel": 2,
+      "test_connector": 7,
+      "to_test_pin": 19
+    }
+  },
+      {
+    "model": "home.RelayPinMap",
+    "pk": 309,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "F",
+      "pxi_channel": 1,
+      "test_connector": 7,
+      "to_test_pin": 12
+    }
+  },
+    {
+    "model": "home.RelayPinMap",
+    "pk": 310,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "F",
+      "pxi_channel": 2,
+      "test_connector": 7,
+      "to_test_pin": 24
+    }
+  },
+    {
+    "model": "home.RelayPinMap",
+    "pk": 311,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "F",
+      "pxi_channel": 3,
+      "test_connector": 7,
+      "to_test_pin": 11
+    }
+  },
+    {
+    "model": "home.RelayPinMap",
+    "pk": 312,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "F",
+      "pxi_channel": 4,
+      "test_connector": 7,
+      "to_test_pin": 23
+    }
+  },
+    {
+    "model": "home.RelayPinMap",
+    "pk": 313,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "F",
+      "pxi_channel": 5,
+      "test_connector": 7,
+      "to_test_pin": 10
+    }
+  },
+    {
+    "model": "home.RelayPinMap",
+    "pk": 314,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "F",
+      "pxi_channel": 6,
+      "test_connector": 7,
+      "to_test_pin": 22
+    }
+  },
+    {
+    "model": "home.RelayPinMap",
+    "pk": 315,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "F",
+      "pxi_channel": 7,
+      "test_connector": 7,
+      "to_test_pin": 9
+    }
+  },
+    {
+    "model": "home.RelayPinMap",
+    "pk": 316,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "F",
+      "pxi_channel": 8,
+      "test_connector": 7,
+      "to_test_pin": 21
+    }
+  },
+    {
+    "model": "home.RelayPinMap",
+    "pk": 317,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "MON",
+      "pxi_channel": 1,
+      "test_connector": 7,
+      "to_test_pin": 13
+    }
+  },
+    {
+    "model": "home.RelayPinMap",
+    "pk": 318,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "MON",
+      "pxi_channel": 2,
+      "test_connector": 7,
+      "to_test_pin": 25
+    }
+  },
+    {
+    "model": "home.RelayPinMap",
+    "pk": 319,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "GND",
+      "pxi_channel": 1,
+      "test_connector": 7,
+      "to_test_pin": 8
+    }
+  },
+    {
+    "model": "home.RelayPinMap",
+    "pk": 320,
+    "fields": {
+      "relay_card": 2,
+      "pxi_channel_type": "GND",
+      "pxi_channel": 2,
+      "test_connector": 7,
+      "to_test_pin": 20
+    }
+  }
+]

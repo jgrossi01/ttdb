@@ -773,37 +773,6 @@ def hardware(request):
 def api_connector_types(request):
     unique_types = get_unique_connector_types()
     return JsonResponse([{"value": t, "text": t} for t in unique_types], safe=False)
-       
-       
-def api_get_adapters(request):
-    data = []
-
-    for adapter in Adapter.objects.all():
-        connectors = adapter.physical_connectors.all()
-
-        pxi_connectors = connectors.filter(connector_side='pxi-side')
-        test_connectors = connectors.filter(connector_side='test-side')
-
-        def format_connectors(queryset):
-            return "<br>".join(
-                f"{pc.label} ({pc.connector_type})"
-                for pc in queryset
-            )
-
-        data.append({
-            "id": adapter.id,
-            "name": adapter.name,
-            "pxi_connectors": format_connectors(pxi_connectors),
-            "test_connectors": format_connectors(test_connectors),
-        })
-
-    return JsonResponse({"data": data})
-
-
-
-def api_get_relaycards(request):
-    data = list(RelayCard.objects.all().values())
-    return JsonResponse({"data": data})
 
 @csrf_exempt
 def api_save_hardware_edit(request):
@@ -827,7 +796,6 @@ def api_save_hardware_edit(request):
             return JsonResponse({"message": "Actualizado con éxito", "type": "success"})
         except Exception as e:
             return JsonResponse({"message": str(e), "type": "danger"}, status=500)
-
 
    
 @csrf_exempt
@@ -884,13 +852,67 @@ def api_delete_hardware_record(request):
         except Exception as e:
             return JsonResponse({"message": str(e), "type": "danger"}, status=500)
     return JsonResponse({"message": "Método no permitido"}, status=405)
+       
+       
+def api_get_adapters(request):
+    data = []
+
+    for adapter in Adapter.objects.all():
+        connectors = adapter.connectors.all()
+
+        pxi_connectors = connectors.filter(connector_side='pxi-side')
+        test_connectors = connectors.filter(connector_side='test-side')
+
+        def format_connectors(queryset):
+            return "<br>".join(
+                f"{pc.label} ({pc.connector_type})"
+                for pc in queryset
+            )
+
+        data.append({
+            "id": adapter.id,
+            "name": adapter.name,
+            "pxi_connectors": format_connectors(pxi_connectors),
+            "test_connectors": format_connectors(test_connectors),
+        })
+
+    return JsonResponse({"data": data})
+
+
+
+def api_get_relaycards(request):
+    data = list(RelayCard.objects.all().values())
+    return JsonResponse({"data": data})
+
+
 
 @csrf_exempt
 def api_get_connection_config(request):
     config = ConnectionConfig.objects.first()
-    return JsonResponse({
-        "ip_port": config.ip_port if config else ""
-    })
+    data = {
+        "ip_port": config.ip_port if config else "",
+        "id": config.id if config else None
+    }
+    return JsonResponse(data)
+
+    
+
+def api_list_adapterconnectors(request):
+    adapter_id = request.GET.get("adapter")
+    connectors = AdapterConnector.objects.filter(adapter_id=adapter_id)
+
+    data = []
+    for c in connectors:
+        data.append({
+            "id": c.id,
+            "label": c.label,
+            "connector_type": c.connector_type,
+            "pin_qty": c.pin_qty,
+            "connector_side": c.connector_side,
+            "connector_side_display": c.get_connector_side_display(),
+        })
+
+    return JsonResponse({"data": data})
     
 
 @csrf_exempt
@@ -904,11 +926,167 @@ def new_adapter_view(request):
             return render(request, "pages/new-adapter.html", {"error": "Ya existe un adaptador con ese nombre."})
 
         adapter = Adapter.objects.create(name=name)
+
+        # Crear AdapterConnectors del lado PXI
+        in_connectors = []
+        out_connectors = []
+
+        for i in range(1, 4):
+            in_con = AdapterConnector.objects.create(
+                adapter=adapter,
+                connector_type="DB50F",
+                label=f"DB-50-H-IN-{i}",
+                pin_qty=50,
+                connector_side="pxi-side"
+            )
+            in_connectors.append(in_con)
+
+            out_con = AdapterConnector.objects.create(
+                adapter=adapter,
+                connector_type="DB50M",
+                label=f"DB-50-M-OUT-{i}",
+                pin_qty=50,
+                connector_side="pxi-side"
+            )
+            out_connectors.append(out_con)
+
+        # Filtrar RelayPinMap para pxi_channel_type = 'U' (inputs)
+        relay_cards = RelayCard.objects.filter(name__in=["PXI-1", "PXI-2"])
+        relay_maps_u = RelayPinMap.objects.filter(
+            relay_card__in=relay_cards,
+            pxi_channel_type='U'
+        ).order_by('relay_card__name', 'pxi_channel')
+
+        # Asignar inputs a AdapterPinMap
+        in_idx = 0
+        in_pin = 1
+
+        for rmap in relay_maps_u:
+            if in_idx >= len(in_connectors):
+                break  # evitar overflow
+            AdapterPinMap.objects.create(
+                adapter=adapter,
+                relay_pin_map=rmap,
+                pxi_connector=in_connectors[in_idx],
+                to_pxi_pin=in_pin
+            )
+            in_pin += 1
+            if in_pin > 50:
+                in_idx += 1
+                in_pin = 1
+
+        # Filtrar RelayPinMap para pxi_channel_type = 'M' (outputs)
+        relay_maps_m = RelayPinMap.objects.filter(
+            relay_card__in=relay_cards,
+            pxi_channel_type='M'
+        ).order_by('relay_card__name', 'pxi_channel')
+
+        # Asignar outputs a AdapterPinMap
+        out_idx = 0
+        out_pin = 1
+
+        for rmap in relay_maps_m:
+            if out_idx >= len(out_connectors):
+                break
+            AdapterPinMap.objects.create(
+                adapter=adapter,
+                relay_pin_map=rmap,
+                pxi_connector=out_connectors[out_idx],
+                to_pxi_pin=out_pin
+            )
+            out_pin += 1
+            if out_pin > 50:
+                out_idx += 1
+                out_pin = 1
+
         return redirect('adapter_connectors_view', id=adapter.id)
 
     return render(request, "pages/new-adapter.html")
 
+@csrf_exempt
+def api_create_adapter(request):
+    name = request.POST.get("name", "").strip()
 
+    if not name:
+        return JsonResponse({"status": "error", "message": "El nombre es obligatorio."})
+
+    if Adapter.objects.filter(name__iexact=name).exists():
+        return JsonResponse({"status": "error", "message": "Ya existe un adaptador con ese nombre."})
+
+    adapter = Adapter.objects.create(name=name)
+
+    # Crear conectores PXI
+    in_connectors = []
+    out_connectors = []
+
+    for i in range(1, 4):
+        in_con = AdapterConnector.objects.create(
+            adapter=adapter,
+            connector_type="DB50F",
+            label=f"DB-50-H-IN-{i}",
+            pin_qty=50,
+            connector_side="pxi-side"
+        )
+        in_connectors.append(in_con)
+
+        out_con = AdapterConnector.objects.create(
+            adapter=adapter,
+            connector_type="DB50M",
+            label=f"DB-50-M-OUT-{i}",
+            pin_qty=50,
+            connector_side="pxi-side"
+        )
+        out_connectors.append(out_con)
+
+    relay_cards = RelayCard.objects.filter(name__in=["PXI-1", "PXI-2"])
+
+    # Entradas (U)
+    relay_maps_u = RelayPinMap.objects.filter(
+        relay_card__in=relay_cards,
+        pxi_channel_type='U'
+    ).order_by('relay_card__name', 'pxi_channel')
+
+    in_idx = 0
+    in_pin = 1
+
+    for rmap in relay_maps_u:
+        if in_idx >= len(in_connectors):
+            break
+        AdapterPinMap.objects.create(
+            adapter=adapter,
+            relay_pin_map=rmap,
+            pxi_connector=in_connectors[in_idx],
+            to_pxi_pin=in_pin
+        )
+        in_pin += 1
+        if in_pin > 50:
+            in_idx += 1
+            in_pin = 1
+
+    # Salidas (M)
+    relay_maps_m = RelayPinMap.objects.filter(
+        relay_card__in=relay_cards,
+        pxi_channel_type='M'
+    ).order_by('relay_card__name', 'pxi_channel')
+
+    out_idx = 0
+    out_pin = 1
+
+    for rmap in relay_maps_m:
+        if out_idx >= len(out_connectors):
+            break
+        AdapterPinMap.objects.create(
+            adapter=adapter,
+            relay_pin_map=rmap,
+            pxi_connector=out_connectors[out_idx],
+            to_pxi_pin=out_pin
+        )
+        out_pin += 1
+        if out_pin > 50:
+            out_idx += 1
+            out_pin = 1
+
+    return JsonResponse({"status": "ok", "adapter_id": adapter.id})
 
 
 def adapter_connectors_view(request, id):
@@ -919,7 +1097,189 @@ def adapter_connectors_view(request, id):
 
     return render(request, "pages/adapter-connectors.html", {"adapter": adapter})
 
+def adapter_connections_view(request, id):
+    try:
+        adapter = apps.get_model("home", "Adapter").objects.get(pk=id)
+    except apps.get_model("home", "Adapter").DoesNotExist:
+        return redirect("new_adapter_view")
+    return render(request, "pages/adapter-connections.html", {"adapter": adapter})
+
+
+def api_list_adapterpinmap(request):
+    adapter_id = request.GET.get("adapter")
+    qs = apps.get_model("home", "AdapterPinMap").objects.filter(adapter_id=adapter_id)
+    data = []
+    for m in qs:
+        data.append({
+            "id": m.id,
+            "pxi_connector": f"{m.pxi_connector.label} ({m.pxi_connector.connector_type})",
+            "to_pxi_pin": m.to_pxi_pin,
+            "test_connector": m.test_connector.id if m.test_connector else None,
+            "test_connector_display": (
+                f"{m.test_connector.label} ({m.test_connector.connector_type})"
+                if m.test_connector else ""
+            ),
+            "to_test_pin": m.to_test_pin,
+            "pxi_channel_type": m.relay_pin_map.get_pxi_channel_type_display(), 
+            "pxi_channel": m.relay_pin_map.pxi_channel,
+            "relay_card_name": m.relay_pin_map.relay_card.name, 
+        })
+    return JsonResponse({"data": data})
+
+
 @csrf_exempt
+def api_save_adapterpinmap(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Método no permitido"}, status=405)
+
+    data = json.loads(request.body)
+    field, val, obj_id = data.get('field'), data.get('value'), data.get('id')
+
+    if field not in ('test_connector', 'to_test_pin'):
+        return JsonResponse({"error": "Campo no permitido"}, status=400)
+
+    Model = apps.get_model("home", "AdapterPinMap")
+    AdapterConnector = apps.get_model("home", "AdapterConnector")
+    instance = get_object_or_404(Model, pk=obj_id)
+
+    # Procesamiento de FK
+    if field == 'test_connector':
+        if val in (None, '', 'null'):
+            val = None
+        else:
+            try:
+                val = AdapterConnector.objects.get(pk=val)
+            except (ValueError, AdapterConnector.DoesNotExist):
+                return JsonResponse({"error": "Conector inválido"}, status=400)
+
+    setattr(instance, field, val)
+
+    try:
+        instance.full_clean()
+        print("DEBUG:", instance.test_connector, type(instance.test_connector))
+        instance.save()
+        return JsonResponse({"success": True})
+    except ValidationError as e:
+        msg = e.message_dict.get(field, e.messages)[0]
+        return JsonResponse({"error": msg}, status=400)
+    except IntegrityError:
+        return JsonResponse({"error": "Combinación duplicada"}, status=400)
+
+
+def api_create_adapterconnector(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            adapter_id = data.get("adapter_id")
+            label = data.get("label", "").strip()
+            connector_type = data.get("connector_type", "").strip()
+            pin_qty = data.get("pin_qty")
+            connector_side = "test-side"
+            
+            if not adapter_id or not connector_type or not label or not pin_qty:
+                return JsonResponse({"type": "warning", "message": "Todos los campos son obligatorios."}, status=400)
+                            
+            try:
+                pin_qty = int(pin_qty)
+                if pin_qty <= 0:
+                    raise ValueError()
+            except ValueError:
+                return JsonResponse({
+                    "type": "warning",
+                    "message": "La cantidad de pines debe ser un número entero positivo."
+                })
+                
+            try:
+                adapter = Adapter.objects.get(pk=adapter_id)
+            except Adapter.DoesNotExist:
+                return JsonResponse({
+                    "type": "warning",
+                    "message": "Adaptador no encontrado."
+                })
+
+
+            if AdapterConnector.objects.filter(adapter=adapter, label__iexact=label).exists():
+                return JsonResponse({"message": "Este adaptador ya tiene un conector con esa etiqueta.", "type": "warning"}, status=400)
+
+            connector = AdapterConnector.objects.create(
+                adapter=adapter,
+                connector_type=connector_type,
+                label=label,
+                pin_qty=pin_qty,
+                connector_side=connector_side
+            )
+            
+                
+            return JsonResponse({
+                "type": "success",
+                "message": "Conector creado correctamente.",
+                "id": connector.id
+            })
+
+        except Exception as e:
+            return JsonResponse({"message": str(e), "type": "danger"}, status=500)
+
+
+def adapterpinmap_bulk_update(request):
+    data = json.loads(request.body)
+    ids = data.get('ids', [])
+    test_connector_val = data.get('fields', {}).get('test_connector')
+
+    if not ids or not isinstance(ids, list):
+        return JsonResponse({'error': 'IDs inválidos'}, status=400)
+
+    # Convertir "" o "null" a None
+    if test_connector_val in ("", "null", None):
+        test_connector = None
+    else:
+        try:
+            test_connector = AdapterConnector.objects.get(id=int(test_connector_val))
+        except (AdapterConnector.DoesNotExist, ValueError):
+            return JsonResponse({'error': 'El conector seleccionado no existe'}, status=400)
+
+    # Actualización en bloque
+    updated = AdapterPinMap.objects.filter(id__in=ids).update(
+        test_connector=test_connector,
+        to_test_pin=None  # Resetear campo dependiente
+    )
+
+    return JsonResponse({'status': 'ok', 'updated': updated})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+""" @csrf_exempt
 def api_create_physical_connector(request):
     if request.method == "POST":
         try:
@@ -969,16 +1329,6 @@ def api_create_physical_connector(request):
                 connector_side=connector_side
             )
             
-            if connector.connector_side == 'pxi-side':
-                pin_maps = []
-                for i in range(1, pin_qty + 1):
-                    pin_maps.append(AdapterPinMap(
-                        adapter=adapter,
-                        pxi_connector=connector,
-                        to_pxi_pin=i,
-                        # Resto de campos queda como null
-                    ))
-                AdapterPinMap.objects.bulk_create(pin_maps)
                 
             return JsonResponse({
                 "type": "success",
@@ -990,29 +1340,10 @@ def api_create_physical_connector(request):
             return JsonResponse({"message": str(e), "type": "danger"}, status=500)
         
 
-def api_list_physical_connectors(request):
-    adapter_id = request.GET.get("adapter")
-    connectors = PhysicalConnector.objects.filter(adapter_id=adapter_id)
 
-    data = []
-    for c in connectors:
-        data.append({
-            "id": c.id,
-            "label": c.label,
-            "connector_type": c.connector_type,
-            "pin_qty": c.pin_qty,
-            "connector_side": c.connector_side,
-            "connector_side_display": c.get_connector_side_display(),
-        })
-
-    return JsonResponse({"data": data})
 
         
 @csrf_exempt
-# Revisar si ya existe un conector con el mismo nombre para el adaptador
-# (evitando que se valide contra sí mismo) 
-# Para edicion inline en adapter-connectors.html
-
 def api_check_connector_label(request):
     if request.method == "POST":
         data = json.loads(request.body)
@@ -1042,7 +1373,7 @@ def adapter_connections_view(request, id):
     return render(request, "pages/adapter-connections.html", {"adapter": adapter})
 
 def api_list_adapterpinmap(request):
-    """GET /api/hardware/adapterpinmap/?adapter=<id> → lista de registros para DataTables"""
+    
     adapter_id = request.GET.get("adapter")
     qs = apps.get_model("home", "AdapterPinMap").objects.filter(adapter_id=adapter_id)
     data = []
@@ -1147,7 +1478,7 @@ def adapterpinmap_bulk_update(request):
     if errors:
         return JsonResponse({'status': 'partial', 'errors': errors}, status=400)
 
-    return JsonResponse({'status': 'ok'})
+    return JsonResponse({'status': 'ok'}) """
 
 
 

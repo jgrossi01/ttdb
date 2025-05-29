@@ -51,11 +51,11 @@
                     <div class="card-header ps-0 pe-2 pt-0">
                       <h3 class="card-title">Placas PXI</h3>
                       <div class="card-actions">
-                        <a href="#" class="btn btn-primary" id="btn-add-placas-pxi">
+                        <button class="btn btn-primary" id="btn-add-placas-pxi">
                           <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
                           <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M12 5l0 14"></path><path d="M5 12l14 0"></path></svg>
                           Agregar
-                        </a>
+                        </button>
                       </div>
                     </div>
                   
@@ -81,11 +81,16 @@
                     <div class="card-header ps-0 pe-2 pt-0">
                       <h3 class="card-title">Adaptadores</h3>
                       <div class="card-actions">
-                        <a href="{% url 'new_adapter_view' %}" class="btn btn-primary" id="btn-add-adaptadores">
+                        <button class="btn btn-primary" id="btn-add-adapter">
                           <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
                           <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M12 5l0 14"></path><path d="M5 12l14 0"></path></svg>
                           Agregar
-                        </a>
+                        </button>
+                        {% comment %} <a href="{% url 'new_adapter_view' %}" class="btn btn-primary" id="btn-add-adaptadores">
+                          <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+                          <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M12 5l0 14"></path><path d="M5 12l14 0"></path></svg>
+                          Agregar
+                        </a> {% endcomment %}
                       </div>
                     </div>
 
@@ -108,14 +113,14 @@
                     
                     <div class="my-3">
                       <label class="form-label">Dirección del bus (IP y puerto)</label>
-                      <input type="text" id="input-ip-port" class="form-control" value="tcp://localhost:6003">
+                      <input type="text" id="input-ip-port" class="form-control" placeholder="protocolo://ip:puerto">
                     </div>
                     <div class="d-flex justify-content-end pt-2">
-                      <a href="#" class="btn btn-success" id="btn-save-config">
+                      <button href="#" class="btn btn-success" id="btn-save-config">
                         <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
                         <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-device-floppy"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2" /><path d="M12 14m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M14 4l0 4l-6 0l0 -4" /></svg>
                         Guardar
-                      </a>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -154,19 +159,50 @@
             <label class="form-label">Device</label>
             <input type="text" class="form-control" name="device" placeholder="Numero de slot donde esta la placa en el PXI">
           </div>
-          <div id="alert-container" class="row col-12">
+          <div id="alert-container">
           </div>
         </div>
         <div class="modal-footer">
-          <a href="#" class="btn btn-link link-secondary btn-3" data-bs-dismiss="modal"> Cancelar </a>
-          <a href="#" class="btn btn-primary btn-5 ms-auto">
+          <button class="btn btn-link link-secondary btn-3" data-bs-dismiss="modal"> Cancelar </button>
+          <button class="btn btn-primary btn-5 ms-auto">
             <!-- Download SVG icon from http://tabler.io/icons/icon/plus -->
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
               <path d="M12 5l0 14"></path>
               <path d="M5 12l14 0"></path>
             </svg>
             Agregar
-          </a>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal agregar adaptador -->
+  <div class="modal modal-blur fade show" id="new-adapter" tabindex="-1" style="display: none;">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Agregar adaptador</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Nombre</label>
+            <input type="text" class="form-control" name="adapter-name" placeholder="Nombre del adaptador">
+          </div>
+          <div id="adapter-alert-container">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-link link-secondary btn-3" data-bs-dismiss="modal"> Cancelar </button>
+          <button class="btn btn-primary btn-5 ms-auto">
+            <!-- Download SVG icon from http://tabler.io/icons/icon/plus -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+              <path d="M12 5l0 14"></path>
+              <path d="M5 12l14 0"></path>
+            </svg>
+            Agregar
+          </button>
         </div>
       </div>
     </div>
@@ -388,12 +424,19 @@
     // MODALS
     // =======================
     const pxiModal = new bootstrap.Modal(document.getElementById('new-pxi'));
+    const adapterModal = new bootstrap.Modal(document.getElementById('new-adapter'));
     const confirmModal = new bootstrap.Modal(document.getElementById('modal-confirm'));
 
     document.getElementById('btn-add-placas-pxi').addEventListener('click', () => {
       document.querySelectorAll('#new-pxi input').forEach(input => input.value = '');
       pxiModal.show();
     });
+
+    document.getElementById('btn-add-adapter').addEventListener('click', () => {
+      document.querySelectorAll('#new-adapter input').forEach(input => input.value = '');
+      adapterModal.show();
+    });
+
 
     let deletePayload = null;
     document.querySelector("#modal-confirm").addEventListener("hidden.bs.modal", function () {
@@ -440,7 +483,8 @@
       .then(res => {
         showToast(res.message || 'Placa agregada correctamente.', 'success');
         pxiModal.hide();
-        $('#table-placas-pxi').DataTable().ajax.reload();
+        alertContainer.innerHTML = '';
+        tablaPlacasPxi.ajax.reload();
       })
       .catch(err => {
         if (err && err.message) {
@@ -449,8 +493,111 @@
           showInlineAlert(alertContainer, "Error al crear la placa", "danger");
         }
       });
-
     });
+
+    document.getElementById('new-adapter').addEventListener('hidden.bs.modal', () => {
+      const container = document.getElementById('adapter-alert-container');
+      container.innerHTML = '';
+    });
+
+    // =======================
+    // Agregar adaptador
+    // =======================
+
+    document.querySelector('#new-adapter .btn-primary').addEventListener('click', () => {
+      const modal = document.getElementById('new-adapter');
+      const nameInput = modal.querySelector('input[name="adapter-name"]');
+      const name = modal.querySelector('input[name="adapter-name"]').value.trim();
+      const button = modal.querySelector('.btn-primary');
+      const svg = button.querySelector('svg');
+      const container = document.getElementById('adapter-alert-container');
+      container.innerHTML = '';
+
+      if (!name) {
+        showInlineAlert(container, 'El nombre es obligatorio.', 'warning');
+        return;  // no cambia estado botón
+      }
+
+      // Estado de "Cargando..."
+      nameInput.disabled = true;
+      button.classList.add('disabled');
+      button.setAttribute('disabled', 'disabled');
+
+      // Vaciar contenido y poner spinner + texto
+      button.innerHTML = ''; 
+      const spinner = document.createElement('div');
+      spinner.className = 'spinner-border spinner-border-sm text-light me-2';
+      spinner.role = 'status';
+      button.appendChild(spinner);
+      button.appendChild(document.createTextNode('Cargando...'));
+
+      const formData = new FormData();
+      formData.append('name', name);
+
+      fetch('/api/hardware/create-adapter/', {
+        method: 'POST',
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'ok') {
+          showToast(data.message || 'Adaptador creado correctamente.', 'success');
+          adapterModal.hide();
+          container.innerHTML = '';
+          restoreButtonState();
+          tablaAdapters.ajax.reload();
+          //showInlineAlert(container, 'Adaptador creado exitosamente.', 'success');
+          // Podés cerrar el modal o redirigir
+          // window.location.href = `/hardware/adapter/${data.adapter_id}/connectors`;
+        } else {
+          restoreButtonState();
+          showInlineAlert(container, data.message, 'warning');
+        }
+      })
+      .catch(err => {
+        restoreButtonState();
+        showInlineAlert(container, err, 'danger');
+      });
+
+      function restoreButtonState() {
+        nameInput.disabled = false;
+        button.classList.remove('disabled');
+        button.removeAttribute('disabled');
+
+        // Vaciar y agregar svg + texto "Agregar"
+        button.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <path d="M12 5l0 14"></path>
+            <path d="M5 12l14 0"></path>
+          </svg>
+          Agregar
+        `;
+      }
+    
+    });
+
+    // limpiar alertas al cerrar modal
+    document.getElementById('new-adapter').addEventListener('hidden.bs.modal', () => {
+      const container = document.getElementById('adapter-alert-container');
+      container.innerHTML = '';
+    });
+
+    // Enter para agregar
+    document.querySelector('#new-adapter input[name="adapter-name"]').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault(); // Evita que el formulario se envíe si lo hubiera
+        document.querySelector('#new-adapter .btn-primary').click();
+      }
+    });
+
+    // Enfocar input al abrir el modal
+    document.getElementById('new-adapter').addEventListener('shown.bs.modal', () => {
+      const input = document.querySelector('#new-adapter input[name="adapter-name"]');
+      input.focus();
+    });
+    
+
 
     // =======================
     // Editar adaptadores inline
@@ -688,19 +835,35 @@
     // CONNECTION CONFIG
     // =======================
 
+    
+
+    let configId = null;
+
+    // Obtener configuración inicial
     fetch('/api/hardware/connection_config/')
       .then(response => response.json())
-      .then(res => {
+      .then(res => { 
         if (res.ip_port) {
           document.getElementById('input-ip-port').value = res.ip_port;
         }
+        if (res.id !== null) {
+          configId = res.id;
+        } else {
+          showToast("No se pudo obtener la configuración", "danger");
+        }
       });
 
+    // Guardar cambios
     document.getElementById('btn-save-config').addEventListener('click', () => {
       const ip_port = document.getElementById('input-ip-port').value.trim();
 
       if (!ip_port) {
         showToast("El campo IP/puerto no puede estar vacío", "warning");
+        return;
+      }
+
+      if (configId === null) {
+        showToast("No se pudo guardar: ID de configuración no definido", "danger");
         return;
       }
 
@@ -711,20 +874,22 @@
           'X-CSRFToken': getCSRFToken()
         },
         body: JSON.stringify({
-          id: 1,
+          id: configId,
           model: 'ConnectionConfig',
           field: 'ip_port',
           value: ip_port
         })
       })
-        .then(res => {
-          if (!res.ok) throw new Error();
-          showToast("Configuración actualizada", "success");
-        })
-        .catch(() => {
-          showToast("Error al guardar la configuración", "danger");
-        });
+      .then(res => {
+        if (!res.ok) throw new Error();
+        showToast("Configuración actualizada", "success");
+      })
+      .catch(() => {
+        showToast("Error al guardar la configuración", "danger");
+      });
     });
+
+
 
     // =======================
     // REDIRECCIÓN CONECTORES
@@ -749,6 +914,34 @@
         }
       }
     });
+
+    // =======================
+    // Mantener tab que se estaba viendo
+    // =======================
+    
+    const tabLinks = document.querySelectorAll('ul.nav-tabs a[data-bs-toggle="tab"]');
+
+    // Función para activar un tab dado un hash
+    function activateTabByHash(hash) {
+      if (!hash) return;
+      const targetLink = Array.from(tabLinks).find(link => link.getAttribute('href') === hash);
+      if (targetLink) {
+        const tab = new bootstrap.Tab(targetLink);
+        tab.show();
+      }
+    }
+
+    // Al cargar, activa el tab que está en el hash (si existe)
+    activateTabByHash(window.location.hash);
+
+    // Cuando un tab se activa, actualiza el hash sin hacer scroll
+    tabLinks.forEach(link => {
+      link.addEventListener('shown.bs.tab', (e) => {
+        history.replaceState(null, '', e.target.getAttribute('href'));
+      });
+    });
+  
+
 
 
   

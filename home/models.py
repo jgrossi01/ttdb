@@ -113,22 +113,63 @@ class RelayCard(models.Model):
 
     def __str__(self):
         return self.name
+    
+class FixedConnector(models.Model):
+    connector_type = models.CharField(max_length=50)  # Ej: "DB50F", "DB25M"
+    label = models.CharField(max_length=50)  # Ej: "Conector A"
+    pin_qty = models.PositiveIntegerField()  # Cantidad de pines
+
+    class Meta:
+        unique_together = ('connector_type', 'label')  # Unicidad por tipo + etiqueta
+        ordering = ['label']
+
+    def __str__(self):
+        return f"{self.label} ({self.connector_type})"
+
+
+class RelayPinMap(models.Model):
+    relay_card = models.ForeignKey(
+        "RelayCard",
+        on_delete=models.CASCADE,
+        related_name="relay_pin_maps"
+    )
+    pxi_channel_type = models.CharField(
+        max_length=10,
+        choices=[
+            ('U', 'Input (1-74)'), 
+            ('M', 'Output (1-74)'), 
+            ('F', 'Fault MUX (1-8)'), 
+            ('MON', 'Monitor (1-2)'), 
+            ('GND', 'GND (1-2)'),
+            ('', 'No definido')
+        ],
+        null=True, blank=True
+    )
+    pxi_channel = models.PositiveIntegerField(null=True, blank=True)
+    test_connector = models.ForeignKey(
+        "FixedConnector",
+        on_delete=models.CASCADE,
+        null=True, blank=True,
+        related_name="relay_mapped_pins"
+    )
+    to_test_pin = models.PositiveIntegerField(null=True, blank=True)
+
+    class Meta:
+        unique_together = [
+            ('relay_card', 'pxi_channel_type', 'pxi_channel'),
+            ('test_connector', 'to_test_pin'),
+        ]
+        ordering = ['relay_card', 'pxi_channel_type', 'pxi_channel']
+
 
 class Adapter(models.Model):
-    """
-    Adaptador físico, p. ej. “Cable chasis → PXI-1”,
-    que conecta varios PhysicalConnector entre sí.
-    """
     name = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
         return self.name
-    
-class PhysicalConnector(models.Model):
-    """
-    Una instancia física de conector (DB15-M, DB78-H, DB50F, etc.),
-    asociada a un adaptador específico.
-    """
+
+
+class AdapterConnector(models.Model):
     CONNECTOR_SIDE_CHOICES = [
         ('pxi-side', 'Lado PXI'),
         ('test-side', 'Lado test'),
@@ -137,11 +178,11 @@ class PhysicalConnector(models.Model):
     adapter = models.ForeignKey(
         "Adapter",
         on_delete=models.CASCADE,
-        related_name="physical_connectors"
+        related_name="connectors"
     )
-    connector_type = models.CharField(max_length=50)  # Ej: "DB50F", "DB25M"
-    label = models.CharField(max_length=50)  # Ej: "Conector A", "Conector B"
-    pin_qty = models.PositiveIntegerField()  # Cantidad de pines del conector
+    connector_type = models.CharField(max_length=50)
+    label = models.CharField(max_length=50)
+    pin_qty = models.PositiveIntegerField()
     connector_side = models.CharField(
         max_length=50,
         choices=CONNECTOR_SIDE_CHOICES,
@@ -160,84 +201,42 @@ class AdapterPinMap(models.Model):
     adapter = models.ForeignKey(
         "Adapter",
         on_delete=models.CASCADE,
-        related_name="pin_maps",
-        null=True, blank=True
+        related_name="pin_maps"
+    )
+    relay_pin_map = models.ForeignKey(
+        "RelayPinMap",
+        on_delete=models.CASCADE,
+        related_name="adapter_mappings"
     )
     pxi_connector = models.ForeignKey(
-        "PhysicalConnector",
+        "AdapterConnector",
         on_delete=models.CASCADE,
-        related_name="pin_maps_pxi",
-        null=True, blank=True
+        related_name="pxi_mapped_pins"
     )
-    to_pxi_pin = models.PositiveIntegerField(
-        null=True, blank=True
-    )
-    pxi_channel = models.PositiveIntegerField(
-        null=True, blank=True
-    )
-    pxi_channel_type = models.CharField(
-        max_length=50,
-        choices=[('U', 'Input'), ('M', 'Output'), ('undefined', 'No definido')],
-        null=True, blank=True
-    )
-    relay_card = models.ForeignKey(
-        "RelayCard",
-        on_delete=models.CASCADE,
-        null=True, blank=True,
-        related_name="pin_maps_relay"
-    )
+    to_pxi_pin = models.PositiveIntegerField()
     test_connector = models.ForeignKey(
-        "PhysicalConnector",
+        "AdapterConnector",
         on_delete=models.CASCADE,
+        related_name="test_mapped_pins",
         null=True, blank=True,
-        related_name="pin_maps_test"
     )
-    to_test_pin = models.PositiveIntegerField(
-        null=True, blank=True
-    )
+    to_test_pin = models.PositiveIntegerField(null=True, blank=True,)
 
     class Meta:
-        
-        constraints = [
-            models.UniqueConstraint(
-                fields=["adapter", "relay_card", "pxi_channel"],
-                name="unique_pxi_mapping_per_adapter_and_relay",
-            ),
-            models.UniqueConstraint(
-                fields=["adapter", "test_connector", "to_test_pin"],
-                name="unique_test_mapping_per_adapter"
-            ),
+        unique_together = [
+            ('adapter', 'relay_pin_map'),
+            ('adapter', 'test_connector', 'to_test_pin'),
+            ('adapter', 'pxi_connector', 'to_pxi_pin'),
         ]
-        ordering = ['pxi_connector', 'to_pxi_pin', 'pxi_channel']
+        ordering = ['adapter', 'relay_pin_map']
 
     def clean(self):
         errors = {}
-
-        # ——— relay_card / pxi_channel ———
-        if not self.relay_card:
-            # Si quito placa, limpio canal
-            self.pxi_channel = None
-        else:
-            # Solo validamos si el canal ya fue asignado
-            if self.pxi_channel is not None:
-                # Rango 1–74
-                if not (1 <= self.pxi_channel <= 74):
-                    errors['pxi_channel'] = "El canal PXI debe estar en 1–74."
-                else:
-                    # Unicidad adapter + relay_card + pxi_channel
-                    qs = AdapterPinMap.objects.filter(
-                        adapter=self.adapter,
-                        relay_card=self.relay_card,
-                        pxi_channel=self.pxi_channel
-                    )
-                    if self.pk:
-                        qs = qs.exclude(pk=self.pk)
-                    if qs.exists():
-                        errors['pxi_channel'] = (
-                            f"El canal {self.pxi_channel} ya esta en uso para esta placa PXI."
-                        )
-
-        # ——— test_connector / to_test_pin ———
+        # Validación adicional si se quiere evitar errores antes de guardar
+        if self.test_connector and self.test_connector.adapter != self.adapter:
+            raise ValidationError("El conector lado test no pertenece al mismo adaptador.")
+        
+         # ——— test_connector / to_test_pin ———
          # Validación test_connector / to_test_pin
         if not self.test_connector:
             self.to_test_pin = None
@@ -256,9 +255,8 @@ class AdapterPinMap(models.Model):
                     qs2 = qs2.exclude(pk=self.pk)
                 if qs2.exists():
                     errors['to_test_pin'] = (
-                        f"El pin {self.to_test_pin} ya está asignado en este conector."
+                        f"El pin {self.to_test_pin} de este conector ya esta asignado."
                     )
-
         if errors:
             raise ValidationError(errors)
 

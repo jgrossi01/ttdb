@@ -1,0 +1,20 @@
+[
+  {
+    "model": "home.RelayCard",
+    "pk": 1,
+    "fields": {
+      "bus": 25,
+      "device": 1,
+      "name": "PXI-1"
+    }
+  },
+  {
+    "model": "home.RelayCard",
+    "pk": 2,
+    "fields": {
+      "bus": 25,
+      "device": 8,
+      "name": "PXI-2"
+    }
+  }
+]
