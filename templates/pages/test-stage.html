@@ -114,8 +114,10 @@
                     <tr>
                       <th>Señal</th>
                       <th>Conector Origen</th>
+                      <th>Tipo</th>
                       <th>Pin Origen</th>
                       <th>Conector Destino</th>
+                      <th>Tipo</th>
                       <th>Pin Destino</th>
                       <th>Esperado (min)</th>
                       <th>Esperado (max)</th>
@@ -131,8 +133,10 @@
                     <tr data-result-id="{{ result.id }}">
                       <td class="cell-signal">{{ result.signal_name }}</td>
                       <td class="cell-orig">{{ result.conector_orig }}</td>
+                      <td class="cell-orig_type">{{ result.conector_orig_type }}</td>
                       <td class="cell-pin-a" title="{{ result.tooltip_a }}" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="tooltip-table">{{ result.pin_a }}</td>
                       <td class="cell-dest">{{ result.conector_dest }}</td>
+                      <td class="cell-dest_type">{{ result.conector_dest_type }}</td>
                       <td class="cell-pin-b" title="{{ result.tooltip_b }}" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="tooltip-table">{{ result.pin_b }}</td>
                       <td class="cell-min">{{ result.min_exp_value|default:"-" }}</td>
                       <td class="cell-max">{{ result.max_exp_value|default:"-" }}</td>
@@ -156,8 +160,10 @@
                     <tr>
                       <td class="cell-signal">{{ result.signal_name }}</td>
                       <td class="cell-orig">{{ result.conector_orig }}</td>
+                      <td class="cell-orig_type">{{ result.conector_orig_type }}</td>
                       <td class="cell-pin-a">{{ result.pin_a }}</td>
                       <td class="cell-dest">{{ result.conector_dest }}</td>
+                      <td class="cell-dest_type">{{ result.conector_dest_type }}</td>
                       <td class="cell-pin-b">{{ result.pin_b }}</td>
                       <td class="cell-min">{{ result.min_exp_value|default:"-" }}</td>
                       <td class="cell-max">{{ result.max_exp_value|default:"-" }}</td>

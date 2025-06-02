@@ -7,6 +7,46 @@
 
   <div class="page-wrapper">
     <!-- Page header -->
+    <div class="page-header d-print-none sticky-top" aria-label="Page header" style="background-color: var(--tblr-body-bg)">
+      <div class="container-xl">
+        <div class="row g-2 align-items-center">
+          <div class="col">
+                <!-- Page pre-title -->
+            <div class="page-pretitle">Conexiones del adaptador</div>
+            <h2 class="page-title">{{ adapter.name }}</h2>
+          </div>
+
+          <div class="col">
+            <div class="row d-flex align-items-center ms-auto">
+              <p class="mb-0" id="selectedCounter"></p>
+            </div>
+          </div>
+
+          <!-- Page title actions -->
+          <div class="col-auto ms-auto d-print-none">
+            <div class="btn-list">
+              <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#new-connector">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                  <path d="M12 5l0 14"></path>
+                  <path d="M5 12l14 0"></path>
+                </svg>
+                Agregar conector
+              </button>
+              <a href="{% url 'adapter_connectors_view' adapter.id %}" class="btn btn-secondary">
+                <!-- Download SVG icon from http://tabler.io/icons/icon/plus -->
+                <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-plug-connected"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 12l5 5l-1.5 1.5a3.536 3.536 0 1 1 -5 -5l1.5 -1.5z" /><path d="M17 12l-5 -5l1.5 -1.5a3.536 3.536 0 1 1 5 5l-1.5 1.5z" /><path d="M3 21l2.5 -2.5" /><path d="M18.5 5.5l2.5 -2.5" /><path d="M10 11l-2 2" /><path d="M13 14l-2 2" /></svg>
+                Editar conectores
+              </a>
+              <a href="/hardware/#tabs-adaptadores" class="btn btn-dark">
+                <!-- Download SVG icon from http://tabler.io/icons/icon/plus -->
+                <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-vector-spline"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M17 3m0 1a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1z" /><path d="M3 17m0 1a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1z" /><path d="M17 5c-6.627 0 -12 5.373 -12 12" /></svg>
+                Adaptadores
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Page body -->
     <div class="page-body">
@@ -14,11 +54,8 @@
         <div class="row row-cards">
           <div class="col-lg-12">
             <div class="card">
-              <div class="card-header">
-                <h3 class="card-title">Conexiones del adaptador "{{ adapter.name }}"</h3>
-              </div>                
+                
               <div class="card-body">
-                <button id="bulk-edit-btn" class="btn btn-secondary btn-sm" disabled>Editar seleccionados</button>
                 <table class="table table-striped" id="connections-table">
                   <thead>
                     <tr>
@@ -50,26 +87,44 @@
   </div>
 
   {% block modal %}
-  <!-- Modal de bulk edit -->
-  <div class="modal modal-blur fade" id="bulk-edit-modal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
+  <!-- Modal para crear nuevo conector -->
+  <div class="modal modal-blur fade" id="new-connector" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Edición en lote</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          <h5 class="modal-title">Agregar conector</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
+
         <div class="modal-body">
           <div class="mb-3">
-            <label class="form-label">Conector de test</label>
-            <select id="bulk-connector-select" class="form-select">
-              <option value="">(Sin cambios)</option>
-            </select>
-            <p class="text-warning mt-1 ms-1"><small>Cambiar esto quitara el "pin lado test" actual</small></p>
+            <label class="form-label">Etiqueta</label>
+            <input type="text" class="form-control" id="connector_label" placeholder="Ej: J1, OUT-A, CON-3">
           </div>
+          
+          <div class="mb-3">
+            <label class="form-label">Tipo de conector</label>
+            <select id="connector_type_select" class="form-select"></select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Cantidad de pines</label>
+            <input type="number" class="form-control" id="connector_pin_qty" min="1" placeholder="Ej: 9, 25, 68">
+          </div>
+
+          <div id="alert-container"></div>
         </div>
+
         <div class="modal-footer">
-          <button type="button" class="btn btn-link" data-bs-dismiss="modal">Cancelar</button>
-          <button type="button" id="confirm-bulk-edit" class="btn btn-primary">Aplicar cambios</button>
+          <button class="btn btn-link link-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button class="btn btn-primary" id="btn-save-connector">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-2" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 5l0 14"></path>
+              <path d="M5 12l14 0"></path>
+            </svg>
+            Agregar
+          </button>
         </div>
       </div>
     </div>
@@ -187,6 +242,51 @@
       }
       return value;
     }
+
+    new TomSelect("#connector_type_select", {
+      create: true,
+      valueField: "value",
+      labelField: "text",
+      searchField: ["text"],
+      render:{
+        option: function(data, escape) {
+          return '<div>' + escape(data.text) + '</div>';
+        },
+        item: function(data, escape) {
+          return '<div>' + escape(data.text) + '</div>';
+        },
+        option_create: function(data, escape) {
+          return '<div class="create">Agregar <strong>' + escape(data.input) + '</strong>&hellip;</div>';
+        },
+        no_results:function(data,escape){
+          return '<div class="no-results text-center">Sin resultados para "'+escape(data.input)+'"</div>';
+        },
+        not_loading:function(data,escape){
+          // no default content
+        },
+        optgroup: function(data) {
+          let optgroup = document.createElement('div');
+          optgroup.className = 'optgroup';
+          optgroup.appendChild(data.options);
+          return optgroup;
+        },
+        optgroup_header: function(data, escape) {
+          return '<div class="optgroup-header">' + escape(data.label) + '</div>';
+        },
+        loading:function(data,escape){
+          return '<div class="spinner"></div>';
+        },
+        dropdown:function(){
+          return '<div></div>';
+        }
+      },
+      load: function (query, callback) {
+        fetch("/api/hardware/connector-types/")
+          .then(res => res.json())
+          .then(data => callback(data))
+          .catch(() => callback());
+      }
+    });
 
     const adapterId = {{ adapter.id }};
 
@@ -415,6 +515,13 @@
 
   
 
+    // Función para actualizar el contador de seleccionados
+    function updateSelectedCounter() {
+      const selected = $('#connections-table tbody input.table-selectable-check:checked').length;
+      const counterEl = document.getElementById('selectedCounter');
+      counterEl.textContent = selected > 0 ? `${selected} registros seleccionados` : '';
+    }
+
     // Checkbox de encabezado: seleccionar todos los visibles
     $('#connections-table thead').on('click', '#select-all-visible', function () {
       const isChecked = this.checked;
@@ -424,6 +531,8 @@
         const checkbox = $(this).find('input.form-check-input');
         checkbox.prop('checked', isChecked);
       });
+
+      updateSelectedCounter();
     });
 
     // Si un checkbox se desmarca manualmente, desmarcar el de encabezado
@@ -431,6 +540,8 @@
       const allVisible = $('#connections-table tbody tr:visible input.form-check-input');
       const allChecked = allVisible.length && allVisible.filter(':checked').length === allVisible.length;
       $('#select-all-visible').prop('checked', allChecked);
+
+      updateSelectedCounter();
     });
 
     // Shift para seleccionar rango
@@ -448,8 +559,106 @@
       }
 
       lastChecked = this;
+
+      updateSelectedCounter();
     });
 
+
+    
+    // Agregar conector con modal
+    const alertContainer = document.getElementById("alert-container");
+
+    document.getElementById("btn-save-connector").addEventListener("click", () => {
+      const type = document.getElementById("connector_type_select").value.trim();
+      const label = document.getElementById("connector_label").value.trim();
+      const pinQty = document.getElementById("connector_pin_qty").value.trim();
+      alertContainer.innerHTML = "";
+
+      if (!type || !label || !pinQty) {
+        showInlineAlert(alertContainer, "Todos los campos son obligatorios.", "warning");
+        return;
+      }
+
+      if (!/^\d+$/.test(pinQty) || pinQty <= 0) {
+        showInlineAlert(alertContainer, "La cantidad de pines debe ser un número entero positivo.", "warning");
+        return;
+      }
+
+      fetch("/api/hardware/adapterconnector/create/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCSRFToken()
+        },
+        body: JSON.stringify({
+          adapter_id: adapterId,
+          connector_type: type.toUpperCase(),
+          label: label,
+          pin_qty: parseInt(pinQty)
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        //showInlineAlert(alertContainer, data.message, data.type || "info");
+
+        if (data.type === "success") {
+          // Opcional: cerrar modal automáticamente
+          
+          const modal = bootstrap.Modal.getInstance(document.getElementById("new-connector"));
+          modal.hide();
+//          resetConnectorModalFields();
+          showToast("Conector guardado exitosamente","success");
+
+          refreshTestConnectorOptions();
+        }
+      })
+      .catch(() => {
+        showInlineAlert(alertContainer, "Error al agregar el conector", "danger");
+      });
+    });
+
+    function resetConnectorModalFields() {
+      // Limpiar inputs simples
+      document.getElementById("connector_label").value = "";
+      document.getElementById("connector_pin_qty").value = "";
+
+      // Limpiar el select con TomSelect
+      const selectEl = document.getElementById("connector_type_select");
+      if (selectEl && selectEl.tomselect) {
+          selectEl.tomselect.clear();       // Limpia la selección
+      } else {
+          // Fallback por si no está inicializado TomSelect (solo resetea el índice)
+          selectEl.selectedIndex = 0;
+      }
+
+      // Limpiar alert container global
+      if (alertContainer) {
+          alertContainer.innerHTML = "";
+      }
+    }
+
+    function refreshTestConnectorOptions() {
+      fetch(`/api/hardware/adapterconnectors/?adapter=${adapterId}`)
+      .then(r => r.json())
+      .then(r => {
+        // Actualizamos la lista global
+        testConnectorOptions = r.data
+          .filter(x => x.connector_side === 'test-side')
+          .map(x => ({ id: x.id, text: `${x.label} (${x.connector_type})`, maxPin: x.pin_qty }));
+
+        // Marcar todas las filas para re-render (para actualizar los select)
+        connTable.rows().every(function () {
+          this.invalidate(); // Marca esta fila para que vuelva a renderizarse
+        });
+
+        connTable.draw(false); // Redibuja la tabla sin cambiar de página
+      });
+    }
+
+
+    document.getElementById("new-connector").addEventListener("hidden.bs.modal", () => {
+        resetConnectorModalFields();
+    });
 
     
   });
@@ -459,5 +668,6 @@
 {% endblock extrajs %}
 
 {% block extrastyle %}
+
 
 {% endblock extrastyle %}

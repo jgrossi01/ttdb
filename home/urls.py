@@ -15,7 +15,6 @@ urlpatterns = [
     path('test-log/', views.test_log, name='test_log'),
     path('tests/<int:session_id>/stage/<int:stage_id>/', views.test_stage_view, name='test_stage'),
     path("hardware/", views.hardware, name="hardware"),
-    path("hardware/new-adapter", views.new_adapter_view, name="new_adapter_view"),
     path("hardware/adapter/<int:id>/connectors", views.adapter_connectors_view, name="adapter_connectors_view"),
     path("hardware/adapter/<int:id>/connections", views.adapter_connections_view, name="adapter_connections_view"),
 

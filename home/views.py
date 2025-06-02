@@ -293,14 +293,27 @@ def get_unique_connectors():
 
     return unique_connectors
 
-def get_unique_connector_types():
-    connectors_orig_type = Conexiones.objects.using("harness").exclude(activo_si_no_field="no").values_list("tipo_de_con_orig", flat=True)
-    connectors_dest_type = Conexiones.objects.using("harness").exclude(activo_si_no_field="no").values_list("tipo_de_con_dest", flat=True)
+def api_connector_types(request):
+    unique_types = get_unique_connector_types()
+    return JsonResponse([{"value": t, "text": t} for t in unique_types], safe=False)
 
-    # Unificar, eliminar None y duplicados
-    unique_connector_types = sorted(set(filter(None, connectors_orig_type)).union(set(filter(None, connectors_dest_type))))
+def get_unique_connector_types():
+    EXCLUDED_VALUES = {"TBD", "NA(ladocaja)", None}
+
+    connectors_orig_type = Conexiones.objects.using("harness") \
+        .exclude(activo_si_no_field="no") \
+        .values_list("tipo_de_con_orig", flat=True)
+
+    connectors_dest_type = Conexiones.objects.using("harness") \
+        .exclude(activo_si_no_field="no") \
+        .values_list("tipo_de_con_dest", flat=True)
+
+    # Unificar, eliminar duplicados y los valores excluidos
+    all_connectors = set(connectors_orig_type).union(set(connectors_dest_type))
+    unique_connector_types = sorted([c for c in all_connectors if c not in EXCLUDED_VALUES])
 
     return unique_connector_types
+
 
 def get_letter_to_number_mapping():
     letter_to_number = {}
@@ -359,14 +372,17 @@ def new_test(request):
             })
 
         with transaction.atomic():
+            # Crear una nueva sesión de prueba
             session = TestSession.objects.create(connector=connector, test_type=test_type)
             
+            # Filtrar señales que involucran el conector seleccionado (origen o destino)
             connections = Conexiones.objects.using("harness").filter(
                 conector_orig=connector
             ).exclude(activo_si_no_field="no") | Conexiones.objects.using("harness").filter(
                 conector_dest=connector
             ).exclude(activo_si_no_field="no")
 
+            # Agrupar conexiones por conector destino
             etapas = {}
             for conn in connections:
                 destino = conn.conector_dest if conn.conector_orig == connector else conn.conector_orig
@@ -374,6 +390,7 @@ def new_test(request):
                     etapas[destino] = []
                 etapas[destino].append(conn)
                 
+            # Definir valores esperados según el tipo de prueba
             expected_values = {
                 "Pin a chasis": (100000000, "OL"),
                 "Pin a otros": (100000000, "OL"),
@@ -383,6 +400,7 @@ def new_test(request):
             min_expected, max_expected = expected_values.get(test_type, (None, None))
 
             for i, (dest, signals) in enumerate(etapas.items(), start=1):
+                # Crear etapas "reference" y "test"
                 reference_stage = TestStage.objects.create(
                     session=session,
                     stage_number=i,
@@ -402,20 +420,22 @@ def new_test(request):
                 result_created = False
                 
                 for signal in signals:
-                    # Crear TestResult para referencia SIN modificaciones
+                    # Crear TestResult de referencia sin normalización
                     TestResult.objects.create(
                         stage=reference_stage,
                         signal_id=signal.field_de_señal,
                         signal_name=signal.nombre,
                         conector_orig=signal.conector_orig,
+                        conector_orig_type=signal.tipo_de_con_orig or "",
                         pin_a=signal.pin_orig or "N/A",
                         conector_dest=signal.conector_dest,
+                        conector_dest_type=signal.tipo_de_con_dest or "",
                         pin_b=signal.pin_dest or "N/A",
                         min_exp_value=min_expected or "0",
                         max_exp_value=max_expected or "0",
-                        #result="Pendiente",
                     )
                     
+                    # Validación de pines
                     pin_a_raw = signal.pin_orig or "N/A"
                     pin_b_raw = signal.pin_dest or "N/A"
 
@@ -423,28 +443,30 @@ def new_test(request):
                     if pin_a_raw in invalid_values or pin_b_raw in invalid_values:
                         continue
 
-                    # Limpiar caracteres no útiles
+                    # Normalización de pines
                     clean_pin_a = pin_a_raw.replace("*", "").replace("(", "").replace(")", "")
                     clean_pin_b = pin_b_raw.replace("*", "").replace("(", "").replace(")", "")
 
-                    # Separar los valores por coma
+                    # Separar pines por coma si vienen agrupados
                     pin_a_parts = [p.strip() for p in clean_pin_a.split(",")]
                     pin_b_parts = [p.strip() for p in clean_pin_b.split(",")]
 
-                    # Expandir y mapear cada valor individual
                     for original_a in pin_a_parts:
                         mapped_a = str(LETTER_TO_NUMBER.get(original_a, original_a))
                         for original_b in pin_b_parts:
                             mapped_b = str(LETTER_TO_NUMBER.get(original_b, original_b))
 
+                            # Crear resultado de prueba con valores mapeados y tooltips
                             TestResult.objects.create(
                                 stage=test_stage,
                                 signal_id=signal.field_de_señal,
                                 signal_name=signal.nombre,
                                 conector_orig=signal.conector_orig,
+                                conector_orig_type=signal.tipo_de_con_orig or "",
                                 pin_a=mapped_a,
                                 tooltip_a=original_a,
                                 conector_dest=signal.conector_dest,
+                                conector_dest_type=signal.tipo_de_con_dest or "",
                                 pin_b=mapped_b,
                                 tooltip_b=original_b,
                                 min_exp_value=min_expected or "0",
@@ -452,15 +474,16 @@ def new_test(request):
                                 result="pending",
                             )
                             
-                            result_created = True  # al menos un resultado válido
+                            result_created = True
                     
+                # Marcar etapa como no medible si no se creó ningún resultado
                 if not result_created:
                     test_stage.status = 'unmeasurable'
                     test_stage.save()
                     reference_stage.status = 'unmeasurable'
                     reference_stage.save()
                             
-            # Si no hay Results en ninguna de las etapas de tipo test, setear la session como No medible.
+            # Verificar si toda la sesión quedó sin resultados medibles
             test_stages = session.stages.filter(stage_type='test')
             has_results = any(stage.results.exists() for stage in test_stages)
 
@@ -471,6 +494,7 @@ def new_test(request):
         return redirect("test_preview", session_id=session.id)
     
     return render(request, 'pages/new-test.html', context)
+
 
     
 def test_log(request):
@@ -585,9 +609,11 @@ def test_stage_view(request, session_id, stage_id):
             "signal_id": r.signal_id,
             "signal_name": r.signal_name,
             "conector_orig": r.conector_orig,
+            "conector_orig_type": r.conector_orig_type,
             "pin_a": r.pin_a,
             "tooltip_a": r.tooltip_a or "",
             "conector_dest": r.conector_dest,
+            "conector_dest_type": r.conector_dest_type,
             "pin_b": r.pin_b,
             "tooltip_b": r.tooltip_b or "",
             "min_exp_value": r.min_exp_value,
@@ -605,8 +631,10 @@ def test_stage_view(request, session_id, stage_id):
             "signal_id": r.signal_id,
             "signal_name": r.signal_name,
             "conector_orig": r.conector_orig,
+            "conector_orig_type": r.conector_orig_type,
             "pin_a": r.pin_a,
             "conector_dest": r.conector_dest,
+            "conector_dest_type": r.conector_dest_type,
             "pin_b": r.pin_b,
             "min_exp_value": r.min_exp_value,
             "max_exp_value": r.max_exp_value,
@@ -770,9 +798,7 @@ def hardware(request):
     }
     return render(request, 'pages/hardware-admin.html', context)
 
-def api_connector_types(request):
-    unique_types = get_unique_connector_types()
-    return JsonResponse([{"value": t, "text": t} for t in unique_types], safe=False)
+
 
 @csrf_exempt
 def api_save_hardware_edit(request):
@@ -860,8 +886,8 @@ def api_get_adapters(request):
     for adapter in Adapter.objects.all():
         connectors = adapter.connectors.all()
 
-        pxi_connectors = connectors.filter(connector_side='pxi-side')
-        test_connectors = connectors.filter(connector_side='test-side')
+        pxi_connectors = connectors.filter(connector_side='pxi-side').order_by('id')
+        test_connectors = connectors.filter(connector_side='test-side').order_by('-id')
 
         def format_connectors(queryset):
             return "<br>".join(
@@ -895,11 +921,10 @@ def api_get_connection_config(request):
     }
     return JsonResponse(data)
 
-    
 
 def api_list_adapterconnectors(request):
     adapter_id = request.GET.get("adapter")
-    connectors = AdapterConnector.objects.filter(adapter_id=adapter_id)
+    connectors = AdapterConnector.objects.filter(adapter_id=adapter_id).order_by('-id')
 
     data = []
     for c in connectors:
@@ -914,95 +939,6 @@ def api_list_adapterconnectors(request):
 
     return JsonResponse({"data": data})
     
-
-@csrf_exempt
-def new_adapter_view(request):
-    if request.method == "POST":
-        name = request.POST.get("name", "").strip()
-        if not name:
-            return render(request, "pages/new-adapter.html", {"error": "El nombre es obligatorio."})
-
-        if Adapter.objects.filter(name__iexact=name).exists():
-            return render(request, "pages/new-adapter.html", {"error": "Ya existe un adaptador con ese nombre."})
-
-        adapter = Adapter.objects.create(name=name)
-
-        # Crear AdapterConnectors del lado PXI
-        in_connectors = []
-        out_connectors = []
-
-        for i in range(1, 4):
-            in_con = AdapterConnector.objects.create(
-                adapter=adapter,
-                connector_type="DB50F",
-                label=f"DB-50-H-IN-{i}",
-                pin_qty=50,
-                connector_side="pxi-side"
-            )
-            in_connectors.append(in_con)
-
-            out_con = AdapterConnector.objects.create(
-                adapter=adapter,
-                connector_type="DB50M",
-                label=f"DB-50-M-OUT-{i}",
-                pin_qty=50,
-                connector_side="pxi-side"
-            )
-            out_connectors.append(out_con)
-
-        # Filtrar RelayPinMap para pxi_channel_type = 'U' (inputs)
-        relay_cards = RelayCard.objects.filter(name__in=["PXI-1", "PXI-2"])
-        relay_maps_u = RelayPinMap.objects.filter(
-            relay_card__in=relay_cards,
-            pxi_channel_type='U'
-        ).order_by('relay_card__name', 'pxi_channel')
-
-        # Asignar inputs a AdapterPinMap
-        in_idx = 0
-        in_pin = 1
-
-        for rmap in relay_maps_u:
-            if in_idx >= len(in_connectors):
-                break  # evitar overflow
-            AdapterPinMap.objects.create(
-                adapter=adapter,
-                relay_pin_map=rmap,
-                pxi_connector=in_connectors[in_idx],
-                to_pxi_pin=in_pin
-            )
-            in_pin += 1
-            if in_pin > 50:
-                in_idx += 1
-                in_pin = 1
-
-        # Filtrar RelayPinMap para pxi_channel_type = 'M' (outputs)
-        relay_maps_m = RelayPinMap.objects.filter(
-            relay_card__in=relay_cards,
-            pxi_channel_type='M'
-        ).order_by('relay_card__name', 'pxi_channel')
-
-        # Asignar outputs a AdapterPinMap
-        out_idx = 0
-        out_pin = 1
-
-        for rmap in relay_maps_m:
-            if out_idx >= len(out_connectors):
-                break
-            AdapterPinMap.objects.create(
-                adapter=adapter,
-                relay_pin_map=rmap,
-                pxi_connector=out_connectors[out_idx],
-                to_pxi_pin=out_pin
-            )
-            out_pin += 1
-            if out_pin > 50:
-                out_idx += 1
-                out_pin = 1
-
-        return redirect('adapter_connectors_view', id=adapter.id)
-
-    return render(request, "pages/new-adapter.html")
-
 @csrf_exempt
 def api_create_adapter(request):
     name = request.POST.get("name", "").strip()
