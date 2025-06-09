@@ -34,7 +34,7 @@
               </button>
               <a href="{% url 'adapter_connectors_view' adapter.id %}" class="btn btn-secondary">
                 <!-- Download SVG icon from http://tabler.io/icons/icon/plus -->
-                <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-plug-connected"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 12l5 5l-1.5 1.5a3.536 3.536 0 1 1 -5 -5l1.5 -1.5z" /><path d="M17 12l-5 -5l1.5 -1.5a3.536 3.536 0 1 1 5 5l-1.5 1.5z" /><path d="M3 21l2.5 -2.5" /><path d="M18.5 5.5l2.5 -2.5" /><path d="M10 11l-2 2" /><path d="M13 14l-2 2" /></svg>
+                <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-plug"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9.785 6l8.215 8.215l-2.054 2.054a5.81 5.81 0 1 1 -8.215 -8.215l2.054 -2.054z" /><path d="M4 20l3.5 -3.5" /><path d="M15 4l-3.5 3.5" /><path d="M20 9l-3.5 3.5" /></svg>
                 Editar conectores
               </a>
               <a href="/hardware/#tabs-adaptadores" class="btn btn-dark">
@@ -413,17 +413,31 @@
       }
     }
 
-    // cuando un select cambia + bulk edit
+
+
+
+
+    function getSelectedRowIdsInVisibleOrder() {
+      const selectedIds = [];
+
+      connTable.rows({ search: 'applied', order: 'applied' }).every(function () {
+        const rowNode = this.node();
+        const checkbox = $(rowNode).find('input.table-selectable-check');
+        if (checkbox.prop('checked')) {
+          selectedIds.push(this.data().id);
+        }
+      });
+
+      return selectedIds;
+    }
+
     $('#connections-table tbody').on('change', 'select.auto-save-select', function () {
       const row = connTable.row($(this).closest('tr')).data();
       const field = this.dataset.field.replace('_display','').replace('_name','');
       const val = this.value ? Number(this.value) : null;
 
-      // Detectar qué checkboxes están seleccionados
-      const selected = $('#connections-table tbody input.table-selectable-check:checked')
-        .map(function () { return $(this).data('id'); }).get();
+      const selected = getSelectedRowIdsInVisibleOrder();
 
-      // Si hay múltiples seleccionados, aplicar el cambio a todos (bulk)
       if (selected.length > 1) {
         fetch('/api/hardware/adapterpinmap/bulk-update/', {
           method: 'POST',
@@ -451,10 +465,9 @@
           showToast('Error de red o servidor.', 'danger');
         })
         .finally(() => {
-          connTable.ajax.reload(() => {$('#select-all-visible').prop('checked', false);}, false);
+          connTable.ajax.reload(null,false);
         });
       } else {
-        // Si no hay selección múltiple, aplicar solo al actual
         editField(row.id, field, val);
       }
     });
@@ -513,7 +526,12 @@
       });
     });
 
-  
+
+    // Desmarca checkbox header cada vez que se recarga la tabla y actualiza contador de seleccionados
+    $('#connections-table').on('draw.dt', function () {
+      $('#select-all-visible').prop('checked', false);
+      updateSelectedCounter();
+    });
 
     // Función para actualizar el contador de seleccionados
     function updateSelectedCounter() {

@@ -40,8 +40,15 @@ class MDBFile(models.Model):
         return self.name
 
 class TestSession(models.Model):
+    TEST_TYPE_CHOICES = [
+        ('Pin a chasis', 'Pin a chasis'),
+        ('Pin a otros', 'Pin a otros'),
+        ('Entre par de pines', 'Entre par de pines'),
+        ('Pin a pin', 'Pin a pin'),
+    ]
     connector = models.CharField(max_length=50)  # Conector en prueba
-    test_type = models.CharField(max_length=50)  # Tipo de prueba
+    connector_type = models.CharField(max_length=50)  # Tipo de prueba
+    test_type = models.CharField(max_length=50, choices=TEST_TYPE_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(
         max_length=20,
@@ -63,6 +70,7 @@ class TestStage(models.Model):
     stage_number = models.PositiveIntegerField()
     stage_type = models.CharField(max_length=50)
     connector_dest = models.CharField(max_length=50)  # Conector que se conecta en esta etapa
+    connector_type = models.CharField(max_length=50) 
     instructions = models.TextField()  # Instrucciones para el usuario
     status = models.CharField(
         max_length=20,
@@ -213,13 +221,13 @@ class AdapterPinMap(models.Model):
     pxi_connector = models.ForeignKey(
         "AdapterConnector",
         on_delete=models.CASCADE,
-        related_name="pxi_mapped_pins"
+        related_name="adapter_mapped_pxi_pins"
     )
     to_pxi_pin = models.PositiveIntegerField()
     test_connector = models.ForeignKey(
         "AdapterConnector",
         on_delete=models.CASCADE,
-        related_name="test_mapped_pins",
+        related_name="adapter_mapped_test_pins",
         null=True, blank=True,
     )
     to_test_pin = models.PositiveIntegerField(null=True, blank=True,)

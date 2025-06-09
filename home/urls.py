@@ -10,10 +10,10 @@ urlpatterns = [
     path('db-manager/edit', views.edit_db, name='edit_db'),
     path('db-manager/update', views.update_db, name='update_db'),
     path('new-test', views.new_test, name='new_test'),
-    path("tests/<int:session_id>/preview/", views.test_preview, name="test_preview"),
-    path("tests/<int:session_id>/result/", views.test_result, name="test_result"),
-    path('test-log/', views.test_log, name='test_log'),
+    path("tests/<int:session_id>/preview/", views.test_preview_view, name="test_preview"),
     path('tests/<int:session_id>/stage/<int:stage_id>/', views.test_stage_view, name='test_stage'),
+    path("tests/<int:session_id>/result/", views.test_result_view, name="test_result"),
+    path('test-log/', views.test_log, name='test_log'),
     path("hardware/", views.hardware, name="hardware"),
     path("hardware/adapter/<int:id>/connectors", views.adapter_connectors_view, name="adapter_connectors_view"),
     path("hardware/adapter/<int:id>/connections", views.adapter_connections_view, name="adapter_connections_view"),
@@ -45,11 +45,12 @@ urlpatterns = [
     path("api/hardware/get-relaycards/", views.api_get_relaycards, name="get_relaycards"),
     path('api/hardware/create-adapter/', views.api_create_adapter, name='create_adapter'),
     #path('api/hardware/get-subunit-choices/', views.api_get_sub_unit_choices, name='get_subunit_choices'),
+    path('api/stage/<int:stage_id>/generate-instructions/', views.api_generate_instructions, name='generate_instructions'),
     
     # Pinmap
     path("api/hardware/adapterpinmap/", views.api_list_adapterpinmap),
     path("api/hardware/adapterpinmap/save/", views.api_save_adapterpinmap),
-    path('api/hardware/adapterpinmap/bulk-update/', views.adapterpinmap_bulk_update, name='adapterpinmap_bulk_update'),
+    path('api/hardware/adapterpinmap/bulk-update/', views.api_adapterpinmap_bulk_update, name='adapterpinmap_bulk_update'),
     
     # Genericas
     path("api/hardware/save/", views.api_save_hardware_edit, name="save_hardware_edit"),

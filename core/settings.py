@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django_eventstream",
     "home",
+    "django_extensions"
 ]
 
 

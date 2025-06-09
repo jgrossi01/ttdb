@@ -1,0 +1,44 @@
+-- LOGICA MEDICIONES --
+
+- Pin a chasis -
+
+Se conecta solo el conector en prueba. 
+Una punta del tester en MON1 y la otra en carcasa conector lado prueba.
+Se cierra FI1 {N de canal a probar} (Subunit 3) y MON1 (Subunit 7)
+
+- Pin a otros -
+
+Se conecta solo el conector en prueba.
+Una punta del tester en MON1 y la otra en MON2.
+Se cierran los FI1 de los "otros" y MON1 - ver aca si no se tiene que dejar abierto otra conexion que este cableado junto con el que se esta probando ej. "1,2" habria que dejar abiertos los FI1 de estos canales - 
+Se cierran el/los (segun nota arriba) FI2 del pin que se esta midiendo y MON2.
+
+
+
+------------------
+
+
+-- CONECTORES DE EJEMPLO COPADOS --
+H-PDU-CM-CNT4
+H-PDU-PDM_F-CNT1
+
+
+-- HOJA DE RUTA --
+
+find_opposite_sex_connectors → lógica de buscar conector opuesto / compatible.
+get_mapping_or_error → lógica de traducir (conector + pin) en (relay_card_id, pxi_channel).
+generate_modal_tasks → orquesta ambos helpers y arma el resultado final (instrucción de texto + datos de relé).
+
+-- ULTIMO PROMPT (enviado sin conexion) --
+
+
+fc = FixedConnector.objects.filter(id=2).first()
+pin = 33  # probá con un número válido según tu base
+
+get_mapping_or_error(fc, pin)
+
+ac = AdapterConnector.objects.filter(connector_side='test-side', id=164).first()
+pin = 15  # o el que esté en el rango válido de ese conector
+
+get_mapping_or_error(ac, pin)
+

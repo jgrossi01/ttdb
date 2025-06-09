@@ -137,9 +137,9 @@
                 {% for result in test_stage.results.all %}
                 <tr>
                   <td>{{ result.signal_name }}</td>
-                  <td>{{ result.conector_orig }}</td>
+                  <td>{{ result.conector_orig }} <span class="text-secondary">({{ result.conector_orig_type }})</span></td>
                   <td title="{{ result.tooltip_a }}">{{ result.pin_a }}</td>
-                  <td>{{ result.conector_dest }}</td>
+                  <td>{{ result.conector_dest }} <span class="text-secondary">({{ result.conector_dest_type }})</span></td>
                   <td title="{{ result.tooltip_b }}">{{ result.pin_b }}</td>
                   <td>{{ result.min_exp_value }}</td>
                   <td>{{ result.max_exp_value }}</td>

@@ -90,7 +90,7 @@
                     
                     <div class="col-auto" id="btnStartTestContainer">
                       {% if stage_test.status == "pending" %}
-                        <button type="button" class="btn btn-success" id="startTest">
+                        <button type="button" class="btn btn-success" data-stage-id="{{ stage_test.id }}" id="btn-generar-instrucciones">
                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="icon icon-tabler icons-tabler-filled icon-tabler-player-play">
                             <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                             <path d="M6 4v16a1 1 0 0 0 1.524 .852l13 -8a1 1 0 0 0 0 -1.704l-13 -8a1 1 0 0 0 -1.524 .852z" />
@@ -114,10 +114,8 @@
                     <tr>
                       <th>Señal</th>
                       <th>Conector Origen</th>
-                      <th>Tipo</th>
                       <th>Pin Origen</th>
                       <th>Conector Destino</th>
-                      <th>Tipo</th>
                       <th>Pin Destino</th>
                       <th>Esperado (min)</th>
                       <th>Esperado (max)</th>
@@ -132,11 +130,9 @@
                     {% for result in test_results %}
                     <tr data-result-id="{{ result.id }}">
                       <td class="cell-signal">{{ result.signal_name }}</td>
-                      <td class="cell-orig">{{ result.conector_orig }}</td>
-                      <td class="cell-orig_type">{{ result.conector_orig_type }}</td>
+                      <td class="cell-orig">{{ result.conector_orig }} <span class="text-secondary">({{ result.conector_orig_type }})</span></td>
                       <td class="cell-pin-a" title="{{ result.tooltip_a }}" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="tooltip-table">{{ result.pin_a }}</td>
-                      <td class="cell-dest">{{ result.conector_dest }}</td>
-                      <td class="cell-dest_type">{{ result.conector_dest_type }}</td>
+                      <td class="cell-dest">{{ result.conector_dest }} <span class="text-secondary">({{ result.conector_dest_type }})</span></td>
                       <td class="cell-pin-b" title="{{ result.tooltip_b }}" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="tooltip-table">{{ result.pin_b }}</td>
                       <td class="cell-min">{{ result.min_exp_value|default:"-" }}</td>
                       <td class="cell-max">{{ result.max_exp_value|default:"-" }}</td>
@@ -159,11 +155,9 @@
                     {% for result in reference_results %}
                     <tr>
                       <td class="cell-signal">{{ result.signal_name }}</td>
-                      <td class="cell-orig">{{ result.conector_orig }}</td>
-                      <td class="cell-orig_type">{{ result.conector_orig_type }}</td>
+                      <td class="cell-orig">{{ result.conector_orig }} <span class="text-secondary">({{ result.conector_orig_type }})</span></td>
                       <td class="cell-pin-a">{{ result.pin_a }}</td>
-                      <td class="cell-dest">{{ result.conector_dest }}</td>
-                      <td class="cell-dest_type">{{ result.conector_dest_type }}</td>
+                      <td class="cell-dest">{{ result.conector_dest }} <span class="text-secondary">({{ result.conector_dest_type }})</span></td>
                       <td class="cell-pin-b">{{ result.pin_b }}</td>
                       <td class="cell-min">{{ result.min_exp_value|default:"-" }}</td>
                       <td class="cell-max">{{ result.max_exp_value|default:"-" }}</td>
@@ -239,6 +233,33 @@
   </div>
 
   {% block modal %}
+
+  <div class="modal modal-blur fade" id="instruccionesModal" tabindex="-1" aria-labelledby="instruccionesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="instruccionesModalLabel">Instrucciones</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body" id="instrucciones-modal-body">
+          <!-- Aquí se insertan dinámicamente las instrucciones -->
+        </div>
+        <div class="modal-footer" id="instrucciones-modal-footer">
+          <button class="btn btn-link link-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-success" data-stage-id="{{ stage_test.id }}" id="btn-start-test" disabled>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                viewBox="0 0 24 24" fill="currentColor"
+                class="icon icon-tabler icons-tabler-filled icon-tabler-player-play">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+              <path d="M6 4v16a1 1 0 0 0 1.524 .852l13 -8a1 1 0 0 0 0 -1.704l-13 -8a1 1 0 0 0 -1.524 .852z"/>
+            </svg>
+            Comenzar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 
   {% endblock modal %}
 
@@ -375,8 +396,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
-  const startButton = document.getElementById("startTest");
-
+  const startButton = document.getElementById("btn-generar-instrucciones");
+  /*
   if(!startButton){ return }
   startButton.addEventListener("click", async () => {
     startButton.disabled = true;
@@ -422,11 +443,74 @@ document.addEventListener('DOMContentLoaded', function () {
       </span>`;
     document.querySelector("#btnStartTestContainer").innerHTML = "";
     table.draw();
-  });
+  });*/
+
+
+
+    document.getElementById("btn-generar-instrucciones").addEventListener("click", function () {
+      const stageId = this.getAttribute("data-stage-id");
+
+      fetch(`/api/stage/${stageId}/generate-instructions/`)
+        .then(response => response.json())
+        .then(data => {
+          const instrucciones = data.instructions;
+          const modalBody = document.getElementById("instrucciones-modal-body");
+          const btnComenzar = document.getElementById("btn-start-test");
+
+          // Resetear contenido
+          modalBody.innerHTML = "";
+          btnComenzar.disabled = true;  // Siempre empezar deshabilitado
+          btnComenzar.setAttribute("data-stage-id", stageId); // Actualizar ID por si cambió
+
+          // Crear instrucciones con checkboxes
+          instrucciones.forEach((linea, index) => {
+            const div = document.createElement("div");
+            div.className = "form-check mb-2";
+
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.className = "form-check-input";
+            checkbox.id = `instruccion-check-${index}`;
+
+            const label = document.createElement("label");
+            label.className = "form-check-label";
+            label.setAttribute("for", checkbox.id);
+            label.textContent = linea;
+
+            checkbox.addEventListener("change", verificarCheckboxes);
+
+            div.appendChild(checkbox);
+            div.appendChild(label);
+            modalBody.appendChild(div);
+          });
+
+          // Mostrar modal
+          const modal = new bootstrap.Modal(document.getElementById("instruccionesModal"));
+          modal.show();
+        })
+        .catch(err => {
+          alert("Error al generar instrucciones.");
+          console.error(err);
+        });
+    });
+
+    function verificarCheckboxes() {
+      const checkboxes = document.querySelectorAll("#instrucciones-modal-body .form-check-input");
+      const btnComenzar = document.getElementById("btn-start-test");
+
+      const todosMarcados = Array.from(checkboxes).every(checkbox => checkbox.checked);
+      btnComenzar.disabled = !todosMarcados;
+    }
+
 
 });
 </script>
 {% endblock extrajs %}
 
 {% block extrastyle %}
+<style>
+  .modal-body label {
+    font-size: 16px;
+  }
+</style>
 {% endblock extrastyle %}

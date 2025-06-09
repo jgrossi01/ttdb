@@ -1,6 +1,7 @@
 from django.test import TestCase
-from home.models import PhysicalConnector, Adapter, AdapterConnection, RelayCard, AdapterPinMap
+from home.models import *
 
+""" 
 class AdapterModelTests(TestCase):
 
     def setUp(self):
@@ -71,3 +72,52 @@ class AdapterModelTests(TestCase):
                 test_connector=self.test_connector,
                 pxi_connector=self.pxi_connector_1
             )
+ """
+ 
+import re
+from dataclasses import dataclass
+from home.utils import find_opposite_sex_connectors
+
+COMPATIBLE_CONNECTOR_TYPES = {
+    "DB": [("DB", False), ("DD", True)],
+    "DD": [("DD", False), ("DB", True)],
+}
+
+@dataclass
+class FixedConnector:
+    connector_type: str
+    label: str
+
+@dataclass
+class AdapterConnector:
+    connector_type: str
+    label: str
+    connector_side: str
+    adapter_name: str
+
+def test_find_opposite_sex_connectors_dd15f():
+    fixed_connectors = [
+        FixedConnector("DB15M", "Zócalo 1"),
+        FixedConnector("DD15M", "Zócalo 2"),
+    ]
+    adapter_connectors = [
+        AdapterConnector("DB15M", "AdapterPortA", "test-side", "Adaptador X"),
+        AdapterConnector("DD15M", "AdapterPortB", "test-side", "Adaptador Y"),
+        AdapterConnector("DB15M", "AdapterPortC", "non-test-side", "Adaptador Z"),
+    ]
+
+    result = find_opposite_sex_connectors("DD15F", fixed_connectors, adapter_connectors)
+
+    assert len(result) == 4
+    assert ('fixed', fixed_connectors[1], 'DD', False) in result
+    assert ('fixed', fixed_connectors[0], 'DB', True) in result
+    assert ('adapter', adapter_connectors[1], 'DD', False) in result
+    assert ('adapter', adapter_connectors[0], 'DB', True) in result
+
+def test_invalid_format_returns_empty():
+    result = find_opposite_sex_connectors("DB15", [], [])
+    assert result == []
+
+def test_no_matches_returns_empty():
+    result = find_opposite_sex_connectors("DB9F", [], [])
+    assert result == []

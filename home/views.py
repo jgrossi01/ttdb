@@ -2,10 +2,12 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_GET
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse, Http404
+from django.core.exceptions import ObjectDoesNotExist
 from django.apps import apps
 from django.conf import settings
 from django.db import transaction, IntegrityError
 from django.utils import timezone
+from home.utils import get_mapping_or_error, find_opposite_sex_connectors
 from .models import *
 from .models_harness import Conexiones
 from django_eventstream import send_event
@@ -25,12 +27,14 @@ import random
 def index(request):
     return render(request, 'pages/index.html')
 
+
 def update_db(request):
     context = {
         'parent': '',
         'segment': 'edit_db'
     }
     return render(request, 'pages/update-db.html', context)
+
 
 def edit_db(request):
     context = {
@@ -39,7 +43,6 @@ def edit_db(request):
     }
     return render(request, 'pages/edit-db.html', context)
 
-#@csrf_exempt
 
 def getDatabases(request):
     registros = MDBFile.objects.using("default").all()
@@ -55,6 +58,7 @@ def getDatabases(request):
     ]
     return JsonResponse({"data": data})
 
+
 def editConexionesHarness(request):
     # en vez de values se puede utilizar .only para generar la estructura como getDatabases.
     data = list(Conexiones.objects.using("harness").values(
@@ -65,6 +69,7 @@ def editConexionesHarness(request):
         'PEM_Telemetria'
     ))
     return JsonResponse({"data": data})
+
 
 def saveConexionesHarness(request):
     if request.method == "POST":
@@ -120,6 +125,7 @@ def getLastDbUpdate(request):
     # Devolver la fecha como JSON
     return JsonResponse({"latest_upload_date": latest_date})
 
+
 def backup_harness():
     """Crea una copia de seguridad de harness.sqlite3 con fecha e ID único."""
     try:
@@ -145,6 +151,7 @@ def backup_harness():
     except Exception as e:
         send_event("dbupdate", "message", {"status": "error", "text": f"Error creando backup: {e}"})
         return None
+    
     
 @csrf_exempt
 def backup_harness_ajax(request):
@@ -184,6 +191,7 @@ def convert_mdb_to_sqlite(mdb_path, sqlite_path, sqlite_name):
     sqlite_conn.close()
     return sqlite_path
 
+
 def get_last_signal_number(db_path, table_name):
     """Obtiene el último '# de Señal' registrado en una tabla."""
     with sqlite3.connect(db_path) as conn:
@@ -191,6 +199,7 @@ def get_last_signal_number(db_path, table_name):
         cursor.execute(f"SELECT MAX(\"# de Señal\") FROM {table_name}")
         result = cursor.fetchone()
         return result[0] if result and result[0] else 0
+
 
 def sync_databases(harness_path, new_db_path, sqlite_name):
     """Sincroniza harness.sqlite3 con la nueva base sin modificar datos existentes."""
@@ -232,6 +241,7 @@ def sync_databases(harness_path, new_db_path, sqlite_name):
              send_event("dbupdate", "message", {"status": "info", "style": "info", "text": f"No se agregaron registros en ninguna tabla"}) 
              
     return total_new_records
+    
     
 @csrf_exempt
 def upload_mdb(request):
@@ -284,6 +294,7 @@ def upload_mdb(request):
         send_event("dbupdate", "message", {"status": "error", "text": f"Error: {e}"})
         return JsonResponse({'success': False, 'message': str(e)}, status=400)
     
+    
 def get_unique_connectors():
     connectors = Conexiones.objects.using("harness").exclude(activo_si_no_field="no").values_list("conector_orig", flat=True)
     connectors_dest = Conexiones.objects.using("harness").exclude(activo_si_no_field="no").values_list("conector_dest", flat=True)
@@ -293,9 +304,11 @@ def get_unique_connectors():
 
     return unique_connectors
 
+
 def api_connector_types(request):
     unique_types = get_unique_connector_types()
     return JsonResponse([{"value": t, "text": t} for t in unique_types], safe=False)
+
 
 def get_unique_connector_types():
     EXCLUDED_VALUES = {"TBD", "NA(ladocaja)", None}
@@ -372,8 +385,21 @@ def new_test(request):
             })
 
         with transaction.atomic():
+            # Obtener tipo de conector desde la base "harness"
+            first_con = Conexiones.objects.using("harness").filter(
+                conector_orig=connector
+            ).exclude(activo_si_no_field="no").first() or Conexiones.objects.using("harness").filter(
+                conector_dest=connector
+            ).exclude(activo_si_no_field="no").first()
+
+            connector_type = first_con.tipo_de_con_orig if first_con and first_con.conector_orig == connector else first_con.tipo_de_con_dest if first_con else ""
+
             # Crear una nueva sesión de prueba
-            session = TestSession.objects.create(connector=connector, test_type=test_type)
+            session = TestSession.objects.create(
+                connector=connector,
+                test_type=test_type,
+                connector_type=connector_type or ""
+            )
             
             # Filtrar señales que involucran el conector seleccionado (origen o destino)
             connections = Conexiones.objects.using("harness").filter(
@@ -400,12 +426,16 @@ def new_test(request):
             min_expected, max_expected = expected_values.get(test_type, (None, None))
 
             for i, (dest, signals) in enumerate(etapas.items(), start=1):
+                # Obtener tipo de conector destino (si se conoce)
+                tipo_destino = signals[0].tipo_de_con_dest if signals[0].conector_dest == dest else signals[0].tipo_de_con_orig
+
                 # Crear etapas "reference" y "test"
                 reference_stage = TestStage.objects.create(
                     session=session,
                     stage_number=i,
                     stage_type='reference',
                     connector_dest=dest,
+                    connector_type=tipo_destino or "",
                     instructions=f"Conectar {connector} y {dest} para ejecutar la prueba.",
                 )
                 
@@ -414,6 +444,7 @@ def new_test(request):
                     stage_number=i,
                     stage_type='test',
                     connector_dest=dest,
+                    connector_type=tipo_destino or "",
                     instructions=f"Conectar {connector} y {dest} para ejecutar la prueba.",
                 )
                 
@@ -495,7 +526,6 @@ def new_test(request):
     
     return render(request, 'pages/new-test.html', context)
 
-
     
 def test_log(request):
     context = {
@@ -531,7 +561,7 @@ def delete_test_session(request, session_id):
     return JsonResponse({"success": False, "message": "Método no permitido."}, status=405)
 
 
-def test_preview(request, session_id):
+def test_preview_view(request, session_id):
     session = get_object_or_404(TestSession, id=session_id)
 
     # Obtener todas las etapas test y reference, agrupadas por stage_number
@@ -660,6 +690,7 @@ def test_stage_view(request, session_id, stage_id):
     }
     return render(request, "pages/test-stage.html", context)
 
+
 @csrf_exempt
 def run_test_stage(request):
     if request.method != "POST":
@@ -720,7 +751,7 @@ def run_test_stage(request):
         return JsonResponse({"success": False, "message": str(e)}, status=500)
 
 
-def test_result(request, session_id):
+def test_result_view(request, session_id):
     session = get_object_or_404(TestSession, id=session_id)
 
     # Obtener todas las etapas test y reference, agrupadas por stage_number
@@ -754,6 +785,7 @@ def test_result(request, session_id):
         "stage_links": stage_links,
     }
     return render(request, "pages/test-result.html", context)
+
 
 '''
 @require_GET
@@ -790,6 +822,7 @@ def test_hardware(request):
         }, status=500)
 '''
 
+
 def hardware(request):
     context = {
         'parent': '',
@@ -797,7 +830,6 @@ def hardware(request):
         'connection_config': ConnectionConfig.objects.first()
     }
     return render(request, 'pages/hardware-admin.html', context)
-
 
 
 @csrf_exempt
@@ -861,7 +893,6 @@ def api_create_hardware_record(request):
     return JsonResponse({"message": "Método no permitido"}, status=405)
 
 
-
 @csrf_exempt
 def api_delete_hardware_record(request):
     if request.method == "POST":
@@ -905,11 +936,9 @@ def api_get_adapters(request):
     return JsonResponse({"data": data})
 
 
-
 def api_get_relaycards(request):
     data = list(RelayCard.objects.all().values())
     return JsonResponse({"data": data})
-
 
 
 @csrf_exempt
@@ -938,6 +967,7 @@ def api_list_adapterconnectors(request):
         })
 
     return JsonResponse({"data": data})
+    
     
 @csrf_exempt
 def api_create_adapter(request):
@@ -1032,6 +1062,7 @@ def adapter_connectors_view(request, id):
         return redirect("new_adapter_view")
 
     return render(request, "pages/adapter-connectors.html", {"adapter": adapter})
+
 
 def adapter_connections_view(request, id):
     try:
@@ -1156,33 +1187,120 @@ def api_create_adapterconnector(request):
             return JsonResponse({"message": str(e), "type": "danger"}, status=500)
 
 
-def adapterpinmap_bulk_update(request):
-    data = json.loads(request.body)
-    ids = data.get('ids', [])
-    test_connector_val = data.get('fields', {}).get('test_connector')
+def api_adapterpinmap_bulk_update(request):
+    try:
+        data = json.loads(request.body)
+        ids = data.get('ids', [])
+        fields = data.get('fields', {})
 
-    if not ids or not isinstance(ids, list):
-        return JsonResponse({'error': 'IDs inválidos'}, status=400)
+        if not ids or not isinstance(ids, list):
+            return JsonResponse({'error': 'IDs inválidos'}, status=400)
 
-    # Convertir "" o "null" a None
-    if test_connector_val in ("", "null", None):
+        test_connector_val = fields.get('test_connector')
         test_connector = None
-    else:
-        try:
-            test_connector = AdapterConnector.objects.get(id=int(test_connector_val))
-        except (AdapterConnector.DoesNotExist, ValueError):
-            return JsonResponse({'error': 'El conector seleccionado no existe'}, status=400)
+        assign_pins = False
 
-    # Actualización en bloque
-    updated = AdapterPinMap.objects.filter(id__in=ids).update(
-        test_connector=test_connector,
-        to_test_pin=None  # Resetear campo dependiente
-    )
+        if test_connector_val not in ("", "null", None):
+            try:
+                test_connector = AdapterConnector.objects.get(id=int(test_connector_val))
+                if len(ids) == test_connector.pin_qty:
+                    assign_pins = True
+            except (AdapterConnector.DoesNotExist, ValueError):
+                return JsonResponse({'error': 'El conector seleccionado no existe'}, status=400)
 
-    return JsonResponse({'status': 'ok', 'updated': updated})
+        # Recuperar los objetos en el orden dado
+        pin_maps = list(AdapterPinMap.objects.filter(id__in=ids))
+        pin_map_dict = {str(obj.id): obj for obj in pin_maps}
 
+        updated_objs = []
+        for index, str_id in enumerate(ids, start=1):
+            obj = pin_map_dict.get(str(str_id))
+            if not obj:
+                continue
 
+            if 'test_connector' in fields:
+                obj.test_connector = test_connector
+                obj.to_test_pin = index if assign_pins else None
 
+            updated_objs.append(obj)
+
+        AdapterPinMap.objects.bulk_update(updated_objs, ['test_connector', 'to_test_pin'])
+
+        return JsonResponse({'status': 'ok', 'updated': len(updated_objs)})
+
+    except Exception as e:
+        return JsonResponse({'error': f'Error interno: {str(e)}'}, status=500)
+    
+    
+def api_generate_instructions(request, stage_id):
+    try:
+        stage = TestStage.objects.select_related('session').prefetch_related('results').get(id=stage_id)
+    except ObjectDoesNotExist:
+        return JsonResponse({"instructions": ["Error: La etapa especificada no existe."]})
+
+    if stage.stage_type != 'test':
+        return JsonResponse({"instructions": ["Error: Solo se pueden generar instrucciones para etapas de tipo 'test'."]})
+
+    session = stage.session
+    test_type = session.test_type
+    connector_label = session.connector  # Ej: "DUT1"
+    connector_type_str = session.connector_type  # Ej: "DB15M"
+    connector_dest = stage.connector_dest
+    connector_dest_type = stage.connector_type
+
+    instructions = []
+
+    if test_type == 'Pin a chasis':
+        candidatos = find_opposite_sex_connectors(connector_type_str)
+        if not candidatos:
+            return JsonResponse({
+                "instructions": [f"Error: No se encontró ningún conector compatible para '{connector_type_str}' (sexo opuesto)."]
+            })
+
+        for tipo_con, conector_obj, tipo_compatible_base, requiere_extensor in candidatos:
+            pines_invalidos = []
+            for result in stage.results.all():
+                pin = result.pin_b  # En este tipo de prueba, el DUT está en pin_b
+                mapeo = get_mapping_or_error(conector_obj, pin)
+                if not mapeo:
+                    pines_invalidos.append(pin)
+            if not pines_invalidos:
+                if tipo_con == 'fixed':
+                    msg1 = (
+                        f"Conecte [{connector_label} ({connector_type_str})] en "
+                        f"[{conector_obj.label} ({conector_obj.connector_type})]"
+                    )
+                else:
+                    adapter = conector_obj.adapter
+                    msg1 = (
+                        f"Utilice el adaptador {adapter.name} para conectar "
+                        f"[{connector_label} ({connector_type_str})] en "
+                        f"[{conector_obj.label} ({conector_obj.connector_type})]"
+                    )
+                    if tipo_compatible_base != connector_type_str[:2]:
+                        msg1 += " utilizando un extender DB a DD"
+
+                msg2 = (
+                    f"Conecte una punta del tester en Monitor 1 y la otra punta en la carcasa (GND) "
+                    f"del conector [{connector_dest} ({connector_dest_type})]"
+                )
+
+                return JsonResponse({"instructions": [msg1, msg2]})
+
+        return JsonResponse({
+            "instructions": ["Error: Ningún conector compatible tiene mapeos completos para los pines requeridos."]
+        })
+
+    elif test_type == 'Pin a otros':
+        return JsonResponse({"instructions": ["Error: Generación de instrucciones para 'Pin a otros' no implementada aún."]})
+
+    elif test_type == 'Entre par de pines':
+        return JsonResponse({"instructions": ["Error: Generación de instrucciones para 'Entre par de pines' no implementada aún."]})
+
+    elif test_type == 'Pin a pin':
+        return JsonResponse({"instructions": ["Error: Generación de instrucciones para 'Pin a pin' no implementada aún."]})
+
+    return JsonResponse({"instructions": [f"Error: Tipo de prueba desconocido '{test_type}'."]})
 
 
 
