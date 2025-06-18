@@ -131,8 +131,8 @@
         <div class="modal-footer">
           <div class="w-100">
             <div class="row">
-              <div class="col"><a href="#" class="btn w-100" data-bs-dismiss="modal">Cancelar</a></div>
-              <div class="col"><a href="#" id="confirmDeleteBtn" class="btn btn-danger w-100">Eliminar</a></div>
+              <div class="col"><button class="btn w-100" data-bs-dismiss="modal">Cancelar</button></div>
+              <div class="col"><button id="confirmDeleteBtn" class="btn btn-danger w-100">Eliminar</button></div>
             </div>
           </div>
         </div>
@@ -237,7 +237,7 @@
         <div class="alert alert-important alert-${type} alert-dismissible" role="alert">
           <div class="alert-icon">${icon}</div>
           <div>${message}</div>
-          <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+          <button class="btn-close" data-bs-dismiss="alert" aria-label="close"></button>
         </div>
       `;
 
@@ -379,6 +379,8 @@
     });
 
     document.querySelector("#connector-table").addEventListener("click", function (e) {
+
+      e.preventDefault();
       if (e.target.closest(".btn-delete")) {
         const id = e.target.closest(".btn-delete").dataset.id;
         deletePayload = {
@@ -389,7 +391,10 @@
       }
     });
 
+    
+
     document.getElementById("confirmDeleteBtn").addEventListener("click", () => {
+
       if (!deletePayload) return;
 
       fetch("/api/hardware/delete/", {
@@ -457,7 +462,7 @@
         }
 
         if (field === "label") {
-          fetch(`/api/hardware/physicalconnector/?adapter=${adapterId}`)
+          fetch(`/api/hardware/adapterconnectors/?adapter=${adapterId}`)
             .then(res => res.json())
             .then(data => {
               const existe = data.data.some(c =>
@@ -485,7 +490,7 @@
               "X-CSRFToken": getCSRFToken()
             },
             body: JSON.stringify({
-              model: "PhysicalConnector",
+              model: "AdapterConnector",
               id: connectorId,
               field: field,
               value: field === "pin_qty" ? parseInt(value) : value

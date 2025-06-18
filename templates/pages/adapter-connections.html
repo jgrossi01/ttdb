@@ -323,6 +323,9 @@
         opts = [{ id: '', text: 'No definido' }, ...testConnectorOptions];
       }
 
+      const selectedOption = opts.find(o => String(o.id) === String(selectedId));
+      const selectedText = selectedOption ? selectedOption.text : '';
+
       return `
         <select class="form-select form-select-sm auto-save-select" data-field="${field}">
           ${opts.map(o => `
@@ -333,8 +336,6 @@
         </select>
       `;
     }
-
-
 
 
     // =======================
@@ -361,7 +362,19 @@
         { data: 'pxi_channel', title: 'Canal PXI' },
         { data: 'pxi_connector', title: 'Conector lado PXI' },
         { data: 'to_pxi_pin', title: 'Pin lado PXI' },
-        { data: 'test_connector', render: (data, type, row) => renderSelect('test_connector_display', data) },
+        {
+          data: 'test_connector',
+          render: function (data, type, row) {
+            if (type === 'filter') {
+              // Devuelve solo el texto del select para el índice de búsqueda
+              const option = testConnectorOptions.find(o => String(o.id) === String(data));
+              return option ? option.text : '';
+            }
+
+            // Renderizado normal para la tabla (HTML)
+            return renderSelect('test_connector_display', data);
+          }
+        },
         {
           data: 'to_test_pin',
           title: 'Pin lado test',
@@ -581,7 +594,6 @@
       updateSelectedCounter();
     });
 
-
     
     // Agregar conector con modal
     const alertContainer = document.getElementById("alert-container");
@@ -624,7 +636,6 @@
           
           const modal = bootstrap.Modal.getInstance(document.getElementById("new-connector"));
           modal.hide();
-//          resetConnectorModalFields();
           showToast("Conector guardado exitosamente","success");
 
           refreshTestConnectorOptions();

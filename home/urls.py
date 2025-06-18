@@ -20,7 +20,7 @@ urlpatterns = [
 
     
     #pruebas de conexion con pxi
-    #path('test-hardware/', views.test_hardware, name='test_hardware'),
+    path('test-hardware/', views.test_hardware, name='test_hardware'),
 
     
     # Funciones
@@ -44,6 +44,11 @@ urlpatterns = [
     path("api/hardware/get-adapters/", views.api_get_adapters, name="get_adapters"),
     path("api/hardware/get-relaycards/", views.api_get_relaycards, name="get_relaycards"),
     path('api/hardware/create-adapter/', views.api_create_adapter, name='create_adapter'),
+    path("api/hardware/toggle-adapter-availability/", views.api_toggle_adapter_availability, name="toggle_adapter_availability"),
+    path("api/hardware/get-adapter-availability/", views.api_get_adapter_availability, name="get_adapter_availability"),
+    path("api/hardware/toggle-fixedconnectors-availability/", views.api_toggle_fixedconnectors_availability, name="toggle_fixedconnectors_availability"),
+    path("api/hardware/get-fixedconnectors-availability/", views.api_get_fixedconnectors_availability, name="get_fixedconnectors_availability"),
+
     #path('api/hardware/get-subunit-choices/', views.api_get_sub_unit_choices, name='get_subunit_choices'),
     path('api/stage/<int:stage_id>/generate-instructions/', views.api_generate_instructions, name='generate_instructions'),
     

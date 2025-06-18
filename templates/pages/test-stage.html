@@ -241,7 +241,7 @@
           <h5 class="modal-title" id="instruccionesModalLabel">Instrucciones</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
-        <div class="modal-body" id="instrucciones-modal-body">
+        <div class="modal-body d-grid gap-3" id="instrucciones-modal-body">
           <!-- Aquí se insertan dinámicamente las instrucciones -->
         </div>
         <div class="modal-footer" id="instrucciones-modal-footer">
@@ -274,6 +274,74 @@
 <script>
 
 document.addEventListener('DOMContentLoaded', function () {
+
+  
+    function showToast(msg, type = "info") {
+      const toast = document.createElement("div");
+      toast.className = `toast align-items-center text-white bg-${type} border-0 my-1`;
+      toast.setAttribute("role", "alert");
+      toast.setAttribute("aria-live", "assertive");
+      toast.setAttribute("aria-atomic", "true");
+      toast.innerHTML = `
+        <div class="d-flex">
+          <div class="toast-body">${msg}</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>`;
+      document.getElementById("toastContainer").appendChild(toast);
+      new bootstrap.Toast(toast).show();
+      toast.addEventListener("hidden.bs.toast", () => toast.remove());
+    }
+
+    function showInlineAlert(container, message, type = "info", replace=true) {
+      const icons = {
+        info: `
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon icon-2">
+            <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path>
+            <path d="M12 9h.01"></path>
+            <path d="M11 12h1v4h1"></path>
+          </svg>`,
+        warning: `
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon icon-2">
+            <path d="M12 9v4"></path>
+            <path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z"></path>
+            <path d="M12 16h.01"></path>
+          </svg>`,
+        danger: `
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon icon-2">
+            <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path>
+            <path d="M12 8v4"></path>
+            <path d="M12 16h.01"></path>
+          </svg>`,
+        success: `
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon icon-2">
+            <path d="M5 12l5 5l10 -10"></path>
+          </svg>`
+      };
+
+      const icon = icons[type] || icons.info;
+
+      const html = `
+        <div class="alert alert-important alert-${type} alert-dismissible my-0" role="alert">
+          <div class="alert-icon">${icon}</div>
+          <div>${message}</div>
+        </div>
+      `;
+      
+      replace ? container.innerHTML = html : container.innerHTML += html;
+
+    }
+
+    function getCSRFToken() {
+      let value = null;
+      if (document.cookie) {
+        document.cookie.split(";").forEach(cookie => {
+          if (cookie.trim().startsWith("csrftoken=")) {
+            value = cookie.trim().substring("csrftoken=".length);
+          }
+        });
+      }
+      return value;
+    }
 
   
   let tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -322,9 +390,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
   isMesurable();
 
-  
-  /* 
-  //Simulacion Frontend
+  // =======================
+  // Simular prueba desde frontend
+  // =======================
+
+  /*   
   const table = new DataTable('#testTable', {
     paging: false,            // sin paginación
     searching: false,         // sin barra de búsqueda
@@ -396,111 +466,135 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
+  // =======================
+  // Generación de instrucciones
+  // =======================
+  
+  
   const startButton = document.getElementById("btn-generar-instrucciones");
-  /*
-  if(!startButton){ return }
+  
+  document.getElementById("btn-generar-instrucciones").addEventListener("click", function () {
+    const stageId = this.getAttribute("data-stage-id");
+    const modal = new bootstrap.Modal(document.getElementById("instruccionesModal"));
+    modal.show();
+
+    fetch(`/api/stage/${stageId}/generate-instructions/`)
+    .then(response => response.json())
+    .then(data => {
+      const modalBody = document.getElementById("instrucciones-modal-body");
+      const btnComenzar = document.getElementById("btn-start-test");
+      
+      modalBody.innerHTML = "";
+      btnComenzar.disabled = true;
+      btnComenzar.setAttribute("data-stage-id", stageId);
+
+      if (data.instructions && data.suggested_connector) {
+        window._suggestedConnector = data.suggested_connector;
+        data.instructions.forEach((linea, index) => {
+          const div = document.createElement("div");
+          div.className = "form-check mb-2";
+
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.className = "form-check-input";
+          checkbox.id = `instruccion-check-${index}`;
+
+          const label = document.createElement("label");
+          label.className = "form-check-label";
+          label.setAttribute("for", checkbox.id);
+          label.innerHTML = linea;
+
+          checkbox.addEventListener("change", verificarCheckboxes);
+
+          div.appendChild(checkbox);
+          div.appendChild(label);
+          modalBody.appendChild(div);
+        });
+      } else if (data.error) {
+        showInlineAlert(modalBody, data.error.join("<br>"), "danger");
+      }
+
+      if (data.disabled_connectors && data.disabled_connectors.length > 0) {
+        const mensaje = "<strong>Conectores compatibles deshabilitados:</strong><br>" +
+                        data.disabled_connectors.join("<br>");
+        showInlineAlert(modalBody, mensaje, "info", false);
+      }
+    })
+    .catch(err => {
+      //const modal = new bootstrap.Modal(document.getElementById("instruccionesModal"));
+      modal.hide();
+      showToast('Ocurrio un error al generar las instrucciones','warning')
+      //alert("Error al generar instrucciones.");
+      console.error(err);
+    });
+  });
+
+  function verificarCheckboxes() {
+    const checkboxes = document.querySelectorAll("#instrucciones-modal-body .form-check-input");
+    const btnComenzar = document.getElementById("btn-start-test");
+    const todosMarcados = Array.from(checkboxes).every(checkbox => checkbox.checked);
+    btnComenzar.disabled = !todosMarcados;
+  }
+
+
+  // =======================
+  // Correr prueba 
+  // =======================
+
+  const startTestButton = document.getElementById("btn-start-test");
+
+  if(!startTestButton || startTestButton.disabled ){ return }
   startButton.addEventListener("click", async () => {
     startButton.disabled = true;
     startButton.textContent = "Ejecutando...";
-
+    
     const rows = document.querySelectorAll("#testTable tbody[data-type='test'] tr");
     const sessionId = "{{ session.id }}";
     const stageId = "{{ stage_test.id }}";
 
     for (const row of rows) {
       const resultId = row.dataset.resultId;
-      if (!resultId) {
-        console.warn("Fila sin resultId, se omite");
+      const { adapter_cnt_category, adapter_cnt_id } = window._suggestedConnector;
+      if (!resultId || !adapter_cnt_category || !adapter_cnt_id) {
+        console.warn("Fila sin resultId en dataset o sin categoría de adapter o sin adapterId");
         continue;
-      }
-    
-      const response = await fetch("{% url 'run_test_stage' %}", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": "{{ csrf_token }}"
-        },
-        body: JSON.stringify({ result_id: resultId })
-      });
-    
-      const data = await response.json();
-    
-      if (data.success) {
-        row.querySelector(".cell-measured").textContent = data.measured;
-        const badgeClass = data.result === "pass" ? "text-green" : "text-red";
-        row.querySelector(".cell-result").innerHTML = `<span class="badge badge-outline ${badgeClass}">${data.result_display}</span>`;
-        row.querySelector(".cell-time").textContent = data.timestamp;
-      } else {
-        console.error("Error al medir:", data.message);
-      }
-    }
-    
-
-    // Actualizar status visual
-    document.querySelector("#stageStatusContainer").innerHTML = `
-      <span class="status status-success">
-        <span class="status-dot"></span> Terminado
-      </span>`;
-    document.querySelector("#btnStartTestContainer").innerHTML = "";
-    table.draw();
-  });*/
-
-
-
-    document.getElementById("btn-generar-instrucciones").addEventListener("click", function () {
-      const stageId = this.getAttribute("data-stage-id");
-
-      fetch(`/api/stage/${stageId}/generate-instructions/`)
-        .then(response => response.json())
-        .then(data => {
-          const instrucciones = data.instructions;
-          const modalBody = document.getElementById("instrucciones-modal-body");
-          const btnComenzar = document.getElementById("btn-start-test");
-
-          // Resetear contenido
-          modalBody.innerHTML = "";
-          btnComenzar.disabled = true;  // Siempre empezar deshabilitado
-          btnComenzar.setAttribute("data-stage-id", stageId); // Actualizar ID por si cambió
-
-          // Crear instrucciones con checkboxes
-          instrucciones.forEach((linea, index) => {
-            const div = document.createElement("div");
-            div.className = "form-check mb-2";
-
-            const checkbox = document.createElement("input");
-            checkbox.type = "checkbox";
-            checkbox.className = "form-check-input";
-            checkbox.id = `instruccion-check-${index}`;
-
-            const label = document.createElement("label");
-            label.className = "form-check-label";
-            label.setAttribute("for", checkbox.id);
-            label.textContent = linea;
-
-            checkbox.addEventListener("change", verificarCheckboxes);
-
-            div.appendChild(checkbox);
-            div.appendChild(label);
-            modalBody.appendChild(div);
-          });
-
-          // Mostrar modal
-          const modal = new bootstrap.Modal(document.getElementById("instruccionesModal"));
-          modal.show();
-        })
-        .catch(err => {
-          alert("Error al generar instrucciones.");
-          console.error(err);
+        }
+        
+        const response = await fetch("{% url 'run_test_stage' %}", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+          },
+          body: JSON.stringify({ 
+            result_id: resultId,
+            connector_category: adapter_cnt_category,  // fixed ó adapter
+            connector_id: adapter_cnt_id
+          })
         });
-    });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          row.querySelector(".cell-measured").textContent = data.measured;
+          const badgeClass = data.result === "pass" ? "text-green" : "text-red";
+          row.querySelector(".cell-result").innerHTML = `<span class="badge badge-outline ${badgeClass}">${data.result_display}</span>`;
+          row.querySelector(".cell-time").textContent = data.timestamp;
+          } else {
+            console.error("Error al medir:", data.message);
+            }
+            }
+            
+            
+            // Actualizar status visual
+            document.querySelector("#stageStatusContainer").innerHTML = `
+            <span class="status status-success">
+              <span class="status-dot"></span> Terminado
+            </span>`;
+            document.querySelector("#btnStartTestContainer").innerHTML = "";
+            table.draw();
+  });
 
-    function verificarCheckboxes() {
-      const checkboxes = document.querySelectorAll("#instrucciones-modal-body .form-check-input");
-      const btnComenzar = document.getElementById("btn-start-test");
-
-      const todosMarcados = Array.from(checkboxes).every(checkbox => checkbox.checked);
-      btnComenzar.disabled = !todosMarcados;
-    }
 
 
 });

@@ -107,12 +107,13 @@ class TestResult(models.Model):
         return f"{self.signal_name}: {self.result}"
     
     
-class ConnectionConfig(models.Model):
-    """Placa PXI con canales de relé."""
-    ip_port = models.CharField(max_length=50, unique=True)  # ej. "tcp://10.245.1.103:9194"
-    
+class GlobalConfig(models.Model):
+    """Configuración global clave-valor."""
+    key = models.CharField(max_length=50, unique=True)  # ej: "relay_card_ip"
+    value = models.CharField(max_length=200, blank=True, null=True)
+
     def __str__(self):
-        return self.ip_port
+        return f"{self.key}: {self.value}"
 
         
 class RelayCard(models.Model):
@@ -174,6 +175,7 @@ class RelayPinMap(models.Model):
 
 class Adapter(models.Model):
     name = models.CharField(max_length=100, unique=True)
+    availability = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name

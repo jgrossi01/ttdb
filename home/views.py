@@ -7,12 +7,13 @@ from django.apps import apps
 from django.conf import settings
 from django.db import transaction, IntegrityError
 from django.utils import timezone
-from home.utils import get_mapping_or_error, find_opposite_sex_connectors
+from django.urls import reverse
+from home.utils import get_mapping_or_error, find_compatible_connectors
 from .models import *
 from .models_harness import Conexiones
 from django_eventstream import send_event
 from datetime import datetime
-#from .hardware.commander import Commander
+from .hardware.commander import Commander
 
 import pyodbc
 import sqlite3
@@ -22,6 +23,7 @@ import json
 import uuid
 import shutil
 import random
+import re
 
 
 def index(request):
@@ -346,7 +348,6 @@ def get_letter_to_number_mapping():
     return letter_to_number
 
 LETTER_TO_NUMBER = get_letter_to_number_mapping()
-
 
 def expand_values(value):
     expanded = []
@@ -698,23 +699,193 @@ def run_test_stage(request):
 
     try:
         data = json.loads(request.body)
+        
+        config = get_ip_port_config()
+        ip_port = config["ip_port"]
+        
+        if not ip_port:
+            return JsonResponse({
+                "success": False,
+                "message": "No se encontró configuración de IP y puerto."
+            }, status=400)
 
         result_test = get_object_or_404(TestResult, id=data.get("result_id"))
-        stage_test = result_test.stage
-        session = stage_test.session
+        stage = result_test.stage        
+        session = stage.session
+        test_type = session.test_type
+        connector_label = session.connector
+        connector_type_str = session.connector_type
+        connector_dest = stage.connector_dest
+        connector_dest_type = stage.connector_type
 
         if not result_test:
             return JsonResponse({"success": False, "message": "Resultado de prueba no encontrado."}, status=404)
+        
+        test_type = session.test_type
+        pin_a = result_test.pin_a
+        pin_b = result_test.pin_b
 
-        # Simular medición
+        min_val = float(result_test.min_exp_value or 0)
+        max_val = float("inf") if result_test.max_exp_value == "OL" else float(result_test.max_exp_value or 0)
+        
+        
+        relay1 = RelayCard.objects.get(id=1)
+        relay2 = RelayCard.objects.get(id=2)
+
+        id_1, bus_1, dev_1 = relay1.id, relay1.bus, relay1.device
+        id_2, bus_2, dev_2 = relay2.id, relay2.bus, relay2.device
+        
+        cmder = Commander(ip_port, 5000) #IP de PC pxi. Placa local en 10.245.1.100 misma mascara y puerta de enlace
+        
+        print("[RUN-TEST DEBUG]:", cmder.pik_open(id_1,bus_1,dev_1))
+        print("[RUN-TEST DEBUG]:", cmder.pik_open(id_2,bus_2,dev_2))
+        
+        print("[RUN-TEST DEBUG]:", cmder.pik_clear_card(id_1))
+        print("[RUN-TEST DEBUG]:", cmder.pik_clear_card(id_2))
+
+        if test_type == "Pin a chasis":
+            # Determinar qué pin se debe activar según el conector
+            if result_test.conector_orig == session.connector:
+                pin_to_test = pin_a
+            elif result_test.conector_dest == session.connector:
+                pin_to_test = pin_b
+            else:
+                return JsonResponse({
+                    "success": False,
+                    "message": f"Error: El conector \"{session.connector}\" no coincide con los conectores de la de prueba."
+                }, status=400)
+            
+            # Obtener conectores compatibles
+            usable, disabled_adapters, disabled_fixed = find_compatible_connectors(connector_type_str, 'input')
+
+            deshabilitados_info = []
+            for cat, obj, tipo_base, flags, adapter_name in disabled_adapters + disabled_fixed:
+                if cat == 'fixed':
+                    deshabilitados_info.append(
+                        f"Fijo: {obj.label} ({obj.connector_type})"
+                    )
+                else:
+                    deshabilitados_info.append(
+                        f"Adaptador: {adapter_name} → {obj.label} ({obj.connector_type})"
+                    )
+
+            if not usable:
+                if deshabilitados_info:
+                    return JsonResponse({
+                        "success": False,
+                        "message": [f"Error: No se encontró ningún conector habilitado para \"{connector_label} <strong>({connector_type_str})</strong>\"."],
+                        "disabled_connectors": deshabilitados_info
+                    })
+                else:
+                    return JsonResponse({
+                        "success": False,
+                        "message": [f"Error: No se encontró ningún conector compatible para \"{connector_label} <strong>({connector_type_str})</strong>\"."],
+                        "disabled_connectors": deshabilitados_info
+                    })
+                    
+            # Tomar el primer candidato usable
+            categoria, conector_obj, tipo_compatible_base, flags, adapter_name = usable[0]
+            
+            # Verificar mapping de pines
+            pines_invalidos = []
+
+            mapping_result = get_mapping_or_error(conector_obj, pin_to_test)
+            if not mapping_result:
+                pines_invalidos.append(pin_to_test)
+
+            if pines_invalidos:
+                if categoria == 'adapter':
+                    adapter = conector_obj.adapter
+                    url = request.build_absolute_uri(reverse("adapter_connections_view", args=[adapter.id]))
+                    return JsonResponse({
+                        "success": False,
+                        "message": [
+                            f"Error: El conector a utilizar [{conector_obj.label}] ({conector_obj.connector_type}) del adaptador \"{adapter.name}\" no tiene la configuración de mapeo necesaria.",
+                            f'Revisa la configuración en: <a href="{url}" target="_blank">{url}</a>'
+                        ]
+                    })
+                else:
+                    return JsonResponse({
+                        "success": False,
+                        "message": [
+                            f"Error: El conector a utilizar {conector_obj.label} ({conector_obj.connector_type}) no tiene la configuración de mapeo necesaria."
+                        ]
+                    })
+                
+            relay_card_id, pxi_channel = mapping_result
+            
+            print("[RUN-TEST DEBUG]:", cmder.pik_op_bit(relay_card_id,"7","1","1"))
+            print("[RUN-TEST DEBUG]:", cmder.pik_op_bit(relay_card_id,"3",pxi_channel,"1"))
+            
+            
+            
+                
+
+            # Simulación de lectura (reemplazar por: measured_value = multimeter.measure())
+            measured_value = random.choice([random.randint(0, 500000000), "OL"])            
+
+            if measured_value == "OL":
+                result_status = "pass"
+            else:
+                result_status = "pass" if min_val <= measured_value <= max_val else "fail"
+                                
+
+        elif test_type == "Pin a otros":
+            # Activar pin_a
+            #relay.activate(pin_a)
+
+            # Simulación de lectura (reemplazar por: measured_value = multimeter.measure())
+            measured_value = random.choice([random.randint(0, 500000000), "OL"])
+
+            #relay.deactivate(pin_a)
+
+            result_status = "pass" if min_val <= measured_value <= max_val else "fail"
+
+        elif test_type == "Entre par de pines":
+            # Activar ambos pines
+            #relay.activate(pin_a)
+            #relay.activate(pin_b)
+
+            # Simulación de lectura (reemplazar por: measured_value = multimeter.measure())
+            measured_value = random.choice([random.randint(0, 500000000), "OL"])
+
+            #relay.deactivate(pin_a)
+            #relay.deactivate(pin_b)
+
+            result_status = "pass" if min_val <= measured_value <= max_val else "fail"
+
+        elif test_type == "Pin a pin":
+            # Activar pin_a
+            #relay.activate(pin_a)
+
+            # Simulación de lectura (reemplazar por: measured_value = multimeter.measure())
+            measured_value = random.choice([random.randint(0, 500000000), "OL"])
+
+            #relay.deactivate(pin_a)
+
+            result_status = "pass" if min_val <= measured_value <= max_val else "fail"
+
+        else:
+            raise ValueError(f"Tipo de prueba no soportado: {test_type}")
+
+
+        """  # Simular medición
         measured_value = random.choice([random.randint(0, 500000000), "OL"])
         min_val = float(result_test.min_exp_value or 0)
         max_val = float("inf") if result_test.max_exp_value == "OL" else float(result_test.max_exp_value or 0)
+        # Fin simulacion prueba
 
+        # Esto solo aplica para el tipo de prueba "Pin to chasis" aca iria un if por cada tipo de prueba 
         if measured_value == "OL":
             result_status = "pass"
         else:
-            result_status = "pass" if min_val <= measured_value <= max_val else "fail"
+            result_status = "pass" if min_val <= measured_value <= max_val else "fail" """
+            
+            
+        """ Fin zona de deteccion y logica por cada de tipo de prueba  """
+        
+        print("[RUN-TEST DEBUG]:", cmder.pik_close(id_1))
+        print("[RUN-TEST DEBUG]:", cmder.pik_close(id_2))
 
         timestamp = timezone.now()
 
@@ -725,9 +896,9 @@ def run_test_stage(request):
         result_test.save()
 
         # Marcar etapa como completada si ya no hay pendientes
-        if not TestResult.objects.filter(stage=stage_test, result="pending").exists():
-            stage_test.status = "completed"
-            stage_test.save()
+        if not TestResult.objects.filter(stage=stage, result="pending").exists():
+            stage.status = "completed"
+            stage.save()
 
         # Si al menos un stage se completó, la sesión pasa a "in_progress"
         if session.status == "pending":
@@ -787,53 +958,90 @@ def test_result_view(request, session_id):
     return render(request, "pages/test-result.html", context)
 
 
-'''
-@require_GET
+
 def test_hardware(request):
-    # Parámetros fijos por ahora (luego los podés tomar del request)
+    cmder = Commander("tcp://10.245.1.103:9194", 5000)  # IP de PC PXI
     card = 1
     bus = 25
     dev = 8
 
-    commander = Commander("tcp://10.245.1.103:9194", 5000) 
+    log = []  # Para registrar los resultados de cada comando
+
     try:
-       
-        
-        
-        success, result =  commander.pik_op_bit("1","7","1","1")
-        if success:
+        res_open = cmder.pik_open(card, bus, dev)
+        log.append({"comando": "pik_open", "resultado": res_open})
+
+        # Si el resultado es False y NO contiene "Already Open", detener con error
+        if isinstance(res_open, (list, tuple)):
+            success, mensaje = res_open
+            if not success and "Already Open" not in str(mensaje):
+                return JsonResponse({
+                    "status": "error",
+                    "message": "Error al intentar iniciar la conexión con la placa",
+                    "detalle": mensaje,
+                    "log": log
+                }, status=500)
+        else:
+            # En caso de que `pik_open` no devuelva una tupla (por seguridad)
+            return JsonResponse({
+                "status": "error",
+                "message": "Formato de respuesta inesperado al intentar iniciar la conexión con la placa",
+                "log": log
+            }, status=500)
+
+        res_clear = cmder.pik_clear_card('1')
+        log.append({"comando": "pik_clear_card", "resultado": res_clear})
+
+        success1, result1 = cmder.pik_op_bit("1", "3", "1", "1")
+        log.append({
+            "comando": 'pik_op_bit("1", "3", "1", "1")',
+            "success": success1,
+            "resultado": result1
+        })
+
+        success2, result2 = cmder.pik_op_bit("1", "7", "1", "1")
+        log.append({
+            "comando": 'pik_op_bit("1", "7", "1", "1")',
+            "success": success2,
+            "resultado": result2
+        })
+
+        if success2:
             return JsonResponse({
                 "status": "ok",
                 "message": "Conexión exitosa con la placa.",
-                "result": result,
-                "success": success
+                "log": log
             })
         else:
             return JsonResponse({
                 "status": "error",
                 "message": "Falló la comunicación con la placa.",
-                "result": result
+                "log": log
             }, status=500)
-        
+
     except Exception as e:
+        log.append({"comando": "error", "resultado": str(e)})
         return JsonResponse({
             "status": "error",
-            "message": f"Error inesperado: {str(e)}"
+            "message": f"Error inesperado: {str(e)}",
+            "log": log
         }, status=500)
-'''
+
 
 
 def hardware(request):
+    ip_config = GlobalConfig.objects.filter(key="ip_port").first()
     context = {
         'parent': '',
         'segment': 'hardware',
-        'connection_config': ConnectionConfig.objects.first()
+        'connection_config': ip_config  # esto sigue funcionando en el template
     }
     return render(request, 'pages/hardware-admin.html', context)
 
 
 @csrf_exempt
 def api_save_hardware_edit(request):
+
     if request.method == "POST":
         try:
             data = json.loads(request.body)
@@ -941,13 +1149,16 @@ def api_get_relaycards(request):
     return JsonResponse({"data": data})
 
 
-@csrf_exempt
-def api_get_connection_config(request):
-    config = ConnectionConfig.objects.first()
-    data = {
-        "ip_port": config.ip_port if config else "",
+def get_ip_port_config():
+    config = GlobalConfig.objects.filter(key="ip_port").first()
+    return {
+        "ip_port": config.value if config else "",
         "id": config.id if config else None
     }
+
+
+def api_get_connection_config(request):
+    data = get_ip_port_config()
     return JsonResponse(data)
 
 
@@ -1186,6 +1397,51 @@ def api_create_adapterconnector(request):
         except Exception as e:
             return JsonResponse({"message": str(e), "type": "danger"}, status=500)
 
+@csrf_exempt
+def api_toggle_adapter_availability(request):
+    try:
+        data = json.loads(request.body)
+        adapter_id = data.get("adapter_id")
+        adapter = Adapter.objects.get(id=adapter_id)
+
+        adapter.availability = not adapter.availability
+        adapter.save()
+
+        return JsonResponse({"success": True, "new_value": adapter.availability})
+    except Adapter.DoesNotExist:
+        return JsonResponse({"success": False, "message": "Adaptador no encontrado"}, status=404)
+    except Exception as e:
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+@csrf_exempt
+def api_get_adapter_availability(request):
+    adapter_id = request.GET.get("id")
+    try:
+        adapter = Adapter.objects.get(id=adapter_id)
+        return JsonResponse({"success": True, "value": adapter.availability})
+    except Adapter.DoesNotExist:
+        return JsonResponse({"success": False, "message": "Adaptador no encontrado"}, status=404)
+
+
+def api_get_fixedconnectors_availability(request):
+    config = GlobalConfig.objects.filter(key="fixedconnectors_availability").first()
+    is_enabled = config.value == "1" if config else False
+    return JsonResponse({"enabled": is_enabled})
+
+
+def api_toggle_fixedconnectors_availability(request):
+    from django.views.decorators.csrf import csrf_exempt
+    import json
+
+    data = json.loads(request.body)
+    enabled = data.get("enabled", False)
+
+    config, _ = GlobalConfig.objects.get_or_create(key="fixedconnectors_availability")
+    config.value = "1" if enabled else "0"
+    config.save()
+
+    return JsonResponse({"success": True, "enabled": enabled})
+
 
 def api_adapterpinmap_bulk_update(request):
     try:
@@ -1235,304 +1491,335 @@ def api_adapterpinmap_bulk_update(request):
 def api_generate_instructions(request, stage_id):
     try:
         stage = TestStage.objects.select_related('session').prefetch_related('results').get(id=stage_id)
-    except ObjectDoesNotExist:
-        return JsonResponse({"instructions": ["Error: La etapa especificada no existe."]})
+    except TestStage.DoesNotExist:
+        return JsonResponse({"error": ["Error: La etapa especificada no existe."]})
 
     if stage.stage_type != 'test':
-        return JsonResponse({"instructions": ["Error: Solo se pueden generar instrucciones para etapas de tipo 'test'."]})
+        return JsonResponse({"error": ["Error: Solo se pueden generar instrucciones para etapas de tipo 'test'."]})
 
     session = stage.session
     test_type = session.test_type
-    connector_label = session.connector  # Ej: "DUT1"
-    connector_type_str = session.connector_type  # Ej: "DB15M"
+    connector_label = session.connector
+    connector_type_str = session.connector_type
     connector_dest = stage.connector_dest
     connector_dest_type = stage.connector_type
 
-    instructions = []
-
     if test_type == 'Pin a chasis':
-        candidatos = find_opposite_sex_connectors(connector_type_str)
-        if not candidatos:
-            return JsonResponse({
-                "instructions": [f"Error: No se encontró ningún conector compatible para '{connector_type_str}' (sexo opuesto)."]
-            })
+        # Obtener conectores compatibles
+        usable, disabled_adapters, disabled_fixed = find_compatible_connectors(connector_type_str, 'input')
 
-        for tipo_con, conector_obj, tipo_compatible_base, requiere_extensor in candidatos:
-            pines_invalidos = []
-            for result in stage.results.all():
-                pin = result.pin_b  # En este tipo de prueba, el DUT está en pin_b
-                mapeo = get_mapping_or_error(conector_obj, pin)
-                if not mapeo:
-                    pines_invalidos.append(pin)
-            if not pines_invalidos:
-                if tipo_con == 'fixed':
-                    msg1 = (
-                        f"Conecte [{connector_label} ({connector_type_str})] en "
-                        f"[{conector_obj.label} ({conector_obj.connector_type})]"
-                    )
-                else:
-                    adapter = conector_obj.adapter
-                    msg1 = (
-                        f"Utilice el adaptador {adapter.name} para conectar "
-                        f"[{connector_label} ({connector_type_str})] en "
-                        f"[{conector_obj.label} ({conector_obj.connector_type})]"
-                    )
-                    if tipo_compatible_base != connector_type_str[:2]:
-                        msg1 += " utilizando un extender DB a DD"
-
-                msg2 = (
-                    f"Conecte una punta del tester en Monitor 1 y la otra punta en la carcasa (GND) "
-                    f"del conector [{connector_dest} ({connector_dest_type})]"
+        # Conectores deshabilitados (preparamos por si los necesitamos)
+        deshabilitados_info = []
+        for cat, obj, tipo_base, flags, adapter_name in disabled_adapters + disabled_fixed:
+            if cat == 'fixed':
+                deshabilitados_info.append(
+                    f"Fijo: {obj.label} ({obj.connector_type})"
+                )
+            else:
+                deshabilitados_info.append(
+                    f"Adaptador: {adapter_name} → {obj.label} ({obj.connector_type})"
                 )
 
-                return JsonResponse({"instructions": [msg1, msg2]})
+        if not usable:
+            if deshabilitados_info:
+                return JsonResponse({
+                    "error": [f"Error: No se encontró ningún conector habilitado para \"{connector_label} <strong>({connector_type_str})</strong>\"."],
+                    "disabled_connectors": deshabilitados_info
+                })
+            else:
+                return JsonResponse({
+                    "error": [f"Error: No se encontró ningún conector compatible para \"{connector_label} <strong>({connector_type_str})</strong>\"."],
+                    "disabled_connectors": deshabilitados_info
+                })
+            
+
+        # Tomar el primer candidato usable
+        categoria, conector_obj, tipo_compatible_base, flags, adapter_name = usable[0]
+
+        # Verificar mapping de pines
+        pines_invalidos = []
+        for result in stage.results.all():
+            if result.conector_orig == connector_label:
+                pin = result.pin_a
+            elif result.conector_dest == connector_label:
+                pin = result.pin_b
+            else:
+                continue
+
+            mapeo = get_mapping_or_error(conector_obj, pin)
+            if not mapeo:
+                pines_invalidos.append(pin)
+
+        if pines_invalidos:
+            if categoria == 'adapter':
+                adapter = conector_obj.adapter
+                url = request.build_absolute_uri(reverse("adapter_connections_view", args=[adapter.id]))
+                return JsonResponse({
+                    "error": [
+                        f"Error: El conector a utilizar [{conector_obj.label}] ({conector_obj.connector_type}) del adaptador \"{adapter.name}\" no tiene la configuración de mapeo necesaria.",
+                        f'Revisa la configuración en: <a href="{url}" target="_blank">{url}</a>'
+                    ]
+                })
+            else:
+                return JsonResponse({
+                    "error": [
+                        f"Error: El conector a utilizar {conector_obj.label} ({conector_obj.connector_type}) no tiene la configuración de mapeo necesaria."
+                    ]
+                })
+                
+        connector_payload = {
+            "category": categoria,                            # "fixed" o "adapter"
+            "id": conector_obj.id,                            # la PK
+            "label": conector_obj.label,
+            "connector_type": conector_obj.connector_type
+        }
+
+        # Construcción del mensaje de instrucción
+        if categoria == 'fixed':
+            msg1 = (
+                f"Conecte <span class=\"text-azure\">[{connector_label} ({connector_type_str})]</span> en "
+                f"<span class=\"text-azure\">[{conector_obj.label} ({conector_obj.connector_type})]</span>"
+            )
+        else:
+            msg1 = (
+                f"Utilice el adaptador \"{adapter_name}\". Conecte <span class=\"text-azure\">[{connector_label} ({connector_type_str})]</span> en "
+                f"<span class=\"text-azure\">[{conector_obj.label} ({conector_obj.connector_type})]</span>"
+            )
+
+        if flags.get('extender') and flags.get('cambiador_sexo'):
+            msg1 += " utilizando un cambiador de sexo y un extender DB a DD"
+        elif flags.get('extender'):
+            msg1 += " utilizando un extender DB a DD"
+        elif flags.get('cambiador_sexo'):
+            msg1 += " utilizando un cambiador de sexo"
+
+        msg2 = (
+            f"Conecte una punta del tester en <span class=\"text-azure\">Monitor 1</span> y la otra punta en la carcasa (GND) "
+            f"del conector <span class=\"text-azure\">[{connector_dest} ({connector_dest_type})]</span>"
+        )
 
         return JsonResponse({
-            "instructions": ["Error: Ningún conector compatible tiene mapeos completos para los pines requeridos."]
+            "instructions": [msg1, msg2],
+            "disabled_connectors": deshabilitados_info,
+            "suggested_connector": connector_payload
         })
 
     elif test_type == 'Pin a otros':
-        return JsonResponse({"instructions": ["Error: Generación de instrucciones para 'Pin a otros' no implementada aún."]})
+        return JsonResponse({"error": ["Error: Generación de instrucciones para 'Pin a otros' no implementada aún."]})
 
     elif test_type == 'Entre par de pines':
-        return JsonResponse({"instructions": ["Error: Generación de instrucciones para 'Entre par de pines' no implementada aún."]})
+        return JsonResponse({"error": ["Error: Generación de instrucciones para 'Entre par de pines' no implementada aún."]})
 
     elif test_type == 'Pin a pin':
-        return JsonResponse({"instructions": ["Error: Generación de instrucciones para 'Pin a pin' no implementada aún."]})
+        return JsonResponse({"error": ["Error: Generación de instrucciones para 'Pin a pin' no implementada aún."]})
 
-    return JsonResponse({"instructions": [f"Error: Tipo de prueba desconocido '{test_type}'."]})
+    return JsonResponse({"error": [f"Error: Tipo de prueba desconocido '{test_type}'."]})
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-""" @csrf_exempt
-def api_create_physical_connector(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            adapter_id = data.get("adapter_id")
-            label = data.get("label", "").strip()
-            connector_type = data.get("connector_type", "").strip()
-            pin_qty = data.get("pin_qty")
-            connector_side = data.get("connector_side", "pxi-side")
-            
-            if not adapter_id or not connector_type or not label or not pin_qty:
-                return JsonResponse({"type": "warning", "message": "Todos los campos son obligatorios."}, status=400)
-            
-            if connector_side not in [choice[0] for choice in PhysicalConnector.CONNECTOR_SIDE_CHOICES]:
-                return JsonResponse({
-                    "type": "warning",
-                    "message": f"Ubicación de conector inválida: {connector_side}"
-                })
-                
-            try:
-                pin_qty = int(pin_qty)
-                if pin_qty <= 0:
-                    raise ValueError()
-            except ValueError:
-                return JsonResponse({
-                    "type": "warning",
-                    "message": "La cantidad de pines debe ser un número entero positivo."
-                })
-                
-            try:
-                adapter = Adapter.objects.get(pk=adapter_id)
-            except Adapter.DoesNotExist:
-                return JsonResponse({
-                    "type": "warning",
-                    "message": "Adaptador no encontrado."
-                })
-
-
-            if PhysicalConnector.objects.filter(adapter=adapter, label__iexact=label).exists():
-                return JsonResponse({"message": "Este adaptador ya tiene un conector con esa etiqueta.", "type": "warning"}, status=400)
-
-            connector = PhysicalConnector.objects.create(
-                adapter=adapter,
-                connector_type=connector_type,
-                label=label,
-                pin_qty=pin_qty,
-                connector_side=connector_side
-            )
-            
-                
-            return JsonResponse({
-                "type": "success",
-                "message": "Conector creado correctamente.",
-                "id": connector.id
-            })
-
-        except Exception as e:
-            return JsonResponse({"message": str(e), "type": "danger"}, status=500)
-        
-
-
-
-        
-@csrf_exempt
-def api_check_connector_label(request):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        adapter_id = data.get("adapter_id")
-        label = data.get("label", "").strip()
-        connector_id = data.get("id")  # el id actual (evita validarse contra sí mismo)
-
-        if not adapter_id or not label:
-            return JsonResponse({"exists": False})
-
-        from home.models import PhysicalConnector
-
-        exists = PhysicalConnector.objects.filter(
-            adapter_id=adapter_id,
-            label__iexact=label
-        ).exclude(id=connector_id).exists()
-
-        return JsonResponse({"exists": exists})
-
-    return JsonResponse({"error": "Método no permitido"}, status=405)
-
-def adapter_connections_view(request, id):
-    try:
-        adapter = apps.get_model("home", "Adapter").objects.get(pk=id)
-    except apps.get_model("home", "Adapter").DoesNotExist:
-        return redirect("new_adapter_view")
-    return render(request, "pages/adapter-connections.html", {"adapter": adapter})
-
-def api_list_adapterpinmap(request):
-    
-    adapter_id = request.GET.get("adapter")
-    qs = apps.get_model("home", "AdapterPinMap").objects.filter(adapter_id=adapter_id)
-    data = []
-    for m in qs:
-        data.append({
-            "id": m.id,
-            "pxi_connector": f"{m.pxi_connector.label} ({m.pxi_connector.connector_type})",
-            "to_pxi_pin": m.to_pxi_pin,
-            "pxi_channel_type": m.get_pxi_channel_type_display(),
-            "pxi_channel": m.pxi_channel,
-            "relay_card": m.relay_card.id if m.relay_card else None,
-            "relay_card_name": m.relay_card.name if m.relay_card else "",
-            "test_connector": m.test_connector.id if m.test_connector else None,
-            "test_connector_display": (
-                f"{m.test_connector.label} ({m.test_connector.connector_type})"
-                if m.test_connector else ""
-            ),
-            "to_test_pin": m.to_test_pin,
-        })
-    return JsonResponse({"data": data})
 
 @csrf_exempt
-def api_save_adapterpinmap(request):
+def run_test_stage(request):
     if request.method != "POST":
-        return JsonResponse({"error": "Método no permitido"}, status=405)
+        return JsonResponse({"success": False, "message": "Método no permitido"}, status=405)
 
-    data = json.loads(request.body)
-    field, val, obj_id = data['field'], data['value'], data['id']
-    Model = apps.get_model("home", "AdapterPinMap")
-    instance = get_object_or_404(Model, pk=obj_id)
-
-    # Conversión de FKs
-    if field in ('relay_card', 'test_connector'):
-        fk_model = 'RelayCard' if field == 'relay_card' else 'PhysicalConnector'
-        val = apps.get_model('home', fk_model).objects.get(pk=val) if val is not None else None
-        
-    if field == 'pxi_channel_type' and not val:
-        val = None
-
-    setattr(instance, field, val)
     try:
-        instance.full_clean()
-        instance.save()
-        return JsonResponse({"success": True})
-    except ValidationError as e:
-        # devolvemos único mensaje de error
-        msg = e.message_dict.get(field, e.messages)[0]
-        return JsonResponse({"error": msg}, status=400)
-    except IntegrityError:
-        return JsonResponse({"error": "Combinación duplicada"}, status=400)
-    
-@csrf_exempt
-def adapterpinmap_bulk_update(request):
-    import json
-    from django.core.exceptions import ValidationError
-    data = json.loads(request.body)
-    ids = data.get('ids', [])
-    fields = data.get('fields', {})
+        data = json.loads(request.body)
+        
+        config = get_ip_port_config()
+        ip_port = config["ip_port"]
+        
+        if not ip_port:
+            return JsonResponse({
+                "success": False,
+                "message": "No se encontró configuración de IP y puerto."
+            }, status=400)
 
-    if not ids or not isinstance(ids, list):
-        return JsonResponse({'error': 'IDs inválidos'}, status=400)
+        result_test = get_object_or_404(TestResult, id=data.get("result_id"))
+        stage = result_test.stage        
+        session = stage.session
+        test_type = session.test_type
+        pin_a = result_test.pin_a
+        pin_b = result_test.pin_b
+        connector_label = session.connector
+        connector_type_str = session.connector_type
+        connector_dest = stage.connector_dest
+        connector_dest_type = stage.connector_type
+        
+        suggested_connector_id = data.get("connector_category")
+        suggested_connector_category = data.get("connector_category")
+        if suggested_connector_category == "fixed":
+            suggested_conector_obj = get_object_or_404(FixedConnector, id=suggested_connector_id)
+        else:
+            suggested_conector_obj = get_object_or_404(AdapterConnector, id=suggested_connector_id)
+        
 
-    qs = AdapterPinMap.objects.filter(id__in=ids)
+        if not result_test:
+            return JsonResponse({"success": False, "message": "Resultado de prueba no encontrado."}, status=404)
+        
+        if not suggested_conector_obj:
+            return JsonResponse({"success": False, "message": "Ocurrio un error al obtener el conector lado PXI a utilizar."}, status=404)
+                
+        
+        relay1 = RelayCard.objects.get(id=1)
+        relay2 = RelayCard.objects.get(id=2)
 
-    allowed_fields = ['relay_card', 'test_connector', 'pxi_channel_type']
-    update_fields = {f: v for f, v in fields.items() if f in allowed_fields}
+        id_1, bus_1, dev_1 = relay1.id, relay1.bus, relay1.device
+        id_2, bus_2, dev_2 = relay2.id, relay2.bus, relay2.device
+        
+        cmder = Commander(ip_port, 5000) #IP de PC pxi. Placa local en 10.245.1.100 misma mascara y puerta de enlace
+        
+        print("[RUN-TEST DEBUG]:", cmder.pik_open(id_1,bus_1,dev_1))
+        print("[RUN-TEST DEBUG]:", cmder.pik_open(id_2,bus_2,dev_2))
+        
+        print("[RUN-TEST DEBUG]:", cmder.pik_clear_card(id_1))
+        print("[RUN-TEST DEBUG]:", cmder.pik_clear_card(id_2))
 
-    errors = []
-
-    for obj in qs:
-        # Cambios dependientes
-        relay_card_changed = 'relay_card' in update_fields
-        test_connector_changed = 'test_connector' in update_fields
-
-        for field, val in update_fields.items():
-            if field in ['relay_card', 'test_connector']:
-                if val is None or val == 'undefined':
-                    setattr(obj, field, None)
-                else:
-                    Model = RelayCard if field == 'relay_card' else PhysicalConnector
-                    try:
-                        related_obj = Model.objects.get(id=val)
-                        setattr(obj, field, related_obj)
-                    except Model.DoesNotExist:
-                        continue
+        if test_type == "Pin a chasis":
+            min_val = float(result_test.min_exp_value or 0)
+            max_val = float("inf") if result_test.max_exp_value == "OL" else float(result_test.max_exp_value or 0)
+            # Determinar qué pin se debe activar según el conector
+            if result_test.conector_orig == session.connector:
+                pin_to_test = pin_a
+            elif result_test.conector_dest == session.connector:
+                pin_to_test = pin_b
             else:
-                setattr(obj, field, val if val else None)
+                return JsonResponse({
+                    "success": False,
+                    "message": f"Error: El conector \"{session.connector}\" no coincide con los conectores de la de prueba."
+                }, status=400)
 
-        # Limpiar campos dependientes manualmente si cambió el FK
-        if relay_card_changed:
-            obj.pxi_channel = None
-        if test_connector_changed:
-            obj.to_test_pin = None
+            mapping_result = get_mapping_or_error(suggested_conector_obj, pin_to_test)
+                
+            relay_card_id, pxi_channel = mapping_result
+            
+            print("[RUN-TEST DEBUG]:", cmder.pik_op_bit(relay_card_id,"7","1","1"))
+            print("[RUN-TEST DEBUG]:", cmder.pik_op_bit(relay_card_id,"3",pxi_channel,"1"))
+            
+            
+            # Simulación de lectura (reemplazar por: measured_value = multimeter.measure())
+            measured_value = random.choice([random.randint(0, 500000000), "OL"])            
 
-        try:
-            obj.full_clean()
-            obj.save()
-        except ValidationError as ve:
-            error_text = '; '.join([f"{k}: {', '.join(v)}" for k, v in ve.message_dict.items()])
-            errors.append({'id': obj.id, 'error': error_text})
+            if measured_value == "OL":
+                result_status = "pass"
+            else:
+                result_status = "pass" if min_val <= measured_value <= max_val else "fail"
+                                
 
-    if errors:
-        return JsonResponse({'status': 'partial', 'errors': errors}, status=400)
+        elif test_type == "Pin a otros":
+            # Activar pin_a
+            #relay.activate(pin_a)
 
-    return JsonResponse({'status': 'ok'}) """
+            # Simulación de lectura (reemplazar por: measured_value = multimeter.measure())
+            measured_value = random.choice([random.randint(0, 500000000), "OL"])
+
+            #relay.deactivate(pin_a)
+
+            result_status = "pass" if min_val <= measured_value <= max_val else "fail"
+
+        elif test_type == "Entre par de pines":
+            # Activar ambos pines
+            #relay.activate(pin_a)
+            #relay.activate(pin_b)
+
+            # Simulación de lectura (reemplazar por: measured_value = multimeter.measure())
+            measured_value = random.choice([random.randint(0, 500000000), "OL"])
+
+            #relay.deactivate(pin_a)
+            #relay.deactivate(pin_b)
+
+            result_status = "pass" if min_val <= measured_value <= max_val else "fail"
+
+        elif test_type == "Pin a pin":
+            # Activar pin_a
+            #relay.activate(pin_a)
+
+            # Simulación de lectura (reemplazar por: measured_value = multimeter.measure())
+            measured_value = random.choice([random.randint(0, 500000000), "OL"])
+
+            #relay.deactivate(pin_a)
+
+            result_status = "pass" if min_val <= measured_value <= max_val else "fail"
+
+        else:
+            raise ValueError(f"Tipo de prueba no soportado: {test_type}")
+
+
+        """  # Simular medición
+        measured_value = random.choice([random.randint(0, 500000000), "OL"])
+        min_val = float(result_test.min_exp_value or 0)
+        max_val = float("inf") if result_test.max_exp_value == "OL" else float(result_test.max_exp_value or 0)
+        # Fin simulacion prueba
+
+        # Esto solo aplica para el tipo de prueba "Pin to chasis" aca iria un if por cada tipo de prueba 
+        if measured_value == "OL":
+            result_status = "pass"
+        else:
+            result_status = "pass" if min_val <= measured_value <= max_val else "fail" """
+            
+            
+        """ Fin zona de deteccion y logica por cada de tipo de prueba  """
+        
+        print("[RUN-TEST DEBUG]:", cmder.pik_close(id_1))
+        print("[RUN-TEST DEBUG]:", cmder.pik_close(id_2))
+
+        timestamp = timezone.now()
+
+        # Guardar SOLO en result_test
+        result_test.measured_value = str(measured_value)
+        result_test.result = result_status
+        result_test.timestamp = timestamp
+        result_test.save()
+
+        # Marcar etapa como completada si ya no hay pendientes
+        if not TestResult.objects.filter(stage=stage, result="pending").exists():
+            stage.status = "completed"
+            stage.save()
+
+        # Si al menos un stage se completó, la sesión pasa a "in_progress"
+        if session.status == "pending":
+            session.status = "in_progress"
+            session.save()
+
+        # Si todas las etapas están completadas, cerrar la sesión
+        if not TestStage.objects.filter(session=session, stage_type="test", status="pending").exists():
+            session.status = "completed"
+            session.save()
+
+        return JsonResponse({
+            "success": True,
+            "measured": measured_value,
+            "result": result_status,
+            "result_display": result_test.get_result_display(),
+            "timestamp": timestamp.strftime("%H:%M:%S")
+        })
+
+    except Exception as e:
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

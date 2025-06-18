@@ -29,16 +29,51 @@ find_opposite_sex_connectors → lógica de buscar conector opuesto / compatible
 get_mapping_or_error → lógica de traducir (conector + pin) en (relay_card_id, pxi_channel).
 generate_modal_tasks → orquesta ambos helpers y arma el resultado final (instrucción de texto + datos de relé).
 
--- ULTIMO PROMPT (enviado sin conexion) --
+-- PRIORIDADES CONECTOR COMPATIBLE --
+
+Si, lo entendiste bien, quiero aclarar que el orden de prioridades a devolver seria:
+1. Fixedconnector - Mismo tipo base + sexo opuesto
+"Conecte [session.connector] en [fixedconnector.label]"
+2. Fixedconnector - Mismo tipo base + mismo sexo
+"Conecte [session.connector] en [fixedconnector.label] utilizando un cambiador de sexo"
+3. Fixedconnector - Diferente tipo base + sexo opuesto
+"Conecte [session.connector] en [fixedconnector.label] utilizando un extender DB a DD"
+4. Fixedconnector - Diferente tipo base + mismo sexo
+"Conecte [session.connector] en [fixedconnector.label] utilizando un cambiador de sexo y un extender DB a DD"
+5. AdapterConnector - Mismo tipo base + sexo opuesto
+"Utilice el adaptador [adapter.name]. Conecte [session.connector] en [adapterconnector.label]"
+6. AdapterConnector - Mismo tipo base + mismo sexo
+"Utilice el adaptador [adapter.name]. Conecte [session.connector] en [AdapterConnector.label] utilizando un cambiador de sexo"
+7. AdapterConnector - Diferente tipo base + sexo opuesto
+"Utilice el adaptador [adapter.name]. Conecte [session.connector] en [AdapterConnector.label] utilizando un extender DB a DD"
+8. AdapterConnector - Diferente tipo base + mismo sexo
+"Utilice el adaptador [adapter.name]. Conecte [session.connector] en [AdapterConnector.label] utilizando un cambiador de sexo y un extender DB a DD"
+
+| Prioridad | Categoría | Tipo base igual  | Sexo opuesto  | Flags                                |
+| --------- | --------- | ---------------  | ------------  | ------------------------------------ |
+| 1         | Fixed     | ✅               | ✅            | `sexo_opuesto=True`                  |
+| 2         | Fixed     | ✅               | ❌            | `cambiador_sexo=True`                |
+| 3         | Fixed     | ❌               | ✅            | `extender=True, sexo_opuesto=True`   |
+| 4         | Fixed     | ❌               | ❌            | `extender=True, cambiador_sexo=True` |
+| 5         | Adapter   | ✅               | ✅            | `sexo_opuesto=True`                  |
+| 6         | Adapter   | ✅               | ❌            | `cambiador_sexo=True`                |
+| 7         | Adapter   | ❌               | ✅            | `extender=True, sexo_opuesto=True`   |
+| 8         | Adapter   | ❌               | ❌            | `extender=True, cambiador_sexo=True` |
 
 
-fc = FixedConnector.objects.filter(id=2).first()
-pin = 33  # probá con un número válido según tu base
 
-get_mapping_or_error(fc, pin)
 
-ac = AdapterConnector.objects.filter(connector_side='test-side', id=164).first()
-pin = 15  # o el que esté en el rango válido de ese conector
+from home.models import FixedConnector, AdapterConnector
+from django.core.serializers import serialize
 
-get_mapping_or_error(ac, pin)
+with open("fixed_connectors.json", "w") as f:
+    f.write(serialize("json", FixedConnector.objects.all()))
+
+from home.models import FixedConnector, AdapterConnector
+from django.core.serializers import serialize
+
+with open("adapter_connectors.json", "w") as f:
+    f.write(serialize("json", AdapterConnector.objects.all()))
+
+
 

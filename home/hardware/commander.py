@@ -111,7 +111,7 @@ class Commander:
 
     # ------------------------------------------------------------------------
     def __init__(
-        self, hostname: str = "tcp://10.245.1.103:9194", timeout: int = 2000
+        self, hostname: str = "tcp://10.245.1.105:9194", timeout: int = 2000
     ):
         """Initializes the Client class of the library and which it instantiates
          a JSON-RPC client which is used to connect with the
@@ -1212,16 +1212,34 @@ if __name__ == '__main__':
 
     
 
-    cmder = Commander()
+    cmder = Commander("tcp://10.245.1.103:9194", 5000) #IP de PC pxi. Placa local en 10.245.1.100 misma mascara y puerta de enlace
     card = 1 #OK
-    bus = 25 #OK Se ve en PXI -> Device manager -> Network adapters -> Intel(R) Ethernet Connection I217-LM -> General, location (PCI bus 0, device 25, function 0)
+    bus = 25 #OK Se ve en PC PXI -> Device manager -> Network adapters -> Intel(R) Ethernet Connection I217-LM -> General, location (PCI bus 0, device 25, function 0)
     dev = 8 #OK Slot PXI
     
     # Abre conexión con placa 
     print(cmder.pik_open(card,bus,dev)) 
-    print()
+    print(cmder.pik_clear_card('1'))
     
-    print("Subinfo 1")
+    print(cmder.pik_op_bit("1","7","1","1"))
+    print(cmder.pik_op_bit("1","3","1","1"))
+    
+    """     for i in range(1, 75):
+        print(cmder.pik_op_bit("1", "2", str(i), "1"))
+        print(cmder.pik_op_bit("1", "3", str(i), "1"))
+        print(cmder.pik_op_bit("1", "4", str(i), "1"))
+        time.sleep(1)  # Espera de 1 segundo """
+    
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    """    print("Subinfo 1")
     print(cmder.pik_subinfo(card, "1")) # Todos los rele
     # [True, [1, 1, 232, 'SWITCH(232)']]
     print("Subinfo 2")
@@ -1229,7 +1247,7 @@ if __name__ == '__main__':
     # [True, [1, 1, 74, 'SWITCH(74)']]
     print("Subinfo 3")
     print(cmder.pik_subinfo(card, "3")) # Fault insertion 1
-    # [True, [1, 1, 74, 'SWITCH(74)']]new_columnpxi_
+    # [True, [1, 1, 74, 'SWITCH(74)']]
     print("Subinfo 4")
     print(cmder.pik_subinfo(card, "4")) # Fault insertion 2
     # [True, [1, 1, 74, 'SWITCH(74)']]
@@ -1264,7 +1282,7 @@ if __name__ == '__main__':
     
     print("Op-bit:", cmder.pik_op_bit(card,"2","30","1")) # Card, Sub-unit, Rele, Abrir/Cerrar (0,1)
     
-    print("View:", cmder.pik_view_sub(card,"2"))
+    print("View:", cmder.pik_view_sub(card,"2")) """
     
     
         

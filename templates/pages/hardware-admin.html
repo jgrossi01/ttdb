@@ -78,6 +78,12 @@
 
             
                   <div class="tab-pane" id="tabs-adaptadores" role="tabpanel">
+
+                    <label class="form-check form-switch form-switch-3">
+                      <input class="form-check-input fixedconnectors-checkbox" type="checkbox" checked="">
+                      <span class="form-check-label">Tener en cuenta los conectores fijos para correr las pruebas</span>
+                    </label>
+
                     <div class="card-header ps-0 pe-2 pt-0">
                       <h3 class="card-title">Adaptadores</h3>
                       <div class="card-actions">
@@ -394,6 +400,9 @@
           title: "Acciones",
           className: "text-center align-middle",
           render: (data, type, row) => `
+            <label class=" form-switch form-switch-3" style="display: inline-block;">
+              <input class="form-check-input adapter-checkbox" type="checkbox" checked="" data-adapter-id="${row.id}">
+            </label>
             <button class="btn btn-sm btn-primary btn-cntEditConectors" title="Editar conectores" data-id="${row.id}" data-model="adapter">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9.785 6l8.215 8.215l-2.054 2.054a5.81 5.81 0 1 1 -8.215 -8.215l2.054 -2.054z" /><path d="M4 20l3.5 -3.5" /><path d="M15 4l-3.5 3.5" /><path d="M20 9l-3.5 3.5" /></svg>
             </button>
@@ -408,7 +417,8 @@
                 <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"></path>
                 <path d="M9 7V4h6v3"></path>
               </svg>
-            </button>`
+            </button>
+            `
         }
       ],
       language: { url: '{% static "datatables/datatables_es-ES.json" %}' },
@@ -683,6 +693,44 @@
       });
     });
 
+    // Carga estado de disponibilidad y funcionalidad para actualizar en db
+    tablaAdapters.on('draw.dt', function () {
+      document.querySelectorAll(".adapter-checkbox").forEach(cb => {
+        const adapterId = cb.dataset.adapterId;
+
+        // Cargar estado actual desde backend
+        fetch(`/api/hardware/get-adapter-availability/?id=${adapterId}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              cb.checked = data.value;
+            }
+          });
+
+        // Manejar cambio
+        cb.addEventListener("change", () => {
+          fetch("/api/hardware/toggle-adapter-availability/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ adapter_id: adapterId })
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              showToast("Disponibilidad actualizada", "success");
+              cb.checked = data.new_value;
+            } else {
+              showToast(data.message || "Error al actualizar disponibilidad", "error");
+              cb.checked = !cb.checked;
+            }
+          })
+          .catch(() => {
+            showToast("Error de red", "error");
+            cb.checked = !cb.checked;
+          });
+        });
+      });
+    });
 
     // =======================
     // Editar placas PXI inline
@@ -875,8 +923,8 @@
         },
         body: JSON.stringify({
           id: configId,
-          model: 'ConnectionConfig',
-          field: 'ip_port',
+          model: 'GlobalConfig',
+          field: 'value',
           value: ip_port
         })
       })
@@ -940,7 +988,41 @@
         history.replaceState(null, '', e.target.getAttribute('href'));
       });
     });
+
+    // =======================
+    // Cargar y editar el estado de "tener en cuenta conectores fisicos" 
+    // =======================
   
+
+    const checkbox = document.querySelector('.fixedconnectors-checkbox');
+
+    // Obtener estado inicial
+    fetch('/api/hardware/get-fixedconnectors-availability/')
+      .then(res => res.json())
+      .then(data => {
+        checkbox.checked = data.enabled;
+      });
+
+    // Escuchar cambios
+    checkbox.addEventListener('change', () => {
+      const enabled = checkbox.checked;
+
+      fetch('/api/hardware/toggle-fixedconnectors-availability/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCSRFToken()
+        },
+        body: JSON.stringify({ enabled: enabled })
+      })
+      .then(res => {
+        if (!res.ok) throw new Error();
+        showToast("Configuración actualizada", "success");
+      })
+      .catch(() => {
+        showToast("Error al guardar configuración", "danger");
+      });
+    });
 
 
 
