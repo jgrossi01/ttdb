@@ -128,8 +128,12 @@ class Commander:
         print_msg(TITULOP)
         try:
             self.client = ZeroMQClient(endpoint=hostname, timeout_ms=timeout)
+            self.connected = True
+            self.client.request("get_config")
             logger.info(print_msg("Connected to service {}: {}".format(__tittle__, hostname)))
-        except ZMQError as error:
+        except (ZMQError, Exception) as error:
+            self.client = None
+            self.connected = False
             logger.error(MSG_ERROR_AL_CONECTAR.format(hostname, error))
 
     # ------------------------------------------------------------------------
@@ -1217,12 +1221,16 @@ if __name__ == '__main__':
     bus = 25 #OK Se ve en PC PXI -> Device manager -> Network adapters -> Intel(R) Ethernet Connection I217-LM -> General, location (PCI bus 0, device 25, function 0)
     dev = 8 #OK Slot PXI
     
-    # Abre conexión con placa 
-    print(cmder.pik_open(card,bus,dev)) 
-    print(cmder.pik_clear_card('1'))
+    #cmder.get_config()
     
-    print(cmder.pik_op_bit("1","7","1","1"))
-    print(cmder.pik_op_bit("1","3","1","1"))
+    # Abre conexión con placa 
+    #print(cmder.pik_open(card,bus,dev)) 
+    #print(cmder.pik_clear_card('1'))
+    
+    #print(cmder.pik_op_bit("1","7","1","1"))
+    #print(cmder.pik_op_bit("1","3","1","1"))
+    
+    
     
     """     for i in range(1, 75):
         print(cmder.pik_op_bit("1", "2", str(i), "1"))

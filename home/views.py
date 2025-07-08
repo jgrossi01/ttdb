@@ -14,6 +14,7 @@ from .models_harness import Conexiones
 from django_eventstream import send_event
 from datetime import datetime
 from .hardware.commander import Commander
+from .hardware.ut61eplus import UT61EPLUS
 
 import pyodbc
 import sqlite3
@@ -24,6 +25,7 @@ import uuid
 import shutil
 import random
 import re
+
 
 
 def index(request):
@@ -692,236 +694,6 @@ def test_stage_view(request, session_id, stage_id):
     return render(request, "pages/test-stage.html", context)
 
 
-@csrf_exempt
-def run_test_stage(request):
-    if request.method != "POST":
-        return JsonResponse({"success": False, "message": "Método no permitido"}, status=405)
-
-    try:
-        data = json.loads(request.body)
-        
-        config = get_ip_port_config()
-        ip_port = config["ip_port"]
-        
-        if not ip_port:
-            return JsonResponse({
-                "success": False,
-                "message": "No se encontró configuración de IP y puerto."
-            }, status=400)
-
-        result_test = get_object_or_404(TestResult, id=data.get("result_id"))
-        stage = result_test.stage        
-        session = stage.session
-        test_type = session.test_type
-        connector_label = session.connector
-        connector_type_str = session.connector_type
-        connector_dest = stage.connector_dest
-        connector_dest_type = stage.connector_type
-
-        if not result_test:
-            return JsonResponse({"success": False, "message": "Resultado de prueba no encontrado."}, status=404)
-        
-        test_type = session.test_type
-        pin_a = result_test.pin_a
-        pin_b = result_test.pin_b
-
-        min_val = float(result_test.min_exp_value or 0)
-        max_val = float("inf") if result_test.max_exp_value == "OL" else float(result_test.max_exp_value or 0)
-        
-        
-        relay1 = RelayCard.objects.get(id=1)
-        relay2 = RelayCard.objects.get(id=2)
-
-        id_1, bus_1, dev_1 = relay1.id, relay1.bus, relay1.device
-        id_2, bus_2, dev_2 = relay2.id, relay2.bus, relay2.device
-        
-        cmder = Commander(ip_port, 5000) #IP de PC pxi. Placa local en 10.245.1.100 misma mascara y puerta de enlace
-        
-        print("[RUN-TEST DEBUG]:", cmder.pik_open(id_1,bus_1,dev_1))
-        print("[RUN-TEST DEBUG]:", cmder.pik_open(id_2,bus_2,dev_2))
-        
-        print("[RUN-TEST DEBUG]:", cmder.pik_clear_card(id_1))
-        print("[RUN-TEST DEBUG]:", cmder.pik_clear_card(id_2))
-
-        if test_type == "Pin a chasis":
-            # Determinar qué pin se debe activar según el conector
-            if result_test.conector_orig == session.connector:
-                pin_to_test = pin_a
-            elif result_test.conector_dest == session.connector:
-                pin_to_test = pin_b
-            else:
-                return JsonResponse({
-                    "success": False,
-                    "message": f"Error: El conector \"{session.connector}\" no coincide con los conectores de la de prueba."
-                }, status=400)
-            
-            # Obtener conectores compatibles
-            usable, disabled_adapters, disabled_fixed = find_compatible_connectors(connector_type_str, 'input')
-
-            deshabilitados_info = []
-            for cat, obj, tipo_base, flags, adapter_name in disabled_adapters + disabled_fixed:
-                if cat == 'fixed':
-                    deshabilitados_info.append(
-                        f"Fijo: {obj.label} ({obj.connector_type})"
-                    )
-                else:
-                    deshabilitados_info.append(
-                        f"Adaptador: {adapter_name} → {obj.label} ({obj.connector_type})"
-                    )
-
-            if not usable:
-                if deshabilitados_info:
-                    return JsonResponse({
-                        "success": False,
-                        "message": [f"Error: No se encontró ningún conector habilitado para \"{connector_label} <strong>({connector_type_str})</strong>\"."],
-                        "disabled_connectors": deshabilitados_info
-                    })
-                else:
-                    return JsonResponse({
-                        "success": False,
-                        "message": [f"Error: No se encontró ningún conector compatible para \"{connector_label} <strong>({connector_type_str})</strong>\"."],
-                        "disabled_connectors": deshabilitados_info
-                    })
-                    
-            # Tomar el primer candidato usable
-            categoria, conector_obj, tipo_compatible_base, flags, adapter_name = usable[0]
-            
-            # Verificar mapping de pines
-            pines_invalidos = []
-
-            mapping_result = get_mapping_or_error(conector_obj, pin_to_test)
-            if not mapping_result:
-                pines_invalidos.append(pin_to_test)
-
-            if pines_invalidos:
-                if categoria == 'adapter':
-                    adapter = conector_obj.adapter
-                    url = request.build_absolute_uri(reverse("adapter_connections_view", args=[adapter.id]))
-                    return JsonResponse({
-                        "success": False,
-                        "message": [
-                            f"Error: El conector a utilizar [{conector_obj.label}] ({conector_obj.connector_type}) del adaptador \"{adapter.name}\" no tiene la configuración de mapeo necesaria.",
-                            f'Revisa la configuración en: <a href="{url}" target="_blank">{url}</a>'
-                        ]
-                    })
-                else:
-                    return JsonResponse({
-                        "success": False,
-                        "message": [
-                            f"Error: El conector a utilizar {conector_obj.label} ({conector_obj.connector_type}) no tiene la configuración de mapeo necesaria."
-                        ]
-                    })
-                
-            relay_card_id, pxi_channel = mapping_result
-            
-            print("[RUN-TEST DEBUG]:", cmder.pik_op_bit(relay_card_id,"7","1","1"))
-            print("[RUN-TEST DEBUG]:", cmder.pik_op_bit(relay_card_id,"3",pxi_channel,"1"))
-            
-            
-            
-                
-
-            # Simulación de lectura (reemplazar por: measured_value = multimeter.measure())
-            measured_value = random.choice([random.randint(0, 500000000), "OL"])            
-
-            if measured_value == "OL":
-                result_status = "pass"
-            else:
-                result_status = "pass" if min_val <= measured_value <= max_val else "fail"
-                                
-
-        elif test_type == "Pin a otros":
-            # Activar pin_a
-            #relay.activate(pin_a)
-
-            # Simulación de lectura (reemplazar por: measured_value = multimeter.measure())
-            measured_value = random.choice([random.randint(0, 500000000), "OL"])
-
-            #relay.deactivate(pin_a)
-
-            result_status = "pass" if min_val <= measured_value <= max_val else "fail"
-
-        elif test_type == "Entre par de pines":
-            # Activar ambos pines
-            #relay.activate(pin_a)
-            #relay.activate(pin_b)
-
-            # Simulación de lectura (reemplazar por: measured_value = multimeter.measure())
-            measured_value = random.choice([random.randint(0, 500000000), "OL"])
-
-            #relay.deactivate(pin_a)
-            #relay.deactivate(pin_b)
-
-            result_status = "pass" if min_val <= measured_value <= max_val else "fail"
-
-        elif test_type == "Pin a pin":
-            # Activar pin_a
-            #relay.activate(pin_a)
-
-            # Simulación de lectura (reemplazar por: measured_value = multimeter.measure())
-            measured_value = random.choice([random.randint(0, 500000000), "OL"])
-
-            #relay.deactivate(pin_a)
-
-            result_status = "pass" if min_val <= measured_value <= max_val else "fail"
-
-        else:
-            raise ValueError(f"Tipo de prueba no soportado: {test_type}")
-
-
-        """  # Simular medición
-        measured_value = random.choice([random.randint(0, 500000000), "OL"])
-        min_val = float(result_test.min_exp_value or 0)
-        max_val = float("inf") if result_test.max_exp_value == "OL" else float(result_test.max_exp_value or 0)
-        # Fin simulacion prueba
-
-        # Esto solo aplica para el tipo de prueba "Pin to chasis" aca iria un if por cada tipo de prueba 
-        if measured_value == "OL":
-            result_status = "pass"
-        else:
-            result_status = "pass" if min_val <= measured_value <= max_val else "fail" """
-            
-            
-        """ Fin zona de deteccion y logica por cada de tipo de prueba  """
-        
-        print("[RUN-TEST DEBUG]:", cmder.pik_close(id_1))
-        print("[RUN-TEST DEBUG]:", cmder.pik_close(id_2))
-
-        timestamp = timezone.now()
-
-        # Guardar SOLO en result_test
-        result_test.measured_value = str(measured_value)
-        result_test.result = result_status
-        result_test.timestamp = timestamp
-        result_test.save()
-
-        # Marcar etapa como completada si ya no hay pendientes
-        if not TestResult.objects.filter(stage=stage, result="pending").exists():
-            stage.status = "completed"
-            stage.save()
-
-        # Si al menos un stage se completó, la sesión pasa a "in_progress"
-        if session.status == "pending":
-            session.status = "in_progress"
-            session.save()
-
-        # Si todas las etapas están completadas, cerrar la sesión
-        if not TestStage.objects.filter(session=session, stage_type="test", status="pending").exists():
-            session.status = "completed"
-            session.save()
-
-        return JsonResponse({
-            "success": True,
-            "measured": measured_value,
-            "result": result_status,
-            "result_display": result_test.get_result_display(),
-            "timestamp": timestamp.strftime("%H:%M:%S")
-        })
-
-    except Exception as e:
-        return JsonResponse({"success": False, "message": str(e)}, status=500)
-
-
 def test_result_view(request, session_id):
     session = get_object_or_404(TestSession, id=session_id)
 
@@ -1149,16 +921,19 @@ def api_get_relaycards(request):
     return JsonResponse({"data": data})
 
 
-def get_ip_port_config():
-    config = GlobalConfig.objects.filter(key="ip_port").first()
+def get_global_config():
+    configs = GlobalConfig.objects.all()
     return {
-        "ip_port": config.value if config else "",
-        "id": config.id if config else None
+        cfg.key: {
+            "id": cfg.id,
+            "value": cfg.value
+        }
+        for cfg in configs
     }
 
 
-def api_get_connection_config(request):
-    data = get_ip_port_config()
+def api_get_global_config(request):
+    data = get_global_config()
     return JsonResponse(data)
 
 
@@ -1488,6 +1263,53 @@ def api_adapterpinmap_bulk_update(request):
         return JsonResponse({'error': f'Error interno: {str(e)}'}, status=500)
     
     
+def check_required_hw():
+    """
+    Verifica la conectividad con las placas de relés y el multímetro.
+
+    Retorna una lista de errores (vacía si todo está OK).
+    """
+    errors = []
+
+    config = get_global_config()
+    ip_port = config.get("ip_port", {}).get("value", "")
+
+    # Verificación de PXI
+    if not ip_port:
+        errors.append("No se encontró configuración de IP y puerto para las placas de relés.")
+    else:
+        cmder = Commander(ip_port, 5000)
+        if not cmder.connected:
+            errors.append(f"No se pudo conectar con el PXI en {ip_port}.")
+
+    # Verificación del multímetro
+    if not UT61EPLUS.is_available():
+        errors.append("No se detectó el multímetro UT61E+ o no respondió correctamente.")
+
+    return errors
+
+
+def api_check_required_hw(request):
+    """
+    View que verifica el estado del hardware (placas de relés y multímetro).
+    Se utiliza de forma asíncrona en el frontend para habilitar o no el botón de comenzar.
+    """
+    errores = check_required_hw()
+
+    if errores:
+        return JsonResponse({
+            "success": False,
+            "errores": errores,
+            "disable_start": True
+        }, status=200)
+    else:
+        return JsonResponse({
+            "success": True,
+            "errores": [],
+            "disable_start": False
+        }, status=200)
+
+    
 def api_generate_instructions(request, stage_id):
     try:
         stage = TestStage.objects.select_related('session').prefetch_related('results').get(id=stage_id)
@@ -1620,18 +1442,35 @@ def api_generate_instructions(request, stage_id):
 def run_test_stage(request):
     if request.method != "POST":
         return JsonResponse({"success": False, "message": "Método no permitido"}, status=405)
+    
+    # Revisar devolucion json.
+    errores_hw = check_required_hw()
+    if errores_hw:
+        return JsonResponse({
+            "error": errores_hw,
+            "disable_start": True
+        }, status=400)
 
     try:
         data = json.loads(request.body)
         
-        config = get_ip_port_config()
-        ip_port = config["ip_port"]
+        config = get_global_config()
+        ip_port = config.get("ip_port", {}).get("value", "")
         
         if not ip_port:
             return JsonResponse({
                 "success": False,
                 "message": "No se encontró configuración de IP y puerto."
             }, status=400)
+            
+        cmder = Commander(ip_port, 5000) #IP de PC pxi. Placa local en 10.245.1.100 misma mascara y puerta de enlace
+        
+        if not cmder.connected:
+            print('Error de conexion con PXI')
+            return JsonResponse({
+                "success": False,
+                "message": f"No se pudo conectar con el hardware en {ip_port}."
+            }, status=500)
 
         result_test = get_object_or_404(TestResult, id=data.get("result_id"))
         stage = result_test.stage        
@@ -1644,7 +1483,7 @@ def run_test_stage(request):
         connector_dest = stage.connector_dest
         connector_dest_type = stage.connector_type
         
-        suggested_connector_id = data.get("connector_category")
+        suggested_connector_id = data.get("connector_id")
         suggested_connector_category = data.get("connector_category")
         if suggested_connector_category == "fixed":
             suggested_conector_obj = get_object_or_404(FixedConnector, id=suggested_connector_id)
@@ -1665,7 +1504,9 @@ def run_test_stage(request):
         id_1, bus_1, dev_1 = relay1.id, relay1.bus, relay1.device
         id_2, bus_2, dev_2 = relay2.id, relay2.bus, relay2.device
         
-        cmder = Commander(ip_port, 5000) #IP de PC pxi. Placa local en 10.245.1.100 misma mascara y puerta de enlace
+        
+        
+        print("[RUN-TEST DEBUG CMDER-STATUS]:", cmder)
         
         print("[RUN-TEST DEBUG]:", cmder.pik_open(id_1,bus_1,dev_1))
         print("[RUN-TEST DEBUG]:", cmder.pik_open(id_2,bus_2,dev_2))
@@ -1696,12 +1537,18 @@ def run_test_stage(request):
             
             
             # Simulación de lectura (reemplazar por: measured_value = multimeter.measure())
-            measured_value = random.choice([random.randint(0, 500000000), "OL"])            
+            #measured_value = random.choice([random.randint(0, 500000000), "OL"])            
 
-            if measured_value == "OL":
+            ut = UT61EPLUS()
+            measured_value = ut.takeMeasurement()
+            print("[RUN-TEST DEBUG-TESTER]:", measured_value)  
+            
+            
+            
+            """ if measured_value == "OL":
                 result_status = "pass"
             else:
-                result_status = "pass" if min_val <= measured_value <= max_val else "fail"
+                result_status = "pass" if min_val <= measured_value <= max_val else "fail" """
                                 
 
         elif test_type == "Pin a otros":
@@ -1764,10 +1611,10 @@ def run_test_stage(request):
         timestamp = timezone.now()
 
         # Guardar SOLO en result_test
-        result_test.measured_value = str(measured_value)
+        """ result_test.measured_value = str(measured_value)
         result_test.result = result_status
         result_test.timestamp = timestamp
-        result_test.save()
+        result_test.save() """
 
         # Marcar etapa como completada si ya no hay pendientes
         if not TestResult.objects.filter(stage=stage, result="pending").exists():

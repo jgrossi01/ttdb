@@ -21,6 +21,7 @@ urlpatterns = [
     
     #pruebas de conexion con pxi
     path('test-hardware/', views.test_hardware, name='test_hardware'),
+    path('check_required_hw/', views.check_required_hw, name='check_required_hw'),
 
     
     # Funciones
@@ -35,9 +36,10 @@ urlpatterns = [
     path("api/delete-test-session/<int:session_id>/", views.delete_test_session, name="delete_test_session"),
     path('api/run-test-stage/', views.run_test_stage, name='run_test_stage'),
     path("api/hardware/connector-types/", views.api_connector_types, name="connector_types"),
+    path("api/get-global-config/", views.api_get_global_config, name="api_get_global_config"),
+    path("api/check-required-hw/", views.api_check_required_hw, name="api_check_required_hw"),
     
     # Especificas
-    path("api/hardware/connection_config/", views.api_get_connection_config, name="get_connection_config"),
     path("api/hardware/adapterconnector/create/", views.api_create_adapterconnector),
     path("api/hardware/adapterconnectors/", views.api_list_adapterconnectors),
     #path("api/hardware/check-connector-label/", views.api_check_connector_label, name="check_connector_label"),

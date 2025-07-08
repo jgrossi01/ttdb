@@ -883,23 +883,23 @@
     // CONNECTION CONFIG
     // =======================
 
-    
-
     let configId = null;
 
-    // Obtener configuración inicial
-    fetch('/api/hardware/connection_config/')
-      .then(response => response.json())
-      .then(res => { 
-        if (res.ip_port) {
-          document.getElementById('input-ip-port').value = res.ip_port;
-        }
-        if (res.id !== null) {
-          configId = res.id;
-        } else {
-          showToast("No se pudo obtener la configuración", "danger");
-        }
-      });
+    // Obtener configuración inicial desde nueva vista
+    fetch('/api/get-global-config/')
+    .then(response => response.json())
+    .then(res => {
+      if (res.ip_port && res.ip_port.value) {
+        document.getElementById('input-ip-port').value = res.ip_port.value;
+        configId = res.ip_port.id;
+      } else {
+        showToast("No se pudo obtener la configuración IP/puerto", "danger");
+      }
+    })
+    .catch(() => {
+      showToast("Error al obtener la configuración global", "danger");
+    });
+
 
     // Guardar cambios
     document.getElementById('btn-save-config').addEventListener('click', () => {

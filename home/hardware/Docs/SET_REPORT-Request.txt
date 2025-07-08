@@ -1,0 +1,906 @@
+Frame 1171: 91 bytes on wire (728 bits), 91 bytes captured (728 bits)
+USB URB
+HID Data: 13abcd10063620204f4c2e2020040430303003a5777777ab39393939393939391f4c21ebddf5f7dd6bb7ddaf7bcf7fef77f7bfd33fabddbfe7eb5fffb7dbfdcf
+
+Frame 1170: 27 bytes on wire (216 bits), 27 bytes captured (216 bits)
+USB URB
+    [Source: 1.12.4]
+    [Destination: host]
+    USBPcap pseudoheader length: 27
+    IRP ID: 0xffffa60f75fe2a20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_BULK_OR_INTERRUPT_TRANSFER (0x0009)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x04, Direction: OUT
+    URB transfer type: URB_INTERRUPT (0x01)
+    Packet Data Length: 0
+    [Request in: 1169]
+    [Time from request: 0.000485000 seconds]
+    [bInterfaceClass: HID (0x03)]
+
+Frame 1169: 91 bytes on wire (728 bits), 91 bytes captured (728 bits)
+USB URB
+HID Data: 06abcd035e01d9000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+    Vendor Data: 06
+    Padding: abcd035e01d9000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+Frame 1168: 92 bytes on wire (736 bits), 92 bytes captured (736 bits)
+USB URB
+    [Source: 1.12.0]
+    [Destination: host]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CONTROL_TRANSFER (0x0008)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x80, Direction: IN
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 64
+    [Request in: 1167]
+    [Time from request: 0.000602000 seconds]
+    Control transfer stage: Complete (3)
+    [bInterfaceClass: HID (0x03)]
+
+Frame 1167: 36 bytes on wire (288 bits), 36 bytes captured (288 bits)
+USB URB
+    [Source: host]
+    [Destination: 1.12.0]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CLASS_INTERFACE (0x001b)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x80, Direction: IN
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 8
+    [Response in: 1168]
+    Control transfer stage: Setup (0)
+    [bInterfaceClass: HID (0x03)]
+Setup Data
+    bmRequestType: 0xa1
+    bRequest: GET_REPORT (0x01)
+    wValue: 0x0100
+    wIndex: 0
+    wLength: 64
+
+Frame 1166: 28 bytes on wire (224 bits), 28 bytes captured (224 bits)
+USB URB
+    [Source: 1.12.0]
+    [Destination: host]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CONTROL_TRANSFER (0x0008)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x00, Direction: OUT
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 0
+    [Request in: 1165]
+    [Time from request: 0.000509000 seconds]
+    Control transfer stage: Complete (3)
+    [bInterfaceClass: HID (0x03)]
+
+Frame 1165: 100 bytes on wire (800 bits), 100 bytes captured (800 bits)
+USB URB
+    [Source: host]
+    [Destination: 1.12.0]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CLASS_INTERFACE (0x001b)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x00, Direction: OUT
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 72
+    [Response in: 1166]
+    Control transfer stage: Setup (0)
+    [bInterfaceClass: HID (0x03)]
+Setup Data
+    bmRequestType: 0x21
+    bRequest: SET_REPORT (0x09)
+    wValue: 0x0200
+    wIndex: 0
+    wLength: 64
+    Data Fragment: a0602000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+Frame 1164: 92 bytes on wire (736 bits), 92 bytes captured (736 bits)
+USB URB
+    [Source: 1.12.0]
+    [Destination: host]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CONTROL_TRANSFER (0x0008)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x80, Direction: IN
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 64
+    [Request in: 1163]
+    [Time from request: 0.000616000 seconds]
+    Control transfer stage: Complete (3)
+    [bInterfaceClass: HID (0x03)]
+
+Frame 1163: 36 bytes on wire (288 bits), 36 bytes captured (288 bits)
+USB URB
+    [Source: host]
+    [Destination: 1.12.0]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CLASS_INTERFACE (0x001b)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x80, Direction: IN
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 8
+    [Response in: 1164]
+    Control transfer stage: Setup (0)
+    [bInterfaceClass: HID (0x03)]
+Setup Data
+    bmRequestType: 0xa1
+    bRequest: GET_REPORT (0x01)
+    wValue: 0x0100
+    wIndex: 0
+    wLength: 64
+
+Frame 1162: 28 bytes on wire (224 bits), 28 bytes captured (224 bits)
+USB URB
+    [Source: 1.12.0]
+    [Destination: host]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CONTROL_TRANSFER (0x0008)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x00, Direction: OUT
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 0
+    [Request in: 1161]
+    [Time from request: 0.000528000 seconds]
+    Control transfer stage: Complete (3)
+    [bInterfaceClass: HID (0x03)]
+
+Frame 1161: 100 bytes on wire (800 bits), 100 bytes captured (800 bits)
+USB URB
+    [Source: host]
+    [Destination: 1.12.0]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CLASS_INTERFACE (0x001b)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x00, Direction: OUT
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 72
+    [Response in: 1162]
+    Control transfer stage: Setup (0)
+    [bInterfaceClass: HID (0x03)]
+Setup Data
+    bmRequestType: 0x21
+    bRequest: SET_REPORT (0x09)
+    wValue: 0x0200
+    wIndex: 0
+    wLength: 64
+    Data Fragment: a0402000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+Frame 1160: 92 bytes on wire (736 bits), 92 bytes captured (736 bits)
+USB URB
+    [Source: 1.12.0]
+    [Destination: host]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CONTROL_TRANSFER (0x0008)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x80, Direction: IN
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 64
+    [Request in: 1159]
+    [Time from request: 0.000620000 seconds]
+    Control transfer stage: Complete (3)
+    [bInterfaceClass: HID (0x03)]
+
+Frame 1159: 36 bytes on wire (288 bits), 36 bytes captured (288 bits)
+USB URB
+    [Source: host]
+    [Destination: 1.12.0]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CLASS_INTERFACE (0x001b)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x80, Direction: IN
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 8
+    [Response in: 1160]
+    Control transfer stage: Setup (0)
+    [bInterfaceClass: HID (0x03)]
+Setup Data
+    bmRequestType: 0xa1
+    bRequest: GET_REPORT (0x01)
+    wValue: 0x0100
+    wIndex: 0
+    wLength: 64
+
+Frame 1158: 28 bytes on wire (224 bits), 28 bytes captured (224 bits)
+USB URB
+    [Source: 1.12.0]
+    [Destination: host]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CONTROL_TRANSFER (0x0008)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x00, Direction: OUT
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 0
+    [Request in: 1157]
+    [Time from request: 0.000519000 seconds]
+    Control transfer stage: Complete (3)
+    [bInterfaceClass: HID (0x03)]
+
+Frame 1157: 100 bytes on wire (800 bits), 100 bytes captured (800 bits)
+USB URB
+    [Source: host]
+    [Destination: 1.12.0]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CLASS_INTERFACE (0x001b)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x00, Direction: OUT
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 72
+    [Response in: 1158]
+    Control transfer stage: Setup (0)
+    [bInterfaceClass: HID (0x03)]
+Setup Data
+    bmRequestType: 0x21
+    bRequest: SET_REPORT (0x09)
+    wValue: 0x0200
+    wIndex: 0
+    wLength: 64
+    Data Fragment: a0202000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+Frame 1156: 92 bytes on wire (736 bits), 92 bytes captured (736 bits)
+USB URB
+    [Source: 1.12.0]
+    [Destination: host]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CONTROL_TRANSFER (0x0008)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x80, Direction: IN
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 64
+    [Request in: 1155]
+    [Time from request: 0.000570000 seconds]
+    Control transfer stage: Complete (3)
+    [bInterfaceClass: HID (0x03)]
+
+Frame 1155: 36 bytes on wire (288 bits), 36 bytes captured (288 bits)
+USB URB
+    [Source: host]
+    [Destination: 1.12.0]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CLASS_INTERFACE (0x001b)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x80, Direction: IN
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 8
+    [Response in: 1156]
+    Control transfer stage: Setup (0)
+    [bInterfaceClass: HID (0x03)]
+Setup Data
+    bmRequestType: 0xa1
+    bRequest: GET_REPORT (0x01)
+    wValue: 0x0100
+    wIndex: 0
+    wLength: 64
+
+Frame 1154: 28 bytes on wire (224 bits), 28 bytes captured (224 bits)
+USB URB
+    [Source: 1.12.0]
+    [Destination: host]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CONTROL_TRANSFER (0x0008)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x00, Direction: OUT
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 0
+    [Request in: 1153]
+    [Time from request: 0.005845000 seconds]
+    Control transfer stage: Complete (3)
+    [bInterfaceClass: HID (0x03)]
+
+Frame 1153: 100 bytes on wire (800 bits), 100 bytes captured (800 bits)
+USB URB
+    [Source: host]
+    [Destination: 1.12.0]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CLASS_INTERFACE (0x001b)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x00, Direction: OUT
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 72
+    [Response in: 1154]
+    Control transfer stage: Setup (0)
+    [bInterfaceClass: HID (0x03)]
+Setup Data
+    bmRequestType: 0x21
+    bRequest: SET_REPORT (0x09)
+    wValue: 0x0200
+    wIndex: 0
+    wLength: 64
+    Data Fragment: a0002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+Frame 1152: 28 bytes on wire (224 bits), 28 bytes captured (224 bits)
+USB URB
+    [Source: 1.12.0]
+    [Destination: host]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CONTROL_TRANSFER (0x0008)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x00, Direction: OUT
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 0
+    [Request in: 1151]
+    [Time from request: 0.000633000 seconds]
+    Control transfer stage: Complete (3)
+    [bInterfaceClass: HID (0x03)]
+
+Frame 1151: 100 bytes on wire (800 bits), 100 bytes captured (800 bits)
+USB URB
+    [Source: host]
+    [Destination: 1.12.0]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CLASS_INTERFACE (0x001b)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x00, Direction: OUT
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 72
+    [Response in: 1152]
+    Control transfer stage: Setup (0)
+    [bInterfaceClass: HID (0x03)]
+Setup Data
+    bmRequestType: 0x21
+    bRequest: SET_REPORT (0x09)
+    wValue: 0x0200
+    wIndex: 0
+    wLength: 64
+    Data Fragment: a160204d535f56312e35ff0c3230313930323135787878785fbf777fcf6bbf6dfffbb70000000000000000000000000000000000000000000000000000000000
+
+Frame 1150: 28 bytes on wire (224 bits), 28 bytes captured (224 bits)
+USB URB
+    [Source: 1.12.0]
+    [Destination: host]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CONTROL_TRANSFER (0x0008)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x00, Direction: OUT
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 0
+    [Request in: 1149]
+    [Time from request: 0.000614000 seconds]
+    Control transfer stage: Complete (3)
+    [bInterfaceClass: HID (0x03)]
+
+Frame 1149: 100 bytes on wire (800 bits), 100 bytes captured (800 bits)
+USB URB
+    [Source: host]
+    [Destination: 1.12.0]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CLASS_INTERFACE (0x001b)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x00, Direction: OUT
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 72
+    [Response in: 1150]
+    Control transfer stage: Setup (0)
+    [bInterfaceClass: HID (0x03)]
+Setup Data
+    bmRequestType: 0x21
+    bRequest: SET_REPORT (0x09)
+    wValue: 0x0200
+    wIndex: 0
+    wLength: 64
+    Data Fragment: a140202e434ef5ff7bbfffb75ff7ebafbfd77f16574348205541525420544f204b422d0000000000000000000000000000000000000000000000000000000000
+
+Frame 1148: 28 bytes on wire (224 bits), 28 bytes captured (224 bits)
+USB URB
+    [Source: 1.12.0]
+    [Destination: host]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CONTROL_TRANSFER (0x0008)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x00, Direction: OUT
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 0
+    [Request in: 1147]
+    [Time from request: 0.000609000 seconds]
+    Control transfer stage: Complete (3)
+    [bInterfaceClass: HID (0x03)]
+
+Frame 1147: 100 bytes on wire (800 bits), 100 bytes captured (800 bits)
+USB URB
+    [Source: host]
+    [Destination: 1.12.0]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CLASS_INTERFACE (0x001b)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x00, Direction: OUT
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 72
+    [Response in: 1148]
+    Control transfer stage: Setup (0)
+    [bInterfaceClass: HID (0x03)]
+Setup Data
+    bmRequestType: 0x21
+    bRequest: SET_REPORT (0x09)
+    wValue: 0x0200
+    wIndex: 0
+    wLength: 64
+    Data Fragment: a12020000000000000000000d697f77ff7bdf3ffb7addb3f7bb57f0a5757572e5743480000000000000000000000000000000000000000000000000000000000
+
+Frame 1146: 28 bytes on wire (224 bits), 28 bytes captured (224 bits)
+USB URB
+    [Source: 1.12.0]
+    [Destination: host]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CONTROL_TRANSFER (0x0008)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x00, Direction: OUT
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 0
+    [Request in: 1145]
+    [Time from request: 0.000559000 seconds]
+    Control transfer stage: Complete (3)
+    [bInterfaceClass: HID (0x03)]
+
+Frame 1145: 100 bytes on wire (800 bits), 100 bytes captured (800 bits)
+USB URB
+    [Source: host]
+    [Destination: 1.12.0]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CLASS_INTERFACE (0x001b)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x00, Direction: OUT
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 72
+    [Response in: 1146]
+    Control transfer stage: Setup (0)
+    [bInterfaceClass: HID (0x03)]
+Setup Data
+    bmRequestType: 0x21
+    bRequest: SET_REPORT (0x09)
+    wValue: 0x0200
+    wIndex: 0
+    wLength: 64
+    Data Fragment: a100205743480302000000258008000003861a29e100000001000d00000000000000000000000000000000000000000000000000000000000000000000000000
+
+Frame 1144: 92 bytes on wire (736 bits), 92 bytes captured (736 bits)
+USB URB
+    [Source: 1.12.0]
+    [Destination: host]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CONTROL_TRANSFER (0x0008)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x80, Direction: IN
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 64
+    [Request in: 1143]
+    [Time from request: 0.000563000 seconds]
+    Control transfer stage: Complete (3)
+    [bInterfaceClass: HID (0x03)]
+
+Frame 1143: 36 bytes on wire (288 bits), 36 bytes captured (288 bits)
+USB URB
+    [Source: host]
+    [Destination: 1.12.0]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CLASS_INTERFACE (0x001b)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x80, Direction: IN
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 8
+    [Response in: 1144]
+    Control transfer stage: Setup (0)
+    [bInterfaceClass: HID (0x03)]
+Setup Data
+    bmRequestType: 0xa1
+    bRequest: GET_REPORT (0x01)
+    wValue: 0x0100
+    wIndex: 0
+    wLength: 64
+
+Frame 1132: 28 bytes on wire (224 bits), 28 bytes captured (224 bits)
+USB URB
+    [Source: 1.12.0]
+    [Destination: host]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CONTROL_TRANSFER (0x0008)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x00, Direction: OUT
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 0
+    [Request in: 1131]
+    [Time from request: 0.000490000 seconds]
+    Control transfer stage: Complete (3)
+    [bInterfaceClass: HID (0x03)]
+
+Frame 1131: 100 bytes on wire (800 bits), 100 bytes captured (800 bits)
+USB URB
+    [Source: host]
+    [Destination: 1.12.0]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CLASS_INTERFACE (0x001b)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x00, Direction: OUT
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 72
+    [Response in: 1132]
+    Control transfer stage: Setup (0)
+    [bInterfaceClass: HID (0x03)]
+Setup Data
+    bmRequestType: 0x21
+    bRequest: SET_REPORT (0x09)
+    wValue: 0x0200
+    wIndex: 0
+    wLength: 64
+    Data Fragment: a0602000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+Frame 1130: 92 bytes on wire (736 bits), 92 bytes captured (736 bits)
+USB URB
+    [Source: 1.12.0]
+    [Destination: host]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CONTROL_TRANSFER (0x0008)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x80, Direction: IN
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 64
+    [Request in: 1129]
+    [Time from request: 0.000628000 seconds]
+    Control transfer stage: Complete (3)
+    [bInterfaceClass: HID (0x03)]
+
+Frame 1129: 36 bytes on wire (288 bits), 36 bytes captured (288 bits)
+USB URB
+    [Source: host]
+    [Destination: 1.12.0]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CLASS_INTERFACE (0x001b)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x80, Direction: IN
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 8
+    [Response in: 1130]
+    Control transfer stage: Setup (0)
+    [bInterfaceClass: HID (0x03)]
+Setup Data
+    bmRequestType: 0xa1
+    bRequest: GET_REPORT (0x01)
+    wValue: 0x0100
+    wIndex: 0
+    wLength: 64
+
+Frame 1128: 28 bytes on wire (224 bits), 28 bytes captured (224 bits)
+USB URB
+    [Source: 1.12.0]
+    [Destination: host]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CONTROL_TRANSFER (0x0008)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x00, Direction: OUT
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 0
+    [Request in: 1127]
+    [Time from request: 0.000528000 seconds]
+    Control transfer stage: Complete (3)
+    [bInterfaceClass: HID (0x03)]
+
+Frame 1127: 100 bytes on wire (800 bits), 100 bytes captured (800 bits)
+USB URB
+    [Source: host]
+    [Destination: 1.12.0]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CLASS_INTERFACE (0x001b)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x00, Direction: OUT
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 72
+    [Response in: 1128]
+    Control transfer stage: Setup (0)
+    [bInterfaceClass: HID (0x03)]
+Setup Data
+    bmRequestType: 0x21
+    bRequest: SET_REPORT (0x09)
+    wValue: 0x0200
+    wIndex: 0
+    wLength: 64
+    Data Fragment: a0402000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+Frame 1126: 92 bytes on wire (736 bits), 92 bytes captured (736 bits)
+USB URB
+    [Source: 1.12.0]
+    [Destination: host]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CONTROL_TRANSFER (0x0008)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x80, Direction: IN
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 64
+    [Request in: 1125]
+    [Time from request: 0.000598000 seconds]
+    Control transfer stage: Complete (3)
+    [bInterfaceClass: HID (0x03)]
+
+Frame 1125: 36 bytes on wire (288 bits), 36 bytes captured (288 bits)
+USB URB
+    [Source: host]
+    [Destination: 1.12.0]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CLASS_INTERFACE (0x001b)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x80, Direction: IN
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 8
+    [Response in: 1126]
+    Control transfer stage: Setup (0)
+    [bInterfaceClass: HID (0x03)]
+Setup Data
+    bmRequestType: 0xa1
+    bRequest: GET_REPORT (0x01)
+    wValue: 0x0100
+    wIndex: 0
+    wLength: 64
+
+Frame 1124: 28 bytes on wire (224 bits), 28 bytes captured (224 bits)
+USB URB
+    [Source: 1.12.0]
+    [Destination: host]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CONTROL_TRANSFER (0x0008)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x00, Direction: OUT
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 0
+    [Request in: 1123]
+    [Time from request: 0.000508000 seconds]
+    Control transfer stage: Complete (3)
+    [bInterfaceClass: HID (0x03)]
+
+Frame 1123: 100 bytes on wire (800 bits), 100 bytes captured (800 bits)
+USB URB
+    [Source: host]
+    [Destination: 1.12.0]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CLASS_INTERFACE (0x001b)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x00, Direction: OUT
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 72
+    [Response in: 1124]
+    Control transfer stage: Setup (0)
+    [bInterfaceClass: HID (0x03)]
+Setup Data
+    bmRequestType: 0x21
+    bRequest: SET_REPORT (0x09)
+    wValue: 0x0200
+    wIndex: 0
+    wLength: 64
+    Data Fragment: a0202000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+Frame 1122: 92 bytes on wire (736 bits), 92 bytes captured (736 bits)
+USB URB
+    [Source: 1.12.0]
+    [Destination: host]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CONTROL_TRANSFER (0x0008)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x80, Direction: IN
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 64
+    [Request in: 1121]
+    [Time from request: 0.000685000 seconds]
+    Control transfer stage: Complete (3)
+    [bInterfaceClass: HID (0x03)]
+
+Frame 1121: 36 bytes on wire (288 bits), 36 bytes captured (288 bits)
+USB URB
+    [Source: host]
+    [Destination: 1.12.0]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CLASS_INTERFACE (0x001b)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x80, Direction: IN
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 8
+    [Response in: 1122]
+    Control transfer stage: Setup (0)
+    [bInterfaceClass: HID (0x03)]
+Setup Data
+    bmRequestType: 0xa1
+    bRequest: GET_REPORT (0x01)
+    wValue: 0x0100
+    wIndex: 0
+    wLength: 64
+
+Frame 1120: 28 bytes on wire (224 bits), 28 bytes captured (224 bits)
+USB URB
+    [Source: 1.12.0]
+    [Destination: host]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CONTROL_TRANSFER (0x0008)
+    IRP information: 0x01, Direction: PDO -> FDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x00, Direction: OUT
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 0
+    [Request in: 1119]
+    [Time from request: 0.000517000 seconds]
+    Control transfer stage: Complete (3)
+    [bInterfaceClass: HID (0x03)]
+
+Frame 1119: 100 bytes on wire (800 bits), 100 bytes captured (800 bits)
+USB URB
+    [Source: host]
+    [Destination: 1.12.0]
+    USBPcap pseudoheader length: 28
+    IRP ID: 0xffffa60f7bceaa20
+    IRP USBD_STATUS: USBD_STATUS_SUCCESS (0x00000000)
+    URB Function: URB_FUNCTION_CLASS_INTERFACE (0x001b)
+    IRP information: 0x00, Direction: FDO -> PDO
+    URB bus id: 1
+    Device address: 12
+    Endpoint: 0x00, Direction: OUT
+    URB transfer type: URB_CONTROL (0x02)
+    Packet Data Length: 72
+    [Response in: 1120]
+    Control transfer stage: Setup (0)
+    [bInterfaceClass: HID (0x03)]
+Setup Data
+    bmRequestType: 0x21
+    bRequest: SET_REPORT (0x09)
+    wValue: 0x0200
+    wIndex: 0
+    wLength: 64
+    Data Fragment: a0002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+
+
+
+
+
+

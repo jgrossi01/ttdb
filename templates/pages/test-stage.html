@@ -225,6 +225,9 @@
             </div>
             {% endif %}
 
+            <!-- Contenedor para toasts -->
+            <div id="toastContainer" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055"></div>
+
           </div> 
         </div>     
       </div>
@@ -476,64 +479,118 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById("btn-generar-instrucciones").addEventListener("click", function () {
     const stageId = this.getAttribute("data-stage-id");
     const modal = new bootstrap.Modal(document.getElementById("instruccionesModal"));
+    const modalBody = document.getElementById("instrucciones-modal-body");
+    const btnComenzar = document.getElementById("btn-start-test");
+
+    // Mostrar spinner mientras se cargan los datos
+    modalBody.innerHTML = `
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status"></div>
+      <div class="mt-2 text-muted">Cargando instrucciones y revisando conexión con hardware..</div>
+    </div>
+    `;
+    btnComenzar.disabled = true;
+    btnComenzar.setAttribute("data-stage-id", stageId);
     modal.show();
 
-    fetch(`/api/stage/${stageId}/generate-instructions/`)
-    .then(response => response.json())
-    .then(data => {
-      const modalBody = document.getElementById("instrucciones-modal-body");
-      const btnComenzar = document.getElementById("btn-start-test");
-      
-      modalBody.innerHTML = "";
-      btnComenzar.disabled = true;
-      btnComenzar.setAttribute("data-stage-id", stageId);
+    // Iniciar ambos fetch en paralelo
+    const instruccionesPromise = fetch(`/api/stage/${stageId}/generate-instructions/`)
+      .then(response => response.json());
 
-      if (data.instructions && data.suggested_connector) {
-        window._suggestedConnector = data.suggested_connector;
-        data.instructions.forEach((linea, index) => {
-          const div = document.createElement("div");
-          div.className = "form-check mb-2";
+    const checkHWPromise = fetch(`/api/check-required-hw/`)
+      .then(response => response.json());
 
-          const checkbox = document.createElement("input");
-          checkbox.type = "checkbox";
-          checkbox.className = "form-check-input";
-          checkbox.id = `instruccion-check-${index}`;
+    // Ejecutar en paralelo
+    Promise.all([instruccionesPromise, checkHWPromise])
+      .then(([data, hw]) => {
+        modalBody.innerHTML = "";
+        // --- Instrucciones ---
+        if (data.instructions && data.suggested_connector) {
+          window._suggestedConnector = data.suggested_connector;
 
-          const label = document.createElement("label");
-          label.className = "form-check-label";
-          label.setAttribute("for", checkbox.id);
-          label.innerHTML = linea;
+          data.instructions.forEach((linea, index) => {
+            const div = document.createElement("div");
+            div.className = "form-check mb-2";
 
-          checkbox.addEventListener("change", verificarCheckboxes);
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.className = "form-check-input";
+            checkbox.id = `instruccion-check-${index}`;
 
-          div.appendChild(checkbox);
-          div.appendChild(label);
-          modalBody.appendChild(div);
-        });
-      } else if (data.error) {
-        showInlineAlert(modalBody, data.error.join("<br>"), "danger");
-      }
+            const label = document.createElement("label");
+            label.className = "form-check-label";
+            label.setAttribute("for", checkbox.id);
+            label.innerHTML = linea;
 
-      if (data.disabled_connectors && data.disabled_connectors.length > 0) {
-        const mensaje = "<strong>Conectores compatibles deshabilitados:</strong><br>" +
-                        data.disabled_connectors.join("<br>");
-        showInlineAlert(modalBody, mensaje, "info", false);
-      }
-    })
-    .catch(err => {
-      //const modal = new bootstrap.Modal(document.getElementById("instruccionesModal"));
-      modal.hide();
-      showToast('Ocurrio un error al generar las instrucciones','warning')
-      //alert("Error al generar instrucciones.");
-      console.error(err);
-    });
+            checkbox.addEventListener("change", verificarCheckboxes);
+
+            div.appendChild(checkbox);
+            div.appendChild(label);
+            modalBody.appendChild(div);
+          });
+
+          // Solo habilitar si no hubo errores de hardware y ya está todo marcado
+          verificarCheckboxes();
+
+        } else if (data.error) {
+          showInlineAlert(modalBody, data.error.join("<br>"), "danger");
+        }
+
+        // --- Aviso de conectores deshabilitados ---
+        if (data.disabled_connectors && data.disabled_connectors.length > 0) {
+          const mensaje = `
+            <strong>Existen conectores compatibles deshabilitados</strong>
+            <a href="#" id="ver-mas-conectores" style="margin-left: 10px; font-size: 0.9em;">más información</a>
+            <div id="lista-conectores" style="display: none; margin-top: 5px;">
+              ${data.disabled_connectors.join("<br>")}
+            </div>
+          `;
+          showInlineAlert(modalBody, mensaje, "info", false);
+
+          // Activar "ver más" después de insertar el HTML
+          setTimeout(() => {
+            const link = document.getElementById("ver-mas-conectores");
+            if (link) {
+              link.addEventListener("click", function (e) {
+                e.preventDefault();
+                document.getElementById("lista-conectores").style.display = "block";
+                link.style.display = "none";  // ocultar el enlace después de hacer clic
+              });
+            }
+          }, 0);
+        }
+
+
+        // --- Verificación de hardware ---
+        if (!hw.success && hw.errores && hw.errores.length > 0) {
+          const mensajeHW = "<strong>Errores de conexión con el hardware:</strong><br>" +
+                            hw.errores.join("<br>");
+          showInlineAlert(modalBody, mensajeHW, "danger", false);
+          btnComenzar.disabled = true;
+        }
+      })
+      .catch(err => {
+        modal.hide();
+        showToast('Ocurrió un error al generar las instrucciones o verificar el hardware', 'warning');
+        console.error(err);
+      });
+  });
+
+
+  document.getElementById("instrucciones-modal-body").addEventListener("change", function (e) {
+    if (e.target && e.target.classList.contains("form-check-input")) {
+      verificarCheckboxes();
+    }
   });
 
   function verificarCheckboxes() {
     const checkboxes = document.querySelectorAll("#instrucciones-modal-body .form-check-input");
     const btnComenzar = document.getElementById("btn-start-test");
     const todosMarcados = Array.from(checkboxes).every(checkbox => checkbox.checked);
-    btnComenzar.disabled = !todosMarcados;
+
+    // Solo habilitar si no hubo errores de hardware
+    const hayErroresHW = document.querySelector("#instrucciones-modal-body .alert-danger") !== null;
+    btnComenzar.disabled = !(todosMarcados && !hayErroresHW);
   }
 
 
@@ -542,19 +599,23 @@ document.addEventListener('DOMContentLoaded', function () {
   // =======================
 
   const startTestButton = document.getElementById("btn-start-test");
-
-  if(!startTestButton || startTestButton.disabled ){ return }
-  startButton.addEventListener("click", async () => {
-    startButton.disabled = true;
-    startButton.textContent = "Ejecutando...";
+    
+  startTestButton.addEventListener("click", async () => {
+    if(startTestButton.disabled){ return }
+    
+    startTestButton.disabled = true;
+    startTestButton.textContent = "Ejecutando...";
     
     const rows = document.querySelectorAll("#testTable tbody[data-type='test'] tr");
     const sessionId = "{{ session.id }}";
     const stageId = "{{ stage_test.id }}";
 
     for (const row of rows) {
+            
       const resultId = row.dataset.resultId;
-      const { adapter_cnt_category, adapter_cnt_id } = window._suggestedConnector;
+      const { category: adapter_cnt_category, id: adapter_cnt_id } = window._suggestedConnector;
+
+
       if (!resultId || !adapter_cnt_category || !adapter_cnt_id) {
         console.warn("Fila sin resultId en dataset o sin categoría de adapter o sin adapterId");
         continue;
@@ -580,19 +641,19 @@ document.addEventListener('DOMContentLoaded', function () {
           const badgeClass = data.result === "pass" ? "text-green" : "text-red";
           row.querySelector(".cell-result").innerHTML = `<span class="badge badge-outline ${badgeClass}">${data.result_display}</span>`;
           row.querySelector(".cell-time").textContent = data.timestamp;
-          } else {
-            console.error("Error al medir:", data.message);
-            }
-            }
+        } else {
+          console.error("Error al medir:", data);
+        }
+      }
             
             
-            // Actualizar status visual
-            document.querySelector("#stageStatusContainer").innerHTML = `
-            <span class="status status-success">
-              <span class="status-dot"></span> Terminado
-            </span>`;
-            document.querySelector("#btnStartTestContainer").innerHTML = "";
-            table.draw();
+      // Actualizar status visual
+      document.querySelector("#stageStatusContainer").innerHTML = `
+      <span class="status status-success">
+        <span class="status-dot"></span> Terminado
+      </span>`;
+      document.querySelector("#btnStartTestContainer").innerHTML = "";
+      table.draw();
   });
 
 
