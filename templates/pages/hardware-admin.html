@@ -11,12 +11,9 @@
       <div class="container-xl">
         <div class="row g-2 align-items-center">
           <div class="col">
-            <!-- Page pre-title -->
-            <div class="page-pretitle">
-              Configuración
-            </div>
+          
             <h2 class="page-title">
-              Hardware
+              Configuración
             </h2>
           </div>
           <!-- Page title actions -->
@@ -41,11 +38,17 @@
                     <a href="#tabs-adaptadores" class="nav-link" data-bs-toggle="tab" aria-selected="false" tabindex="-1" role="tab">Adaptadores</a>
                   </li>
                   <li class="nav-item" role="presentation">
+                    <a href="#tabs-tipos-señal" class="nav-link" data-bs-toggle="tab" aria-selected="false" tabindex="-1" role="tab">Tipos de señal</a>
+                  </li>
+                  <li class="nav-item" role="presentation">
                     <a href="#tabs-conexion" class="nav-link" data-bs-toggle="tab" aria-selected="false" tabindex="-1" role="tab">Conexión</a>
                   </li>
                 </ul>
               </div>
+
               <div class="card-body">
+
+                <!-- TAB PLACAS PXI -->
                 <div class="tab-content">
                   <div class="tab-pane active show" id="tabs-placas-pxi" role="tabpanel">
                     <div class="card-header ps-0 pe-2 pt-0">
@@ -72,13 +75,11 @@
                         <!-- Las filas serán cargadas dinámicamente con DataTables -->
                       </tbody>
                     </table>
-                    
                   </div>
             
 
-            
+                  <!-- TAB ADAPTADORES -->
                   <div class="tab-pane" id="tabs-adaptadores" role="tabpanel">
-
                     <label class="form-check form-switch form-switch-3">
                       <input class="form-check-input fixedconnectors-checkbox" type="checkbox" checked="">
                       <span class="form-check-label">Tener en cuenta los conectores fijos para correr las pruebas</span>
@@ -111,7 +112,38 @@
                       </thead>
                     </table>
                   </div>
+
+                  <!-- TAB TIPOS DE SEÑAL -->
+                  
+                  <div class="tab-pane" id="tabs-tipos-señal" role="tabpanel">
+                    <div class="card-header ps-0 pe-2 pt-0">
+                      <h3 class="card-title">Tipos de señal</h3>
+                      <div class="card-actions">
+                        <button class="btn btn-primary" id="btn-new-signal-type">
+                          <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+                          <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M12 5l0 14"></path><path d="M5 12l14 0"></path></svg>
+                          Agregar
+                        </button>
+                      </div>
+                    </div>
+                  
+                    <table id="table-signal-types" class="table table-bordered w-100">
+                      <thead>
+                        <tr>
+                          <th>Nombre</th>
+                          <th>Max</th>
+                          <th>Min</th>
+                          <th>Unidad</th>
+                          <th style="width: 1%">Acciones</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <!-- Las filas serán cargadas dinámicamente con DataTables -->
+                      </tbody>
+                    </table>
+                  </div>
             
+                  <!-- TAB CONEXION -->
                   <div class="tab-pane" id="tabs-conexion" role="tabpanel">
                     <div class="card-header ps-0 pe-2 pt-0">
                       <h3 class="card-title">Conexión</h3>
@@ -197,6 +229,49 @@
             <input type="text" class="form-control" name="adapter-name" placeholder="Nombre del adaptador">
           </div>
           <div id="adapter-alert-container">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-link link-secondary btn-3" data-bs-dismiss="modal"> Cancelar </button>
+          <button class="btn btn-primary btn-5 ms-auto">
+            <!-- Download SVG icon from http://tabler.io/icons/icon/plus -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+              <path d="M12 5l0 14"></path>
+              <path d="M5 12l14 0"></path>
+            </svg>
+            Agregar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal agregar tipo de señal -->
+  <div class="modal modal-blur fade show" id="new-signal-type" tabindex="-1" style="display: none;">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Agregar tipo de señal</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Nombre</label>
+            <input type="text" class="form-control" name="signal-name" placeholder="Nombre de la señal">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Mínimo</label>
+            <input type="text" class="form-control" name="signal-min" placeholder="Valor mínimo aceptable">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Máximo</label>
+            <input type="text" class="form-control" name="signal-max" placeholder="Valor máximo aceptable">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Unidad</label>
+            <input type="text" class="form-control" name="signal-unit" placeholder="(k, M, G)">
+          </div>
+          <div id="alert-container-signal-type">
           </div>
         </div>
         <div class="modal-footer">
@@ -429,12 +504,50 @@
       stateSave: false
     });
 
+    // =======================
+    // SIGNAL TYPES TABLE (table-signal-types)
+    // =======================
+    const tablasSignalType = $('#table-signal-types').DataTable({
+      ajax: '/api/hardware/get-signaltypes/',
+      dataSrc: 'data',
+      columns: [
+        { data: 'name', className: 'editable' },
+        { data: 'min', className: 'editable' },
+        { data: 'max', className: 'editable' },
+        { data: 'unit', className: 'editable' },
+        {
+          data: null,
+          orderable: false,
+          searchable: false,
+          title: "Acciones",
+          className: "text-center",
+          render: (data, type, row) => `
+            <button class="btn btn-sm btn-danger btn-delete" title="Eliminar" data-id="${row.id}" data-model="SignalTypesMaxMin">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+                <path d="M4 7h16"></path>
+                <path d="M10 11v6"></path>
+                <path d="M14 11v6"></path>
+                <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"></path>
+                <path d="M9 7V4h6v3"></path>
+              </svg>
+            </button>`
+        }
+      ],
+      language: { url: '{% static "datatables/datatables_es-ES.json" %}' },
+      paging: false,
+      searching: false,
+      info: false,
+      ordering: false,
+      stateSave: false
+    });
+
 
     // =======================
     // MODALS
     // =======================
     const pxiModal = new bootstrap.Modal(document.getElementById('new-pxi'));
     const adapterModal = new bootstrap.Modal(document.getElementById('new-adapter'));
+    const signalModal = new bootstrap.Modal(document.getElementById('new-signal-type'));
     const confirmModal = new bootstrap.Modal(document.getElementById('modal-confirm'));
 
     document.getElementById('btn-add-placas-pxi').addEventListener('click', () => {
@@ -447,6 +560,10 @@
       adapterModal.show();
     });
 
+    document.getElementById('btn-new-signal-type').addEventListener('click', () => {
+      document.querySelectorAll('#new-signal-type input').forEach(input => input.value = '');
+      signalModal.show();
+    });
 
     let deletePayload = null;
     document.querySelector("#modal-confirm").addEventListener("hidden.bs.modal", function () {
@@ -509,6 +626,7 @@
       const container = document.getElementById('adapter-alert-container');
       container.innerHTML = '';
     });
+
 
     // =======================
     // Agregar adaptador
@@ -606,8 +724,151 @@
       const input = document.querySelector('#new-adapter input[name="adapter-name"]');
       input.focus();
     });
+
+    // =======================
+    // Agregar tipo de señal
+    // =======================
+
+    document.querySelector('#new-signal-type .btn-primary').addEventListener('click', () => {
+      const modal = document.getElementById('new-signal-type');
+      const name = modal.querySelector('input[name="signal-name"]').value.trim();
+      const min = modal.querySelector('input[name="signal-min"]').value.trim();
+      const max = modal.querySelector('input[name="signal-max"]').value.trim();
+      const unit = modal.querySelector('input[name="signal-unit"]').value.trim();
+      const alertContainer = modal.querySelector("#alert-container-signal-type");
+      alertContainer.innerHTML = '';
+
+      if (!name || !min || !max || !unit) {
+        showInlineAlert(alertContainer, "Todos los campos son obligatorios.", "warning");
+        return;
+      }
+
+      if (!/^\d+$/.test(min) || !/^\d+$/.test(max)) {
+        showInlineAlert(alertContainer, "Los campos 'Min' y 'Max' deben ser números enteros.", "warning");
+        return;
+      }
+
+      fetch('/api/hardware/create/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCSRFToken()
+        },
+        body: JSON.stringify({
+          model: 'SignalTypesMaxMin',
+          fields: { name, min: parseInt(min), max: parseInt(max), unit }
+        })
+      })
+      .then(response => {
+        if (!response.ok) return response.json().then(data => Promise.reject(data));
+        return response.json();
+      })
+      .then(res => {
+        showToast(res.message || 'Tipo de señal agregada correctamente.', 'success');
+        signalModal.hide();
+        alertContainer.innerHTML = '';
+        //tablasSignalType.ajax.reload();
+      })
+      .catch(err => {
+        if (err && err.message) {
+          showInlineAlert(alertContainer, err.message, "danger");
+        } else {
+          showInlineAlert(alertContainer, "Error al agregar el tipo de señal", "danger");
+        }
+      });
+    });
     
 
+    // =======================
+    // Editar placas PXI inline
+    // =======================
+
+    document.querySelector('#table-placas-pxi tbody').addEventListener('click', function (e) {
+      const cellElement = e.target.closest('td.editable');
+      if (!cellElement) return;
+
+      const rowElement = cellElement.closest('tr');
+      const row = tablaPlacasPxi.row(rowElement);
+      const rowData = row.data();
+      const cellIndex = Array.from(cellElement.parentNode.children).indexOf(cellElement);
+      const column = tablaPlacasPxi.column(cellIndex).dataSrc();
+      const oldValue = rowData[column];
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'form-control form-control-sm';
+      input.value = oldValue;
+      cellElement.innerHTML = '';
+      cellElement.appendChild(input);
+      input.focus();
+
+      const restoreCell = () => {
+        row.data(rowData).draw();
+      };
+
+      input.addEventListener('blur', function () {
+        const newValue = input.value.trim();
+
+        if (!newValue) {
+          showToast("El valor no puede estar vacío", "warning");
+          restoreCell();
+          return;
+        }
+
+        if ((column === 'bus' || column === 'device') && !/^\d+$/.test(newValue)) {
+          showToast(`El campo "${column}" debe ser un número entero`, "warning");
+          restoreCell();
+          return;
+        }
+
+        if (newValue === String(oldValue)) {
+          restoreCell();
+          return;
+        }
+
+        // Validación de duplicado solo para 'name'
+        if (column === 'name') {
+          const allData = tablaPlacasPxi.rows().data().toArray();
+          const nameExists = allData.some(d => d.id !== rowData.id && String(d.name).trim().toLowerCase() === newValue.toLowerCase());
+          if (nameExists) {
+            showToast("Ya existe un registro con ese nombre", "warning");
+            restoreCell();
+            return;
+          }
+        }
+
+        const payload = {
+          id: rowData.id,
+          model: "relaycard",
+          field: column,
+          value: (column === 'bus' || column === 'device') ? parseInt(newValue) : newValue
+        };
+
+        fetch('/api/hardware/save/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+          },
+          body: JSON.stringify(payload)
+        })
+        .then(res => {
+          if (!res.ok) throw new Error();
+          rowData[column] = payload.value;
+          row.data(rowData).draw();
+          showToast("Actualizado con éxito", "success");
+        })
+        .catch(() => {
+          restoreCell();
+          showToast("Error al actualizar", "danger");
+        });
+      });
+
+      input.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') input.blur();
+        if (event.key === 'Escape') restoreCell();
+      });
+    });
 
     // =======================
     // Editar adaptadores inline
@@ -733,18 +994,18 @@
     });
 
     // =======================
-    // Editar placas PXI inline
+    // Editar tipos de señal inline
     // =======================
 
-    document.querySelector('#table-placas-pxi tbody').addEventListener('click', function (e) {
+    document.querySelector('#table-signal-types tbody').addEventListener('click', function (e) {
       const cellElement = e.target.closest('td.editable');
       if (!cellElement) return;
 
       const rowElement = cellElement.closest('tr');
-      const row = tablaPlacasPxi.row(rowElement);
+      const row = tablasSignalType.row(rowElement);
       const rowData = row.data();
       const cellIndex = Array.from(cellElement.parentNode.children).indexOf(cellElement);
-      const column = tablaPlacasPxi.column(cellIndex).dataSrc();
+      const column = tablasSignalType.column(cellIndex).dataSrc();
       const oldValue = rowData[column];
 
       const input = document.createElement('input');
@@ -767,8 +1028,8 @@
           restoreCell();
           return;
         }
-
-        if ((column === 'bus' || column === 'device') && !/^\d+$/.test(newValue)) {
+        
+        if ((column === 'min' || column === 'max') && !/^\d+$/.test(newValue)) {
           showToast(`El campo "${column}" debe ser un número entero`, "warning");
           restoreCell();
           return;
@@ -792,9 +1053,9 @@
 
         const payload = {
           id: rowData.id,
-          model: "relaycard",
+          model: "SignalTypesMaxMin",
           field: column,
-          value: (column === 'bus' || column === 'device') ? parseInt(newValue) : newValue
+          value: (column === 'min' || column === 'max') ? parseInt(newValue) : newValue
         };
 
         fetch('/api/hardware/save/', {
@@ -823,13 +1084,11 @@
       });
     });
 
-
-
     // =======================
     // Eliminar registros
     // =======================
 
-    document.querySelectorAll('#table-adaptadores, #table-placas-pxi').forEach(table => {
+    document.querySelectorAll('#table-adaptadores, #table-placas-pxi, #table-signal-types').forEach(table => {
       table.addEventListener('click', function (e) {
         if (e.target.closest('.btn-delete')) {
           const button = e.target.closest('.btn-delete');

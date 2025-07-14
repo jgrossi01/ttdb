@@ -169,7 +169,54 @@ def backup_harness_ajax(request):
 
 
 def convert_mdb_to_sqlite(mdb_path, sqlite_path, sqlite_name):
-    """Convierte un archivo .mdb a .sqlite3"""
+    """
+    Convierte un archivo de base de datos Microsoft Access (.mdb o .accdb) a formato SQLite (.sqlite3),
+    copiando todas las tablas y sus datos.
+
+    Parámetros:
+    ----------
+    mdb_path : str
+        Ruta al archivo .mdb (Microsoft Access) de origen.
+    
+    sqlite_path : str
+        Ruta de destino donde se guardará el archivo .sqlite3 generado.
+    
+    sqlite_name : str
+        Nombre del archivo SQLite (utilizado únicamente para mostrar en el mensaje final).
+
+    Retorna:
+    -------
+    str
+        Ruta completa donde fue guardado el archivo SQLite (`sqlite_path`).
+
+    Comportamiento:
+    --------------
+    - Establece conexión con el archivo `.mdb` usando ODBC.
+    - Recupera la lista de todas las tablas de tipo "TABLE".
+    - Por cada tabla:
+        - Lee su contenido completo con `pandas.read_sql`.
+        - La exporta a SQLite usando `df.to_sql`, reemplazando si ya existía.
+        - Emite eventos informativos con `send_event`.
+    - Informa si hubo errores de conexión o durante la exportación de cada tabla.
+
+    Dependencias:
+    ------------
+    - `pyodbc`: para conectar con la base de datos Access.
+    - `pandas`: para convertir datos a DataFrame y exportar a SQLite.
+    - `sqlite3`: módulo estándar para conexión con SQLite.
+    - `send_event(event_type, event_subtype, payload)`: función externa usada para informar estado del proceso.
+
+    Notas:
+    -----
+    - El parámetro `sqlite_name` se usa solo para fines informativos (en logs o mensajes).
+    - Si alguna tabla falla durante la exportación, las demás continúan siendo procesadas.
+    - El archivo SQLite generado reemplazará cualquier archivo existente en `sqlite_path`.
+
+    Excepciones:
+    -----------
+    - Lanza una excepción si falla la conexión al archivo Access.
+    """
+    
     conn_str = f"DRIVER={{Microsoft Access Driver (*.mdb, *.accdb)}};DBQ={mdb_path}"
     try:
         access_conn = pyodbc.connect(conn_str)
@@ -206,7 +253,48 @@ def get_last_signal_number(db_path, table_name):
 
 
 def sync_databases(harness_path, new_db_path, sqlite_name):
-    """Sincroniza harness.sqlite3 con la nueva base sin modificar datos existentes."""
+    """
+    Sincroniza datos de una base SQLite nueva (`new_db_path`) hacia la base principal (`harness_path`),
+    sin sobrescribir ni modificar registros existentes.
+
+    La sincronización se basa en el campo `# de Señal`, asumiendo que es un identificador numérico incremental.
+    Solo se copian los registros que estén en la base nueva y tengan un `# de Señal` mayor que el último en la base original.
+
+    Parámetros:
+    ----------
+    harness_path : str
+        Ruta al archivo `harness.sqlite3`, base de datos principal donde se insertarán los nuevos registros.
+    
+    new_db_path : str
+        Ruta al archivo SQLite desde donde se copiarán los datos nuevos.
+    
+    sqlite_name : str
+        Nombre del archivo SQLite nuevo (actualmente no se utiliza dentro de la función, pero podría usarse para logs o validaciones externas).
+
+    Retorna:
+    -------
+    int
+        Cantidad total de registros nuevos insertados en la base `harness_path`.
+
+    Comportamiento:
+    --------------
+    - Recorre todas las tablas existentes en `new_db_path`.
+    - Compara el último valor de `# de Señal` en cada tabla de ambas bases.
+    - Si `new_db_path` tiene registros más nuevos, los copia a `harness_path`.
+    - Emite eventos de estado mediante `send_event` para indicar progreso o resultados.
+    - No borra ni actualiza registros existentes.
+    
+    Dependencias:
+    ------------
+    - `get_last_signal_number(db_path, table)`: función externa que retorna el valor máximo de `# de Señal` en una tabla dada.
+    - `send_event(event_type, event_subtype, payload)`: función externa para emitir mensajes de estado al sistema o a la interfaz.
+
+    Notas:
+    -----
+    - Se asume que todas las tablas en ambas bases tienen una columna `# de Señal`.
+    - No se realiza validación del esquema entre bases. Ambas deben tener estructuras compatibles.
+    - La variable `sqlite_name` no se utiliza dentro de la función y puede eliminarse si no se necesita externamente.
+    """
     #modifications_made = False
     total_new_records = 0
     with sqlite3.connect(harness_path) as conn_harness, sqlite3.connect(new_db_path) as conn_new:
@@ -423,7 +511,7 @@ def new_test(request):
             expected_values = {
                 "Pin a chasis": (100000000, "OL"),
                 "Pin a otros": (100000000, "OL"),
-                "Pin a pin": (0, 10),
+                "Pin a pin": (0, 1)
             }
 
             min_expected, max_expected = expected_values.get(test_type, (None, None))
@@ -459,6 +547,7 @@ def new_test(request):
                         stage=reference_stage,
                         signal_id=signal.field_de_señal,
                         signal_name=signal.nombre,
+                        signal_type=signal.tipo_señal,
                         conector_orig=signal.conector_orig,
                         conector_orig_type=signal.tipo_de_con_orig or "",
                         pin_a=signal.pin_orig or "N/A",
@@ -495,6 +584,7 @@ def new_test(request):
                                 stage=test_stage,
                                 signal_id=signal.field_de_señal,
                                 signal_name=signal.nombre,
+                                signal_type=signal.tipo_señal,
                                 conector_orig=signal.conector_orig,
                                 conector_orig_type=signal.tipo_de_con_orig or "",
                                 pin_a=mapped_a,
@@ -641,6 +731,7 @@ def test_stage_view(request, session_id, stage_id):
             "id": r.id,  
             "signal_id": r.signal_id,
             "signal_name": r.signal_name,
+            "signal_type": r.signal_type,
             "conector_orig": r.conector_orig,
             "conector_orig_type": r.conector_orig_type,
             "pin_a": r.pin_a,
@@ -663,6 +754,7 @@ def test_stage_view(request, session_id, stage_id):
         {
             "signal_id": r.signal_id,
             "signal_name": r.signal_name,
+            "signal_type": r.signal_type,
             "conector_orig": r.conector_orig,
             "conector_orig_type": r.conector_orig_type,
             "pin_a": r.pin_a,
@@ -918,6 +1010,10 @@ def api_get_adapters(request):
 
 def api_get_relaycards(request):
     data = list(RelayCard.objects.all().values())
+    return JsonResponse({"data": data})
+
+def api_get_signaltypes(request):
+    data = list(SignalTypesMaxMin.objects.all().values())
     return JsonResponse({"data": data})
 
 

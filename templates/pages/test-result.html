@@ -122,6 +122,7 @@
               <thead>
                 <tr>
                   <th>Señal</th>
+                  <th>Tipo</th>
                   <th>Conector Origen</th>
                   <th>Pin A</th>
                   <th>Conector Destino</th>
@@ -137,6 +138,7 @@
                 {% for result in test_stage.results.all %}
                 <tr>
                   <td>{{ result.signal_name }}</td>
+                  <td>{{ result.signal_type }}</td>
                   <td>{{ result.conector_orig }} <span class="text-secondary">({{ result.conector_orig_type }})</span></td>
                   <td title="{{ result.tooltip_a }}">{{ result.pin_a }}</td>
                   <td>{{ result.conector_dest }} <span class="text-secondary">({{ result.conector_dest_type }})</span></td>

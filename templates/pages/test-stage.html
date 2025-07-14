@@ -113,6 +113,7 @@
                   <thead>
                     <tr>
                       <th>Señal</th>
+                      <th>Tipo</th>
                       <th>Conector Origen</th>
                       <th>Pin Origen</th>
                       <th>Conector Destino</th>
@@ -130,6 +131,7 @@
                     {% for result in test_results %}
                     <tr data-result-id="{{ result.id }}">
                       <td class="cell-signal">{{ result.signal_name }}</td>
+                      <td class="cell-signal_type">{{ result.signal_type }}</td>
                       <td class="cell-orig">{{ result.conector_orig }} <span class="text-secondary">({{ result.conector_orig_type }})</span></td>
                       <td class="cell-pin-a" title="{{ result.tooltip_a }}" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="tooltip-table">{{ result.pin_a }}</td>
                       <td class="cell-dest">{{ result.conector_dest }} <span class="text-secondary">({{ result.conector_dest_type }})</span></td>
@@ -155,6 +157,7 @@
                     {% for result in reference_results %}
                     <tr>
                       <td class="cell-signal">{{ result.signal_name }}</td>
+                      <td class="cell-signal_type">{{ result.signal_type }}</td>
                       <td class="cell-orig">{{ result.conector_orig }} <span class="text-secondary">({{ result.conector_orig_type }})</span></td>
                       <td class="cell-pin-a">{{ result.pin_a }}</td>
                       <td class="cell-dest">{{ result.conector_dest }} <span class="text-secondary">({{ result.conector_dest_type }})</span></td>
@@ -191,7 +194,7 @@
                     </div>
                     <div>
                       <h4 class="alert-heading">Los datos pin origen y pin destino de esta tabla pueden haberse modificado para la correcta interpretación del hardware.</h4>
-                      <div class="alert-description">Puedes verificar los datos originales pasando el cursor por encima o ver la tabla de referencia en resumen.</div>
+                      <div class="alert-description">Puedes verificar los datos originales pasando el cursor por encima o ver la tabla de referencia en previsualización.</div>
                     </div>
                   </div>
                 </div>
@@ -362,7 +365,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Verificar si el tbody está vacío (sin filas)
     if (hasReferenceTbody) {
-      // 1. Insertar el alert después de la tabla
       
       infoAlert.remove();
       const alertHTML = `
@@ -393,71 +395,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
   isMesurable();
 
+
+
   // =======================
-  // Simular prueba desde frontend
+  // Generación de instrucciones
   // =======================
+  // Se ve mejor sin datatables, activar de ser necesario
 
-  /*   
-  const table = new DataTable('#testTable', {
-    paging: false,            // sin paginación
-    searching: false,         // sin barra de búsqueda
-    info: false,              // sin texto "mostrando x de x"
-    ordering: false,           // opcional: podés desactivarlo con false
-    lengthChange: false,      // sin selector de cantidad de registros
-    language: {
-      url: '{% static "datatables/datatables_es-ES.json" %}' // opcional: si querés mantener el idioma
-    }
-  });
-
-  const startButton = document.getElementById("startTest");
-  startButton.addEventListener("click", async function () {
-      startButton.disabled = true;
-      startButton.textContent = "Ejecutando...";
-
-      const rows = document.querySelectorAll("#testTable tbody tr");
-
-      for (const row of rows) {
-        const signalId = row.dataset.signalId;
-
-        // Datos que podrías enviar a la view en el futuro
-        const pinA = row.querySelector(".cell-pin-a").textContent.trim();
-        const pinB = row.querySelector(".cell-pin-b").textContent.trim();
-
-        // Simulación: Esperar 500ms por "medición"
-        await new Promise(res => setTimeout(res, 500));
-
-        // Simular resultado
-        const measured = Math.floor(Math.random() * 100);
-        const min = parseFloat(row.querySelector(".cell-min").textContent) || 0;
-        const max = row.querySelector(".cell-max").textContent.trim();
-        const expectedMax = max === "OL" ? Infinity : parseFloat(max);
-
-        const result = (measured >= min && measured <= expectedMax) ? "Pass" : "Fail";
-        const badgeClass = result === "Pass" ? "text-green" : "text-red";
-        const now = new Date().toLocaleTimeString();
-
-        // Actualizar valores
-        row.querySelector(".cell-measured").textContent = `${measured}`;
-        row.querySelector(".cell-result").innerHTML = `<span class="badge badge-outline ${badgeClass}">${result}</span>`;
-        row.querySelector(".cell-time").textContent = now;
-      }
-
-      // Redibujar tabla (si querés aplicar estilos actualizados o algún efecto)
-      table.draw();
-      const stageStatusContainer = document.querySelector("#stageStatusContainer");
-      stageStatusContainer.innerHTML = `
-      <span class="status status-success">
-        <span class="status-dot"></span>
-        Completado
-      </span>
-      `
-      const btnStartTestContainer = document.querySelector("#btnStartTestContainer");
-      btnStartTestContainer.innerHTML = '';
-
-      //startButton.disabled = false;
-      //startButton.textContent = "Repetir prueba";
-  });*/
-
+  /*
   const table = new DataTable("#testTable", {
     paging: false,
     searching: false,
@@ -467,7 +412,7 @@ document.addEventListener('DOMContentLoaded', function () {
     language: {
       url: "{% static 'datatables/datatables_es-ES.json' %}"
     }
-  });
+  });*/
 
   // =======================
   // Generación de instrucciones

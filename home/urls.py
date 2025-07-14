@@ -45,6 +45,7 @@ urlpatterns = [
     #path("api/hardware/check-connector-label/", views.api_check_connector_label, name="check_connector_label"),
     path("api/hardware/get-adapters/", views.api_get_adapters, name="get_adapters"),
     path("api/hardware/get-relaycards/", views.api_get_relaycards, name="get_relaycards"),
+    path("api/hardware/get-signaltypes/", views.api_get_signaltypes, name="get_signaltypes"),
     path('api/hardware/create-adapter/', views.api_create_adapter, name='create_adapter'),
     path("api/hardware/toggle-adapter-availability/", views.api_toggle_adapter_availability, name="toggle_adapter_availability"),
     path("api/hardware/get-adapter-availability/", views.api_get_adapter_availability, name="get_adapter_availability"),

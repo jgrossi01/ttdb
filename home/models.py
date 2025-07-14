@@ -89,6 +89,7 @@ class TestResult(models.Model):
     stage = models.ForeignKey(TestStage, on_delete=models.CASCADE, related_name='results')
     signal_id = models.IntegerField()
     signal_name = models.CharField(max_length=50)
+    signal_type = models.CharField(max_length=50)
     conector_orig = models.CharField(max_length=50)
     conector_orig_type = models.CharField(max_length=50)
     pin_a = models.CharField(max_length=50)
@@ -271,6 +272,28 @@ class AdapterPinMap(models.Model):
                     )
         if errors:
             raise ValidationError(errors)
+        
+class SignalTypesMaxMin(models.Model):
+    name = models.CharField(
+        max_length=50,
+        unique=True
+    )
+    min = models.IntegerField(
+        null=True,
+        blank=True
+    )
+    max = models.IntegerField(
+        null=True,
+        blank=True
+    )
+    unit = models.CharField(
+        null=True,
+        blank=True,
+        max_length=10
+    )
+
+    def __str__(self):
+        return f"{self.name} ({self.min}–{self.max} {self.unit})"
 
                 
 
