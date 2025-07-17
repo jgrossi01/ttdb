@@ -474,6 +474,8 @@ def new_test(request):
                 "error": "Tipo de prueba no válido",
                 "connectors": get_unique_connectors()
             })
+            
+        # [ DESDE ACA VARIA SEGUN TIPO DE PRUEBA ]
 
         with transaction.atomic():
             # Obtener tipo de conector desde la base "harness"
@@ -483,6 +485,7 @@ def new_test(request):
                 conector_dest=connector
             ).exclude(activo_si_no_field="no").first()
 
+            # Para la session 
             connector_type = first_con.tipo_de_con_orig if first_con and first_con.conector_orig == connector else first_con.tipo_de_con_dest if first_con else ""
 
             # Crear una nueva sesión de prueba
@@ -498,6 +501,8 @@ def new_test(request):
             ).exclude(activo_si_no_field="no") | Conexiones.objects.using("harness").filter(
                 conector_dest=connector
             ).exclude(activo_si_no_field="no")
+            
+            
 
             # Agrupar conexiones por conector destino
             etapas = {}
@@ -599,7 +604,8 @@ def new_test(request):
                             )
                             
                             result_created = True
-                    
+                
+                # [ DESDE ACA SE MANTIENE PARA TODOS LOS TIPOS DE PRUEBA ]
                 # Marcar etapa como no medible si no se creó ningún resultado
                 if not result_created:
                     test_stage.status = 'unmeasurable'
